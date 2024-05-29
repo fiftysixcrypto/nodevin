@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 	"text/tabwriter"
 
@@ -55,7 +56,7 @@ func displayInfo() {
 
 	// Set up tabwriter for nicely formatted output
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.Debug)
-	fmt.Fprintln(w, "\nBLOCKCHAIN\tVERSION\tCOMMAND\tSTATUS\tPORTS")
+	fmt.Fprintln(w, "\n| BLOCKCHAIN\t VERSION\t COMMAND\t STATUS\t PORTS")
 
 	for _, containerJSON := range containers {
 		if strings.TrimSpace(containerJSON) == "" {
@@ -67,28 +68,31 @@ func displayInfo() {
 			continue
 		}
 
-		_, exists := getDockerContainerName(container.Image)
-		if !exists {
-			logError("Unsupported blockchain network for image: " + container.Image)
+		imageName := container.Image
+		if strings.HasPrefix(container.Image, "fiftysix/") {
+			imageName = strings.TrimPrefix(container.Image, "fiftysix/")
+		} else {
+			// Skip if the image does not begin with fiftysix
 			continue
 		}
 
 		version := "unknown"
-		if parts := strings.Split(container.Image, ":"); len(parts) > 1 {
+		if parts := strings.Split(imageName, ":"); len(parts) > 1 {
+			imageName = parts[0]
 			version = parts[1]
 		}
+
+		formattedPorts := formatPorts(container.Ports)
 
 		stopCmd := fmt.Sprintf("go run main.go stop-node --network %s", getNetworkFromImage(container.Image))
 		logsCmd := fmt.Sprintf("go run main.go logs --network %s", getNetworkFromImage(container.Image))
 
-		// TODO: container.Image and version should be smooshed together to create bitcoin-core:21.0
-
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n\n%s\n%s\n",
-			container.Image,
+		fmt.Fprintf(w, "| %s\t %s\t %s\t %s\t %s\n\n%s\n%s\n",
+			imageName,
 			version,
 			container.Command,
 			container.Status,
-			container.Ports,
+			formattedPorts,
 			"Logs Command: "+logsCmd,
 			"Stop Command: "+stopCmd,
 		)
@@ -96,13 +100,24 @@ func displayInfo() {
 	w.Flush()
 }
 
-func getDockerContainerName(image string) (string, bool) {
-	for _, container := range networkContainerMap {
-		if strings.Contains(image, container) {
-			return container, true
+func formatPorts(ports string) string {
+	// Split the ports field by commas
+	portSegments := strings.Split(ports, ",")
+	formattedPorts := []string{}
+	uniquePorts := make(map[string]bool)
+
+	for _, segment := range portSegments {
+		// Use a regex to extract the port numbers and ranges
+		re := regexp.MustCompile(`(\d+(-\d+)?)`)
+		matches := re.FindAllString(segment, -1)
+		for _, match := range matches {
+			if match != "0" && !uniquePorts[match] {
+				uniquePorts[match] = true
+				formattedPorts = append(formattedPorts, match)
+			}
 		}
 	}
-	return "", false
+	return strings.Join(formattedPorts, ", ")
 }
 
 func getNetworkFromImage(image string) string {

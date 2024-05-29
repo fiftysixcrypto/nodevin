@@ -1,10 +1,8 @@
 package main
 
-import (
-    "fmt"
-)
+import "github.com/curveballdaniel/nodevin/cmd"
 
 func main() {
-    fmt.Println("Welcome to NodeVin CLI")
+    cmd.Execute()
 }
 

@@ -1,89 +1,66 @@
 package cmd
 
 import (
-    "fmt"
-    "os"
-    "os/signal"
-    "syscall"
-    "time"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-    "github.com/spf13/cobra"
-    "github.com/spf13/viper"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var daemonCmd = &cobra.Command{
-    Use:   "daemon",
-    Short: "Run the NodeVin daemon",
-    Run: func(cmd *cobra.Command, args []string) {
-        initConfig()
-        runDaemon()
-    },
+	Use:   "daemon",
+	Short: "Run the NodeVin daemon",
+	Run: func(cmd *cobra.Command, args []string) {
+		initConfig()
+		runDaemon()
+	},
 }
 
 func runDaemon() {
-    logInfo("Starting NodeVin daemon...")
+	logInfo("Starting NodeVin daemon...")
 
-    // Log configuration for debugging
-    logInfo(fmt.Sprintf("Network: %s, StoragePath: %s, Port: %d, ResourceLimit: %s", config.Network, config.StoragePath, config.Port, config.ResourceLimit))
+	// Set up a signal channel to capture OS signals
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
-    // Get the blockchain instance
-    blockchain, exists := GetBlockchain(config.Network)
-    if !exists {
-        logError("Unsupported blockchain network: " + config.Network)
-        return
-    }
+	// Set up a ticker to check for updates periodically
+	ticker := time.NewTicker(24 * time.Hour)
+	go func() {
+		for range ticker.C {
+			logInfo("Checking for updates...")
+			if err := checkForUpdates(); err != nil {
+				logError("Failed to check for updates: " + err.Error())
+				continue
+			}
+			logInfo("Update downloaded. Applying update...")
+			if err := applyUpdate(); err != nil {
+				logError("Failed to apply update: " + err.Error())
+				continue
+			}
+			logInfo("Update applied successfully. Please restart the application.")
+		}
+	}()
 
-    // Start the blockchain node
-    if err := blockchain.StartNode(config); err != nil {
-        logError("Failed to start blockchain node: " + err.Error())
-        return
-    }
+	// Block until a signal is received
+	sig := <-sigs
+	logInfo("Received signal: " + sig.String())
 
-    // Set up a signal channel to capture OS signals
-    sigs := make(chan os.Signal, 1)
-    signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-
-    // Set up a ticker to check for updates periodically
-    ticker := time.NewTicker(24 * time.Hour)
-    go func() {
-        for range ticker.C {
-            logInfo("Checking for updates...")
-            if err := checkForUpdates(); err != nil {
-                logError("Failed to check for updates: " + err.Error())
-                continue
-            }
-            logInfo("Update downloaded. Applying update...")
-            if err := applyUpdate(); err != nil {
-                logError("Failed to apply update: " + err.Error())
-                continue
-            }
-            logInfo("Update applied successfully. Please restart the application.")
-        }
-    }()
-
-    // Block until a signal is received
-    sig := <-sigs
-    logInfo("Received signal: " + sig.String())
-
-    // Stop the blockchain node
-    if err := blockchain.StopNode(); err != nil {
-        logError("Failed to stop blockchain node: " + err.Error())
-    }
-
-    logInfo("Shutting down NodeVin daemon...")
+	logInfo("Shutting down NodeVin daemon...")
 }
 
 func init() {
-    daemonCmd.Flags().StringVar(&config.Network, "network", "mainnet", "Blockchain network to connect to")
-    daemonCmd.Flags().StringVar(&config.StoragePath, "storage_path", "/var/lib/nodevin", "Path to store blockchain data")
-    daemonCmd.Flags().IntVar(&config.Port, "port", 30303, "Port to bind the node")
-    daemonCmd.Flags().StringVar(&config.ResourceLimit, "resource_limit", "2GB", "Resource limit for the node")
+	daemonCmd.Flags().StringVar(&config.Network, "network", "mainnet", "Blockchain network to connect to")
+	daemonCmd.Flags().StringVar(&config.StoragePath, "storage_path", "/var/lib/nodevin", "Path to store blockchain data")
+	daemonCmd.Flags().IntVar(&config.Port, "port", 30303, "Port to bind the node")
+	daemonCmd.Flags().StringVar(&config.ResourceLimit, "resource_limit", "2GB", "Resource limit for the node")
 
-    viper.BindPFlag("network", daemonCmd.Flags().Lookup("network"))
-    viper.BindPFlag("storage_path", daemonCmd.Flags().Lookup("storage_path"))
-    viper.BindPFlag("port", daemonCmd.Flags().Lookup("port"))
-    viper.BindPFlag("resource_limit", daemonCmd.Flags().Lookup("resource_limit"))
+	viper.BindPFlag("network", daemonCmd.Flags().Lookup("network"))
+	viper.BindPFlag("storage_path", daemonCmd.Flags().Lookup("storage_path"))
+	viper.BindPFlag("port", daemonCmd.Flags().Lookup("port"))
+	viper.BindPFlag("resource_limit", daemonCmd.Flags().Lookup("resource_limit"))
 
-    rootCmd.AddCommand(daemonCmd)
+	rootCmd.AddCommand(daemonCmd)
 }
-

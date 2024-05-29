@@ -1,0 +1,19 @@
+services:
+  bitcoin-node:
+    image: fiftysix/bitcoin-core:latest
+    container_name: bitcoin-core
+    ports:
+      - "8332:8332"
+      - "8333:8333"
+    volumes:
+      - bitcoin-core-data:/node/bitcoin-core
+    networks:
+      - bitcoin-net
+
+networks:
+  bitcoin-net:
+    driver: bridge
+
+volumes:
+  bitcoin-core-data:
+

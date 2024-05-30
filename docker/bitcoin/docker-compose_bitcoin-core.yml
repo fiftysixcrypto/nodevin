@@ -1,9 +1,10 @@
 services:
-  bitcoin-node:
+  bitcoin-core:
     image: fiftysix/bitcoin-core:latest
     container_name: bitcoin-core
+    command: bitcoind ${BITCOIN_EXTRA_ARGS}
     ports:
-      - "8332:8332"
+      - "${FIFTYSIX_BITCOIN_RPC_PORT:-8332}:${FIFTYSIX_BITCOIN_RPC_PORT:-8332}"
       - "8333:8333"
     volumes:
       - bitcoin-core-data:/node/bitcoin-core
@@ -16,4 +17,5 @@ networks:
 
 volumes:
   bitcoin-core-data:
-
+    labels:
+      - "blockchain.software=bitcoin-core"

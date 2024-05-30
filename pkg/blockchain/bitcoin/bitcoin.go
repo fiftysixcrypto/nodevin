@@ -20,7 +20,7 @@ func (b Bitcoin) StartNode(config config.Config) error {
 	//os.Setenv("BITCOIN_STORAGE_PATH", config.StoragePath)
 	//os.Setenv("BITCOIN_EXTRA_ARGS", fmt.Sprintf("%s", extraArgs))
 
-	//     command: bitcoind ${BITCOIN_EXTRA_ARGS}
+	//     command: bitcoind ${FIFTYSIX_BITCOIN_EXTRA_ARGS}
 	//  - "${FIFTYSIX_BITCOIN_RPC_PORT:-8332}:${FIFTYSIX_BITCOIN_RPC_PORT:-8332}"
 
 	// Define the path to the Docker Compose file

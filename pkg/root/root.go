@@ -36,6 +36,7 @@ func init() {
 	viper.BindPFlag("resource_limit", rootCmd.PersistentFlags().Lookup("resource_limit"))
 
 	// Add blockchain commands
+	rootCmd.AddCommand(blockchain.DeleteVolumeCmd)
 	rootCmd.AddCommand(blockchain.StartNodeCmd)
 	rootCmd.AddCommand(blockchain.StopNodeCmd)
 	rootCmd.AddCommand(blockchain.LogsCmd)

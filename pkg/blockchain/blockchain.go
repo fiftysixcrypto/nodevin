@@ -9,10 +9,11 @@ import (
 )
 
 var (
-	StartNodeCmd = startNodeCmd
-	StopNodeCmd  = stopNodeCmd
-	LogsCmd      = logsCmd
-	InfoCmd      = infoCmd
+	StartNodeCmd    = startNodeCmd
+	StopNodeCmd     = stopNodeCmd
+	DeleteVolumeCmd = deleteVolumeCmd
+	LogsCmd         = logsCmd
+	InfoCmd         = infoCmd
 )
 
 var blockchainCmd = &cobra.Command{

@@ -1,4 +1,4 @@
-package cmd
+package blockchain
 
 import (
 	"encoding/json"
@@ -9,8 +9,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/curveballdaniel/nodevin/internal/logger"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 type ContainerInfo struct {
@@ -28,13 +28,12 @@ var infoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Get information about all running blockchain nodes",
 	Run: func(cmd *cobra.Command, args []string) {
-		initConfig()
 		displayInfo()
 	},
 }
 
 func displayInfo() {
-	logInfo("Fetching information about running blockchain nodes...")
+	logger.LogInfo("Fetching information about running blockchain nodes...")
 
 	// Prepare the docker ps command
 	args := []string{"ps", "-a", "--format", "{{json .}}"}
@@ -43,14 +42,14 @@ func displayInfo() {
 	cmd := exec.Command("docker", args...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		logError("Failed to fetch Docker container information: " + err.Error())
+		logger.LogError("Failed to fetch Docker container information: " + err.Error())
 		return
 	}
 
 	// Parse the output
 	containers := strings.Split(string(output), "\n")
 	if len(containers) < 2 {
-		logInfo("No running blockchain nodes found.")
+		logger.LogInfo("No running blockchain nodes found.")
 		return
 	}
 
@@ -64,7 +63,7 @@ func displayInfo() {
 		}
 		var container ContainerInfo
 		if err := json.Unmarshal([]byte(containerJSON), &container); err != nil {
-			logError("Failed to parse container JSON: " + err.Error())
+			logger.LogError("Failed to parse container JSON: " + err.Error())
 			continue
 		}
 
@@ -127,12 +126,4 @@ func getNetworkFromImage(image string) string {
 		}
 	}
 	return "unknown"
-}
-
-func init() {
-	infoCmd.Flags().StringVar(&config.Network, "network", "mainnet", "Blockchain network to connect to")
-
-	viper.BindPFlag("network", infoCmd.Flags().Lookup("network"))
-
-	rootCmd.AddCommand(infoCmd)
 }

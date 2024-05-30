@@ -1,20 +1,19 @@
-package cmd
+package bitcoin
 
 import (
 	"fmt"
 	"os"
 	"os/exec"
+
+	"github.com/curveballdaniel/nodevin/internal/config"
+	"github.com/curveballdaniel/nodevin/internal/logger"
+	"github.com/curveballdaniel/nodevin/pkg/blockchain"
 )
 
 type Bitcoin struct{}
 
-func (b Bitcoin) StartNode(config Config) error {
+func (b Bitcoin) StartNode(config config.Config) error {
 	fmt.Println("Starting Bitcoin node with config:", config)
-
-	// Set environment variables for Docker Compose
-	//os.Setenv("BITCOIN_PORT", fmt.Sprintf("%d", config.Port))
-	//os.Setenv("BITCOIN_STORAGE_PATH", config.StoragePath)
-	//os.Setenv("BITCOIN_EXTRA_ARGS", fmt.Sprintf("%s", extraArgs))
 
 	// Define the path to the Docker Compose file
 	composeFilePath := "docker/bitcoin/docker-compose_bitcoin-core.yml"
@@ -25,11 +24,11 @@ func (b Bitcoin) StartNode(config Config) error {
 	cmd.Stderr = logWriter{}
 
 	if err := cmd.Run(); err != nil {
-		logError("Failed to start Docker Compose services: " + err.Error())
+		logger.LogError("Failed to start Docker Compose services: " + err.Error())
 		return err
 	}
 
-	logInfo("Bitcoin node started successfully")
+	logger.LogInfo("Bitcoin node started successfully")
 
 	return nil
 }
@@ -46,17 +45,17 @@ func (b Bitcoin) StopNode() error {
 	cmd.Stderr = logWriter{}
 
 	if err := cmd.Run(); err != nil {
-		logError("Failed to stop Docker Compose services: " + err.Error())
+		logger.LogError("Failed to stop Docker Compose services: " + err.Error())
 		return err
 	}
 
-	logInfo("Bitcoin node stopped successfully")
+	logger.LogInfo("Bitcoin node stopped successfully")
 
 	return nil
 }
 
 func init() {
-	RegisterBlockchain("bitcoin", Bitcoin{})
+	blockchain.RegisterBlockchain("bitcoin", Bitcoin{})
 }
 
 type logWriter struct{}

@@ -102,7 +102,14 @@ func CalculateDirSize(path string) (int64, error) {
 }
 
 func ListVolumes() (string, error) {
+	if dockerClient == nil {
+		if err := InitDockerClient(); err != nil {
+			return "", fmt.Errorf("failed to initialize Docker client: %w", err)
+		}
+	}
+
 	ctx := context.Background()
+
 	volumes, err := dockerClient.VolumeList(ctx, volume.ListOptions{
 		Filters: filters.Args{},
 	})
@@ -115,17 +122,36 @@ func ListVolumes() (string, error) {
 		volumeNames = append(volumeNames, v.Name)
 	}
 
-	return strings.Join(volumeNames, ", "), nil
+	finalResponse := strings.Join(volumeNames, ", ")
+	if len(finalResponse) < 1 {
+		finalResponse = "(none)"
+	}
+
+	return finalResponse, nil
 }
 
-func RemoveVolume(volumeName string) error {
+func RemoveVolume(volumeName string) (bool, error) {
 	ctx := context.Background()
-	err := dockerClient.VolumeRemove(ctx, volumeName, true)
+
+	// Check if the volume exists
+	_, err := dockerClient.VolumeInspect(ctx, volumeName)
 	if err != nil {
-		return err
+		if client.IsErrNotFound(err) {
+			// Volume does not exist
+			return false, nil
+		}
+		// An error occurred while inspecting the volume
+		return false, err
 	}
+
+	// Volume exists, attempt to remove it
+	err = dockerClient.VolumeRemove(ctx, volumeName, true)
+	if err != nil {
+		return true, err // true because it found the volume, but there was an error
+	}
+
 	fmt.Println("Removed volume:", volumeName)
-	return nil
+	return true, nil
 }
 
 func PullImage(image string) error {

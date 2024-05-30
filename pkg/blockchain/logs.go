@@ -6,26 +6,35 @@ import (
 
 	"github.com/curveballdaniel/nodevin/internal/logger"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var follow bool
 var tail string
 
 var logsCmd = &cobra.Command{
-	Use:   "logs",
+	Use:   "logs [network]",
 	Short: "Fetch logs from a running blockchain node",
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fetchLogs()
+		if len(args) == 0 {
+			logger.LogError("No network specified. To fetch logs, specify the network explicitly.")
+			availableNetworks := getAllSupportedNetworks()
+			logger.LogInfo("List of available networks: " + availableNetworks)
+			logger.LogInfo("Example usage: `nodevin logs <network>`")
+			return
+		}
+
+		network := args[0]
+		fetchLogs(network)
 	},
 }
 
-func fetchLogs() {
+func fetchLogs(network string) {
 	logger.LogInfo("Fetching logs for blockchain node...")
 
-	containerName, exists := getOutputLogsContainerName(viper.GetString("network"))
+	containerName, exists := getOutputLogsContainerName(network)
 	if !exists {
-		logger.LogError("Unsupported blockchain network: " + viper.GetString("network"))
+		logger.LogError("Unsupported blockchain network: " + network)
 		return
 	}
 

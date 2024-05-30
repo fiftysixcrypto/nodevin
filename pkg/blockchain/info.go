@@ -87,8 +87,8 @@ func displayInfo() {
 			logger.LogError("Failed to fetch Docker volume information: " + err.Error())
 		}
 
-		stopCmd := fmt.Sprintf("nodevin stop-node --network %s", getNetworkFromImage(container.Image))
-		logsCmd := fmt.Sprintf("nodevin logs --network %s", getNetworkFromImage(container.Image))
+		stopCmd := fmt.Sprintf("nodevin stop %s", getNetworkFromImage(container.Image))
+		logsCmd := fmt.Sprintf("nodevin logs %s --tail 50", getNetworkFromImage(container.Image))
 
 		fmt.Fprintf(w, "| %s\t %s\t %s\t %s\t %s\n\n%s\n%s\n\n%s\n%s\n",
 			imageName,

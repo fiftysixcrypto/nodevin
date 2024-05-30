@@ -11,7 +11,7 @@ import (
 )
 
 var startNodeCmd = &cobra.Command{
-	Use:   "start-node [network]",
+	Use:   "start [network]",
 	Short: "Start a blockchain node",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -22,7 +22,7 @@ var startNodeCmd = &cobra.Command{
 func startNode(args []string) {
 	if len(args) == 0 {
 		logger.LogError("No network provided. Nodevin supports any of the following: " + getAllSupportedNetworks())
-		logger.LogInfo("Example usage: `nodevin start-node <network>`")
+		logger.LogInfo("Example usage: `nodevin start <network>`")
 		return
 	}
 

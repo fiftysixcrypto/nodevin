@@ -10,7 +10,7 @@ import (
 )
 
 var stopNodeCmd = &cobra.Command{
-	Use:   "stop-node [network]",
+	Use:   "stop [network]",
 	Short: "Stop a blockchain node",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -19,7 +19,7 @@ var stopNodeCmd = &cobra.Command{
 			availableNetworks := getAllSupportedNetworks()
 
 			logger.LogInfo("List of available networks: " + availableNetworks)
-			logger.LogInfo("Example usage: `nodevin stop-node <network>`")
+			logger.LogInfo("Example usage: `nodevin stop <network>`")
 			return
 		}
 

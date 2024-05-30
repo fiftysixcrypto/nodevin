@@ -10,6 +10,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/curveballdaniel/nodevin/internal/logger"
+	"github.com/curveballdaniel/nodevin/pkg/docker"
 	"github.com/spf13/cobra"
 )
 
@@ -33,8 +34,6 @@ var infoCmd = &cobra.Command{
 }
 
 func displayInfo() {
-	logger.LogInfo("Fetching information about running blockchain nodes...")
-
 	// Prepare the docker ps command
 	args := []string{"ps", "-a", "--format", "{{json .}}"}
 
@@ -55,7 +54,7 @@ func displayInfo() {
 
 	// Set up tabwriter for nicely formatted output
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.Debug)
-	fmt.Fprintln(w, "\n| BLOCKCHAIN\t VERSION\t COMMAND\t STATUS\t PORTS")
+	fmt.Fprintln(w, "| BLOCKCHAIN\t VERSION\t COMMAND\t STATUS\t PORTS")
 
 	for _, containerJSON := range containers {
 		if strings.TrimSpace(containerJSON) == "" {
@@ -83,17 +82,24 @@ func displayInfo() {
 
 		formattedPorts := formatPorts(container.Ports)
 
-		stopCmd := fmt.Sprintf("go run main.go stop-node --network %s", getNetworkFromImage(container.Image))
-		logsCmd := fmt.Sprintf("go run main.go logs --network %s", getNetworkFromImage(container.Image))
+		volumeInfo, err := docker.ListVolumeDetails(imageName)
+		if err != nil {
+			logger.LogError("Failed to fetch Docker volume information: " + err.Error())
+		}
 
-		fmt.Fprintf(w, "| %s\t %s\t %s\t %s\t %s\n\n%s\n%s\n",
+		stopCmd := fmt.Sprintf("nodevin stop-node --network %s", getNetworkFromImage(container.Image))
+		logsCmd := fmt.Sprintf("nodevin logs --network %s", getNetworkFromImage(container.Image))
+
+		fmt.Fprintf(w, "| %s\t %s\t %s\t %s\t %s\n\n%s\n%s\n\n%s\n%s\n",
 			imageName,
 			version,
 			container.Command,
 			container.Status,
 			formattedPorts,
-			"Logs Command: "+logsCmd,
-			"Stop Command: "+stopCmd,
+			"Data Location: "+volumeInfo.Mountpoint,
+			"Data Size: "+getSizeDescription(int64(volumeInfo.Size)),
+			"Node Logs: "+logsCmd,
+			"Stop Node: "+stopCmd,
 		)
 	}
 	w.Flush()
@@ -126,4 +132,33 @@ func getNetworkFromImage(image string) string {
 		}
 	}
 	return "unknown"
+}
+
+func getSizeDescription(size int64) string {
+	if size <= 0 {
+		return "unknown (do you have permissions?)"
+	}
+
+	const (
+		KB = 1024
+		MB = KB * 1024
+		GB = MB * 1024
+		TB = GB * 1024
+		PB = TB * 1024
+	)
+
+	switch {
+	case size >= PB:
+		return fmt.Sprintf("%.2f PB", float64(size)/PB)
+	case size >= TB:
+		return fmt.Sprintf("%.2f TB", float64(size)/TB)
+	case size >= GB:
+		return fmt.Sprintf("%.2f GB", float64(size)/GB)
+	case size >= MB:
+		return fmt.Sprintf("%.2f MB", float64(size)/MB)
+	case size >= KB:
+		return fmt.Sprintf("%.2f KB", float64(size)/KB)
+	default:
+		return fmt.Sprintf("%d B", size)
+	}
 }

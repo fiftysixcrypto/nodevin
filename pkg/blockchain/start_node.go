@@ -8,26 +8,33 @@ import (
 	"github.com/curveballdaniel/nodevin/internal/logger"
 	"github.com/curveballdaniel/nodevin/pkg/docker"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var startNodeCmd = &cobra.Command{
-	Use:   "start-node",
+	Use:   "start-node [network]",
 	Short: "Start a blockchain node",
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		startNode()
+		startNode(args)
 	},
 }
 
-func startNode() {
-	logger.LogInfo("Starting blockchain node...")
+func startNode(args []string) {
+	if len(args) == 0 {
+		logger.LogError("No network provided. Nodevin supports any of the following: " + getAllSupportedNetworks())
+		logger.LogInfo("Example usage: `nodevin start-node <network>`")
+		return
+	}
 
-	network := viper.GetString("network")
+	network := args[0]
+
 	containerName, exists := getFiftysixDockerhubContainerName(network)
 	if !exists {
 		logger.LogError("Unsupported blockchain network: " + network)
 		return
 	}
+
+	logger.LogInfo("Starting blockchain node for network: " + network)
 
 	// Initialize Docker client
 	if err := docker.InitDockerClient(); err != nil {
@@ -56,27 +63,8 @@ func startNode() {
 
 	if err := cmd.Run(); err != nil {
 		logger.LogError("Failed to start Docker Compose services: " + err.Error())
-	}
-}
-
-func init() {
-	startNodeCmd.Flags().String("network", "bitcoin", "Blockchain network to connect to")
-	viper.BindPFlag("network", startNodeCmd.Flags().Lookup("network"))
-}
-
-/*
-func startNode() {
-	logger.LogInfo("Starting blockchain node...")
-
-	network := viper.GetString("network")
-	blockchain, exists := GetBlockchain(network)
-	if !exists {
-		logger.LogError("Unsupported blockchain network: " + network)
 		return
 	}
 
-	if err := blockchain.StartNode(config.AppConfig); err != nil {
-		logger.LogError("Failed to start blockchain node: " + err.Error())
-	}
+	logger.LogInfo("Successfully started blockchain node for network: " + network)
 }
-*/

@@ -7,21 +7,32 @@ import (
 
 	"github.com/curveballdaniel/nodevin/internal/logger"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var stopNodeCmd = &cobra.Command{
-	Use:   "stop-node",
+	Use:   "stop-node [network]",
 	Short: "Stop a blockchain node",
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		stopNode()
+		if len(args) == 0 {
+			logger.LogError("No network specified. To stop a node, specify the network explicitly.")
+			availableNetworks := getAllSupportedNetworks()
+
+			logger.LogInfo("List of available networks: " + availableNetworks)
+			logger.LogInfo("Example usage: `nodevin stop-node <network>`")
+			return
+		}
+
+		// TODO: add (no nodes are running!)
+
+		network := args[0]
+		stopNode(network)
 	},
 }
 
-func stopNode() {
+func stopNode(network string) {
 	logger.LogInfo("Stopping blockchain node...")
 
-	network := viper.GetString("network")
 	containerName, exists := getFiftysixLocalMappedContainerName(network)
 	if !exists {
 		logger.LogError("Unsupported blockchain network: " + network)
@@ -38,25 +49,3 @@ func stopNode() {
 		logger.LogError("Failed to stop Docker Compose services: " + err.Error())
 	}
 }
-
-func init() {
-	stopNodeCmd.Flags().String("network", "bitcoin", "Blockchain network to connect to")
-	viper.BindPFlag("network", stopNodeCmd.Flags().Lookup("network"))
-}
-
-/*
-func stopNode() {
-	logger.LogInfo("Stopping blockchain node...")
-
-	network := viper.GetString("network")
-	blockchain, exists := GetBlockchain(network)
-	if !exists {
-		logger.LogError("Unsupported blockchain network: " + network)
-		return
-	}
-
-	if err := blockchain.StopNode(); err != nil {
-		logger.LogError("Failed to stop blockchain node: " + err.Error())
-	}
-}
-*/

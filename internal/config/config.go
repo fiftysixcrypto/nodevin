@@ -1,8 +1,6 @@
 package config
 
 import (
-	"log"
-
 	"github.com/curveballdaniel/nodevin/internal/logger"
 	"github.com/spf13/viper"
 )
@@ -23,9 +21,9 @@ func InitConfig() {
 	viper.AutomaticEnv()
 
 	// Read in config file if it exists
-	if err := viper.ReadInConfig(); err == nil {
-		log.Println("Using config file:", viper.ConfigFileUsed())
-	}
+	//if err := viper.ReadInConfig(); err == nil {
+	//	log.Println("Using config file:", viper.ConfigFileUsed())
+	//}
 
 	// Unmarshal the config into the config struct
 	if err := viper.Unmarshal(&AppConfig); err != nil {

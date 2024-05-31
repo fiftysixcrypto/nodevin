@@ -6,10 +6,10 @@ import (
 )
 
 type Config struct {
-	Network       string `mapstructure:"network"`
-	StoragePath   string `mapstructure:"storage_path"`
-	Port          int    `mapstructure:"port"`
-	ResourceLimit string `mapstructure:"resource_limit"`
+	Port      string `mapstructure:"port"`
+	DataDir   string `mapstructure:"data-dir"`
+	ExtraArgs string `mapstructure:"extra-args"`
+	//ResourceLimit string `mapstructure:"resource_limit"`
 }
 
 var AppConfig Config

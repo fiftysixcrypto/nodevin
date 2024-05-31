@@ -28,10 +28,20 @@ func init() {
 	rootCmd.PersistentFlags().String("data-dir", "", "Path to store blockchain data")
 	rootCmd.PersistentFlags().String("args", "", "Extra flags/arguments to add to node execution")
 
+	rootCmd.PersistentFlags().String("cpu-limit", "", "Maximum CPU limit of use (amount of CPUs -- ex 1.5)")
+	rootCmd.PersistentFlags().String("mem-limit", "", "Maximum memory limit of use (positive integer followed by 'b', 'k', 'm', 'g', to indicate bytes, kilobytes, megabytes, or gigabytes -- ex 50m)")
+	rootCmd.PersistentFlags().String("cpu-reservation", "", "Reserve a set amount of CPU for use (amount of CPUs -- ex 1.5)")
+	rootCmd.PersistentFlags().String("mem-reservation", "", "Reserve a set amount of memory for use (positive integer followed by 'b', 'k', 'm', 'g', to indicate bytes, kilobytes, megabytes, or gigabytes -- ex 50m)")
+
 	// Bind flags to viper
 	viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
 	viper.BindPFlag("data-dir", rootCmd.PersistentFlags().Lookup("data-dir"))
 	viper.BindPFlag("args", rootCmd.PersistentFlags().Lookup("args"))
+
+	viper.BindPFlag("cpu-limit", rootCmd.PersistentFlags().Lookup("cpu-limit"))
+	viper.BindPFlag("mem-limit", rootCmd.PersistentFlags().Lookup("mem-limit"))
+	viper.BindPFlag("cpu-reservation", rootCmd.PersistentFlags().Lookup("cpu-reservation"))
+	viper.BindPFlag("mem-reservation", rootCmd.PersistentFlags().Lookup("mem-reservation"))
 
 	// Add blockchain commands
 	rootCmd.AddCommand(blockchain.DeleteVolumeCmd)

@@ -10,6 +10,18 @@ services:
       - "${FIFTYSIX_BITCOIN_STORAGE_PATH:-bitcoin-core-data}:/node/bitcoin-core"
     networks:
       - bitcoin-net
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: ${FIFTYSIX_BITCOIN_LIMITS_CPUS:-}
+          memory: ${FIFTYSIX_BITCOIN_LIMITS_MEMORY:-}
+        reservations:
+          cpus: ${FIFTYSIX_BITCOIN_RESERVATIONS_CPUS:-}
+          memory: ${FIFTYSIX_BITCOIN_RESERVATIONS_MEMORY:-}
 
 networks:
   bitcoin-net:

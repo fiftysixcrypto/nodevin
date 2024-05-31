@@ -57,17 +57,24 @@ func startNode(args []string) {
 		return
 	}
 
+	// TODO: remove
 	fmt.Println("here's the chain name", dockerContainerName, containerName, network)
 
-	// Set env variables for chain compose
-	envFilePath, err := bitcoin.CreateBitcoinEnv()
+	// Get current working directory
+	cwd, err := os.Getwd()
 	if err != nil {
-		logger.LogError("Failed to create node settings .env file: " + err.Error())
+		logger.LogError("failed to get current working directory: " + err.Error())
+		return
+	}
+
+	// Create env file for chain compose
+	composeFilePath, err := bitcoin.CreateBitcoinComposeFile(cwd)
+	if err != nil {
+		logger.LogError("Failed to create node docker compose file: " + err.Error())
 	}
 
 	// Start the node
-	composeFilePath := fmt.Sprintf("docker/%s/docker-compose_%s.yml", network, dockerContainerName)
-	cmd := exec.Command("docker-compose", "--env-file", envFilePath, "-f", composeFilePath, "up", "-d")
+	cmd := exec.Command("docker-compose", "-f", composeFilePath, "up", "-d")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

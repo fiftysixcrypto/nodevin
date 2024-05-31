@@ -40,7 +40,7 @@ func stopNode(network string) {
 	}
 
 	// Stop the node
-	composeFilePath := fmt.Sprintf("docker/%s/docker-compose_%s.yml", network, containerName)
+	composeFilePath := fmt.Sprintf("docker-compose_%s.yml", containerName)
 	cmd := exec.Command("docker-compose", "-f", composeFilePath, "down")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

@@ -1,63 +1,76 @@
 package bitcoin
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
-
+	"github.com/curveballdaniel/nodevin/pkg/docker/compose"
 	"github.com/spf13/viper"
 )
 
-func CreateBitcoinEnv() (string, error) {
-	port := viper.GetString("port")
-	storagePath := viper.GetString("data-dir")
-	extraArgs := viper.GetString("args")
-
-	// Get the current working directory
-	cwd, err := os.Getwd()
-	if err != nil {
-		return "", fmt.Errorf("failed to get current working directory: %w", err)
-	}
-
-	// Specify the path to the custom .env file in the current working directory
-	envFilePath := filepath.Join(cwd, ".bitcoin.env")
-
-	// Create or open the custom .env file
-	file, err := os.Create(envFilePath)
-	if err != nil {
-		return "", fmt.Errorf("failed to create .bitcoin.env file: %w", err)
-	}
-	defer file.Close()
-
-	// Write environment variables to the custom .env file
-	if len(port) > 0 {
-		_, err = fmt.Fprintf(file, "FIFTYSIX_BITCOIN_RPC_PORT=%s\n", port)
-		if err != nil {
-			return "", fmt.Errorf("failed to write to .bitcoin.env file: %w", err)
-		}
-	}
-
-	if len(storagePath) > 0 {
-		_, err = fmt.Fprintf(file, "FIFTYSIX_BITCOIN_STORAGE_PATH=%s\n", storagePath)
-		if err != nil {
-			return "", fmt.Errorf("failed to write to .bitcoin.env file: %w", err)
-		}
-	}
-
-	if len(extraArgs) > 0 {
-		_, err = fmt.Fprintf(file, "FIFTYSIX_BITCOIN_EXTRA_ARGS=%s\n", extraArgs)
-		if err != nil {
-			return "", fmt.Errorf("failed to write to .bitcoin.env file: %w", err)
-		}
-	}
-
+func CreateBitcoinComposeFile(cwd string) (string, error) {
 	/*
-	     cpus: ${FIFTYSIX_BITCOIN_LIMITS_CPUS}
-	     memory: ${FIFTYSIX_BITCOIN_LIMITS_MEMORY}
-	   reservations:
-	     cpus: ${FIFTYSIX_BITCOIN_RESERVATIONS_CPUS}
-	     memory: ${FIFTYSIX_BITCOIN_RESERVATIONS_MEMORY}
-	*/
+			viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
+			viper.BindPFlag("data-dir", rootCmd.PersistentFlags().Lookup("data-dir"))
+			viper.BindPFlag("args", rootCmd.PersistentFlags().Lookup("args"))
 
-	return envFilePath, nil
+		port := viper.GetString("port")
+	*/
+	// Define Viper configuration keys and set defaults where necessary
+
+	viper.SetDefault("command", "bitcoind")
+	viper.SetDefault("ports", []string{"8332:8332", "8333:8333"})
+
+	viper.SetDefault("volumes", []string{"bitcoin-core-data:/node/bitcoin-core"})
+	viper.SetDefault("volume-definitions", []string{"bitcoin-core-data"})
+
+	viper.SetDefault("image", "fiftysix/bitcoin-core:latest")
+
+	viper.SetDefault("container_name", "bitcoin-core")
+	viper.SetDefault("networks", []string{"bitcoin-net"})
+	viper.SetDefault("network-driver", "bridge")
+	viper.SetDefault("volume-labels", map[string]string{
+		"blockchain.software": "bitcoin-core",
+	})
+
+	// Define the override configuration using Viper
+	override := compose.NetworkConfig{
+		Image:         viper.GetString("image"),
+		ContainerName: viper.GetString("container_name"),
+		Command:       viper.GetString("command"),
+		Ports:         viper.GetStringSlice("ports"),
+		Volumes:       viper.GetStringSlice("volumes"),
+		Networks:      viper.GetStringSlice("networks"),
+		Deploy: compose.Deploy{
+			Resources: compose.Resources{
+				Limits: compose.ResourceDetails{
+					CPUs:   viper.GetString("cpu-limit"),
+					Memory: viper.GetString("mem-limit"),
+				},
+				Reservations: compose.ResourceDetails{
+					CPUs:   viper.GetString("cpu-reservation"),
+					Memory: viper.GetString("mem-reservation"),
+				},
+			},
+		},
+		NetworkDefs: map[string]compose.NetworkDetails{
+			viper.GetStringSlice("networks")[0]: {
+				Driver: viper.GetString("network-driver"),
+			},
+		},
+		VolumeDefs: map[string]compose.VolumeDetails{
+			viper.GetStringSlice("volume-definitions")[0]: {
+				Labels: viper.GetStringMapString("volume-labels"),
+			},
+		},
+	}
+
+	bitcoinBaseComposeConfig, err := compose.GetNetworkComposeConfig("bitcoin")
+	if err != nil {
+		return "", err
+	}
+
+	composeFilePath, err := compose.CreateComposeFile("bitcoin-core", cwd, bitcoinBaseComposeConfig, override)
+	if err != nil {
+		return "", err
+	}
+
+	return composeFilePath, nil
 }

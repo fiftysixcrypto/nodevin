@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
 
@@ -59,11 +60,50 @@ func isDeploySet(deploy Deploy) bool {
 		deploy.Resources.Reservations.Memory != ""
 }
 
-func CreateComposeFile(nodeName string, cwd string, config NetworkConfig, overrides NetworkConfig) (string, error) {
-	// Merge default and override configurations
-	finalConfig := mergeConfigs(config, overrides)
+func CreateComposeFile(nodeName string, cwd string, config NetworkConfig) (string, error) {
+	networks := viper.GetStringSlice("networks")
+	volumeDefinitions := viper.GetStringSlice("volume-definitions")
 
-	// Define the Docker Compose structure
+	networkDefs := make(map[string]NetworkDetails)
+	volumeDefs := make(map[string]VolumeDetails)
+
+	for _, network := range networks {
+		if network != "" {
+			networkDefs[network] = NetworkDetails{Driver: viper.GetString("network-driver")}
+		}
+	}
+
+	for _, volume := range volumeDefinitions {
+		if volume != "" {
+			volumeDefs[volume] = VolumeDetails{Labels: viper.GetStringMapString("volume-labels")}
+		}
+	}
+
+	override := NetworkConfig{
+		Image:         viper.GetString("image"),
+		ContainerName: viper.GetString("container-name"),
+		Command:       viper.GetString("command"),
+		Ports:         viper.GetStringSlice("ports"),
+		Volumes:       viper.GetStringSlice("volumes"),
+		Networks:      networks,
+		Deploy: Deploy{
+			Resources: Resources{
+				Limits: ResourceDetails{
+					CPUs:   viper.GetString("cpu-limit"),
+					Memory: viper.GetString("mem-limit"),
+				},
+				Reservations: ResourceDetails{
+					CPUs:   viper.GetString("cpu-reservation"),
+					Memory: viper.GetString("mem-reservation"),
+				},
+			},
+		},
+		NetworkDefs: networkDefs,
+		VolumeDefs:  volumeDefs,
+	}
+
+	finalConfig := mergeConfigs(config, override)
+
 	service := Service{
 		Image:         finalConfig.Image,
 		ContainerName: finalConfig.ContainerName,
@@ -74,15 +114,7 @@ func CreateComposeFile(nodeName string, cwd string, config NetworkConfig, overri
 	}
 
 	if isDeploySet(finalConfig.Deploy) {
-		// Only set non-empty fields in the deploy section
-		deploy := &Deploy{}
-		if finalConfig.Deploy.Resources.Limits.CPUs != "" || finalConfig.Deploy.Resources.Limits.Memory != "" {
-			deploy.Resources.Limits = finalConfig.Deploy.Resources.Limits
-		}
-		if finalConfig.Deploy.Resources.Reservations.CPUs != "" || finalConfig.Deploy.Resources.Reservations.Memory != "" {
-			deploy.Resources.Reservations = finalConfig.Deploy.Resources.Reservations
-		}
-		service.Deploy = deploy
+		service.Deploy = &Deploy{Resources: finalConfig.Deploy.Resources}
 	}
 
 	composeFile := ComposeFile{
@@ -94,17 +126,15 @@ func CreateComposeFile(nodeName string, cwd string, config NetworkConfig, overri
 		Volumes:  finalConfig.VolumeDefs,
 	}
 
-	// Write the Docker Compose file to the current working directory
 	composeFileName := fmt.Sprintf("docker-compose_%s.yml", nodeName)
 	composeFilePath := filepath.Join(cwd, composeFileName)
 	composeData, err := yaml.Marshal(&composeFile)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal docker-compose.yml file: %w", err)
+		return "", fmt.Errorf("failed to marshal docker-yml file: %w", err)
 	}
 
-	err = os.WriteFile(composeFilePath, composeData, 0644)
-	if err != nil {
-		return "", fmt.Errorf("failed to write docker-compose.yml file: %w", err)
+	if err = os.WriteFile(composeFilePath, composeData, 0644); err != nil {
+		return "", fmt.Errorf("failed to write docker-yml file: %w", err)
 	}
 
 	return composeFilePath, nil

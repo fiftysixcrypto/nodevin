@@ -24,9 +24,15 @@ var versionCmd = &cobra.Command{
 
 func init() {
 	// Define flags and configuration settings
-	rootCmd.PersistentFlags().String("port", "", "Port to bind the node")
-	rootCmd.PersistentFlags().String("data-dir", "", "Path to store blockchain data")
-	rootCmd.PersistentFlags().String("args", "", "Extra flags/arguments to add to node execution")
+	rootCmd.PersistentFlags().String("command", "", "Initial command to run the node")
+	rootCmd.PersistentFlags().StringSlice("ports", []string{}, "Ports to bind to the node")
+	rootCmd.PersistentFlags().StringSlice("volumes", []string{}, "Docker volumes to mount for compose file")
+	rootCmd.PersistentFlags().StringSlice("volume-definitions", []string{}, "Docker volume definitions for compose file")
+	rootCmd.PersistentFlags().String("image", "", "Docker image to use for the node")
+	rootCmd.PersistentFlags().String("container-name", "", "Docker container name for compose file")
+	rootCmd.PersistentFlags().StringSlice("networks", []string{}, "Docker networks to connect to for compose file")
+	rootCmd.PersistentFlags().String("network-driver", "", "Docker network driver for compose file")
+	rootCmd.PersistentFlags().StringToString("volume-labels", map[string]string{}, "Docker volume labels for compose file")
 
 	rootCmd.PersistentFlags().String("cpu-limit", "", "Maximum CPU limit of use (amount of CPUs -- ex 1.5)")
 	rootCmd.PersistentFlags().String("mem-limit", "", "Maximum memory limit of use (positive integer followed by 'b', 'k', 'm', 'g', to indicate bytes, kilobytes, megabytes, or gigabytes -- ex 50m)")
@@ -34,9 +40,15 @@ func init() {
 	rootCmd.PersistentFlags().String("mem-reservation", "", "Reserve a set amount of memory for use (positive integer followed by 'b', 'k', 'm', 'g', to indicate bytes, kilobytes, megabytes, or gigabytes -- ex 50m)")
 
 	// Bind flags to viper
-	viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
-	viper.BindPFlag("data-dir", rootCmd.PersistentFlags().Lookup("data-dir"))
-	viper.BindPFlag("args", rootCmd.PersistentFlags().Lookup("args"))
+	viper.BindPFlag("command", rootCmd.PersistentFlags().Lookup("command"))
+	viper.BindPFlag("ports", rootCmd.PersistentFlags().Lookup("ports"))
+	viper.BindPFlag("volumes", rootCmd.PersistentFlags().Lookup("volumes"))
+	viper.BindPFlag("volume-definitions", rootCmd.PersistentFlags().Lookup("volume-definitions"))
+	viper.BindPFlag("image", rootCmd.PersistentFlags().Lookup("image"))
+	viper.BindPFlag("container-name", rootCmd.PersistentFlags().Lookup("container-name"))
+	viper.BindPFlag("networks", rootCmd.PersistentFlags().Lookup("networks"))
+	viper.BindPFlag("network-driver", rootCmd.PersistentFlags().Lookup("network-driver"))
+	viper.BindPFlag("volume-labels", rootCmd.PersistentFlags().Lookup("volume-labels"))
 
 	viper.BindPFlag("cpu-limit", rootCmd.PersistentFlags().Lookup("cpu-limit"))
 	viper.BindPFlag("mem-limit", rootCmd.PersistentFlags().Lookup("mem-limit"))

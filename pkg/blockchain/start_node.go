@@ -50,16 +50,6 @@ func startNode(args []string) {
 		return
 	}
 
-	// Obtain compose name from mappings
-	dockerContainerName, exists := getFiftysixLocalMappedContainerName(network)
-	if !exists {
-		logger.LogError("Unsupported blockchain compose file: " + network)
-		return
-	}
-
-	// TODO: remove
-	fmt.Println("here's the chain name", dockerContainerName, containerName, network)
-
 	// Get current working directory
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -68,7 +58,7 @@ func startNode(args []string) {
 	}
 
 	// Create env file for chain compose
-	composeFilePath, err := bitcoin.CreateBitcoinComposeFile(cwd)
+	composeFilePath, err := createComposeFileForNetwork(network, cwd)
 	if err != nil {
 		logger.LogError("Failed to create node docker compose file: " + err.Error())
 	}
@@ -84,4 +74,21 @@ func startNode(args []string) {
 	}
 
 	logger.LogInfo("Successfully started blockchain node for network: " + network)
+}
+
+func createComposeFileForNetwork(network string, cwd string) (string, error) {
+	switch network {
+	case "bitcoin":
+		return bitcoin.CreateBitcoinComposeFile(cwd)
+	case "ethereum":
+		return "", nil // createEthereumComposeFile(cwd)
+	case "dogecoin":
+		return "", nil // createDogecoinComposeFile(cwd)
+	case "ethereumclassic":
+		return "", nil // createEthereumClassicComposeFile(cwd)
+	case "litecoin":
+		return "", nil // createLitecoinComposeFile(cwd)
+	default:
+		return "", fmt.Errorf("unsupported network: %s", network)
+	}
 }

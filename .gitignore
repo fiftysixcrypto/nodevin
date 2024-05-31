@@ -6,6 +6,9 @@ nodevin-linux
 nodevin-new
 nodevin*
 
+# Environment variables
+*.env
+
 # Output of 'go build', 'go install', etc.
 *.exe
 *.exe~

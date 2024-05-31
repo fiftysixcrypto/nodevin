@@ -3,71 +3,61 @@ package bitcoin
 import (
 	"fmt"
 	"os"
-	"os/exec"
+	"path/filepath"
 
-	"github.com/curveballdaniel/nodevin/internal/config"
-	"github.com/curveballdaniel/nodevin/internal/logger"
-	"github.com/curveballdaniel/nodevin/pkg/blockchain"
+	"github.com/spf13/viper"
 )
 
-type Bitcoin struct{}
+func CreateBitcoinEnv() (string, error) {
+	port := viper.GetString("port")
+	storagePath := viper.GetString("data-dir")
+	extraArgs := viper.GetString("args")
 
-func (b Bitcoin) StartNode(config config.Config) error {
-	fmt.Println("Starting Bitcoin node with config:", config)
-
-	// Set environment variables for Docker Compose
-	//os.Setenv("BITCOIN_PORT", fmt.Sprintf("%d", config.Port))
-	//os.Setenv("BITCOIN_STORAGE_PATH", config.StoragePath)
-	//os.Setenv("BITCOIN_EXTRA_ARGS", fmt.Sprintf("%s", extraArgs))
-
-	//     command: bitcoind ${FIFTYSIX_BITCOIN_EXTRA_ARGS}
-	//  - "${FIFTYSIX_BITCOIN_RPC_PORT:-8332}:${FIFTYSIX_BITCOIN_RPC_PORT:-8332}"
-
-	// Define the path to the Docker Compose file
-	composeFilePath := "docker/bitcoin/docker-compose_bitcoin-core.yml"
-
-	// Start the services using Docker Compose
-	cmd := exec.Command("docker-compose", "-f", composeFilePath, "up", "-d")
-	cmd.Stdout = logWriter{}
-	cmd.Stderr = logWriter{}
-
-	if err := cmd.Run(); err != nil {
-		logger.LogError("Failed to start Docker Compose services: " + err.Error())
-		return err
+	// Get the current working directory
+	cwd, err := os.Getwd()
+	if err != nil {
+		return "", fmt.Errorf("failed to get current working directory: %w", err)
 	}
 
-	logger.LogInfo("Bitcoin node started successfully")
+	// Specify the path to the custom .env file in the current working directory
+	envFilePath := filepath.Join(cwd, ".bitcoin.env")
 
-	return nil
-}
+	// Create or open the custom .env file
+	file, err := os.Create(envFilePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to create .bitcoin.env file: %w", err)
+	}
+	defer file.Close()
 
-func (b Bitcoin) StopNode() error {
-	fmt.Println("Stopping Bitcoin node")
-
-	// Define the path to the Docker Compose file
-	composeFilePath := "docker/bitcoin/docker-compose_bitcoin-core.yml"
-
-	// Stop the services using Docker Compose
-	cmd := exec.Command("docker-compose", "-f", composeFilePath, "down")
-	cmd.Stdout = logWriter{}
-	cmd.Stderr = logWriter{}
-
-	if err := cmd.Run(); err != nil {
-		logger.LogError("Failed to stop Docker Compose services: " + err.Error())
-		return err
+	// Write environment variables to the custom .env file
+	if len(port) > 0 {
+		_, err = fmt.Fprintf(file, "FIFTYSIX_BITCOIN_RPC_PORT=%s\n", port)
+		if err != nil {
+			return "", fmt.Errorf("failed to write to .bitcoin.env file: %w", err)
+		}
 	}
 
-	logger.LogInfo("Bitcoin node stopped successfully")
+	if len(storagePath) > 0 {
+		_, err = fmt.Fprintf(file, "FIFTYSIX_BITCOIN_STORAGE_PATH=%s\n", storagePath)
+		if err != nil {
+			return "", fmt.Errorf("failed to write to .bitcoin.env file: %w", err)
+		}
+	}
 
-	return nil
-}
+	if len(extraArgs) > 0 {
+		_, err = fmt.Fprintf(file, "FIFTYSIX_BITCOIN_EXTRA_ARGS=%s\n", extraArgs)
+		if err != nil {
+			return "", fmt.Errorf("failed to write to .bitcoin.env file: %w", err)
+		}
+	}
 
-func init() {
-	blockchain.RegisterBlockchain("bitcoin", Bitcoin{})
-}
+	/*
+	     cpus: ${FIFTYSIX_BITCOIN_LIMITS_CPUS}
+	     memory: ${FIFTYSIX_BITCOIN_LIMITS_MEMORY}
+	   reservations:
+	     cpus: ${FIFTYSIX_BITCOIN_RESERVATIONS_CPUS}
+	     memory: ${FIFTYSIX_BITCOIN_RESERVATIONS_MEMORY}
+	*/
 
-type logWriter struct{}
-
-func (f logWriter) Write(bytes []byte) (int, error) {
-	return fmt.Fprint(os.Stdout, string(bytes))
+	return envFilePath, nil
 }

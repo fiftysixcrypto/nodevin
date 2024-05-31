@@ -6,6 +6,7 @@ import (
 	"os/exec"
 
 	"github.com/curveballdaniel/nodevin/internal/logger"
+	"github.com/curveballdaniel/nodevin/pkg/blockchain/bitcoin"
 	"github.com/curveballdaniel/nodevin/pkg/docker"
 	"github.com/spf13/cobra"
 )
@@ -49,15 +50,24 @@ func startNode(args []string) {
 		return
 	}
 
-	// Start the node
+	// Obtain compose name from mappings
 	dockerContainerName, exists := getFiftysixLocalMappedContainerName(network)
 	if !exists {
 		logger.LogError("Unsupported blockchain compose file: " + network)
 		return
 	}
 
+	fmt.Println("here's the chain name", dockerContainerName, containerName, network)
+
+	// Set env variables for chain compose
+	envFilePath, err := bitcoin.CreateBitcoinEnv()
+	if err != nil {
+		logger.LogError("Failed to create node settings .env file: " + err.Error())
+	}
+
+	// Start the node
 	composeFilePath := fmt.Sprintf("docker/%s/docker-compose_%s.yml", network, dockerContainerName)
-	cmd := exec.Command("docker-compose", "-f", composeFilePath, "up", "-d")
+	cmd := exec.Command("docker-compose", "--env-file", envFilePath, "-f", composeFilePath, "up", "-d")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

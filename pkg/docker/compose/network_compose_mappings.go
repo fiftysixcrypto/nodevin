@@ -6,7 +6,8 @@ func GetNetworkComposeConfig(network string) (NetworkConfig, error) {
 	switch network {
 	case "bitcoin":
 		return NetworkConfig{
-			Image:         "fiftysix/bitcoin-core:latest",
+			Image:         "fiftysix/bitcoin-core",
+			Version:       "latest",
 			ContainerName: "bitcoin-core",
 			Command:       "bitcoind",
 			Ports:         []string{"8332:8332", "8333:8333"},

@@ -41,6 +41,7 @@ type ComposeFile struct {
 
 type NetworkConfig struct {
 	Image         string
+	Version       string
 	ContainerName string
 	Command       string
 	Ports         []string

@@ -13,6 +13,9 @@ func mergeConfigs(defaultConfig, overrideConfig NetworkConfig) NetworkConfig {
 	if overrideConfig.Image != "" {
 		defaultConfig.Image = overrideConfig.Image
 	}
+	if overrideConfig.Version != "" {
+		defaultConfig.Version = overrideConfig.Version
+	}
 	if overrideConfig.ContainerName != "" {
 		defaultConfig.ContainerName = overrideConfig.ContainerName
 	}
@@ -81,6 +84,7 @@ func CreateComposeFile(nodeName string, cwd string, config NetworkConfig) (strin
 
 	override := NetworkConfig{
 		Image:         viper.GetString("image"),
+		Version:       viper.GetString("version"),
 		ContainerName: viper.GetString("container-name"),
 		Command:       viper.GetString("command"),
 		Ports:         viper.GetStringSlice("ports"),
@@ -105,7 +109,7 @@ func CreateComposeFile(nodeName string, cwd string, config NetworkConfig) (strin
 	finalConfig := mergeConfigs(config, override)
 
 	service := Service{
-		Image:         finalConfig.Image,
+		Image:         finalConfig.Image + ":" + finalConfig.Version,
 		ContainerName: finalConfig.ContainerName,
 		Command:       finalConfig.Command,
 		Ports:         finalConfig.Ports,

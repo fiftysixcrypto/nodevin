@@ -9,6 +9,7 @@ import (
 )
 
 var (
+	ShellCmd        = shellCmd
 	StartNodeCmd    = startNodeCmd
 	StopNodeCmd     = stopNodeCmd
 	DeleteVolumeCmd = deleteVolumeCmd

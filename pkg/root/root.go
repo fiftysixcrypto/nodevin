@@ -58,6 +58,7 @@ func init() {
 	viper.BindPFlag("mem-reservation", rootCmd.PersistentFlags().Lookup("mem-reservation"))
 
 	// Add blockchain commands
+	rootCmd.AddCommand(blockchain.ShellCmd)
 	rootCmd.AddCommand(blockchain.DeleteVolumeCmd)
 	rootCmd.AddCommand(blockchain.StartNodeCmd)
 	rootCmd.AddCommand(blockchain.StopNodeCmd)

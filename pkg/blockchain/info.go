@@ -1,16 +1,20 @@
 package blockchain
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"regexp"
+	"strconv"
 	"strings"
 	"text/tabwriter"
 
+	"github.com/docker/docker/client"
+
 	"github.com/curveballdaniel/nodevin/internal/logger"
-	"github.com/curveballdaniel/nodevin/pkg/docker"
+	"github.com/docker/docker/api/types/volume"
 	"github.com/spf13/cobra"
 )
 
@@ -35,7 +39,7 @@ var infoCmd = &cobra.Command{
 
 func displayInfo() {
 	// Prepare the docker ps command
-	args := []string{"ps", "-a", "--format", "{{json .}}"}
+	args := []string{"ps", "--format", "{{json .}}"}
 
 	// Execute the docker ps command
 	cmd := exec.Command("docker", args...)
@@ -45,10 +49,16 @@ func displayInfo() {
 		return
 	}
 
+	fmt.Println("Running Nodes:\n")
+
 	// Parse the output
 	containers := strings.Split(string(output), "\n")
 	if len(containers) < 2 {
-		logger.LogInfo("No running blockchain nodes found.")
+		fmt.Println("No running blockchain nodes found.\n")
+		displayVolumeInfo()
+
+		fmt.Println("\nHelpful Commands:\n")
+		fmt.Println("nodevin delete <volume-name>")
 		return
 	}
 
@@ -82,27 +92,93 @@ func displayInfo() {
 
 		formattedPorts := formatPorts(container.Ports)
 
-		volumeInfo, err := docker.ListVolumeDetails(imageName)
-		if err != nil {
-			logger.LogError("Failed to fetch Docker volume information: " + err.Error())
-		}
-
-		stopCmd := fmt.Sprintf("nodevin stop %s", getNetworkFromImage(container.Image))
-		logsCmd := fmt.Sprintf("nodevin logs %s --tail 50", getNetworkFromImage(container.Image))
-
-		fmt.Fprintf(w, "| %s\t %s\t %s\t %s\t %s\n\n%s\n%s\n\n%s\n%s\n",
+		fmt.Fprintf(w, "| %s\t %s\t %s\t %s\t %s\n",
 			imageName,
 			version,
 			container.Command,
 			container.Status,
 			formattedPorts,
-			"Data Location: "+volumeInfo.Mountpoint,
-			"Data Size: "+getSizeDescription(int64(volumeInfo.Size)),
-			"Node Logs: "+logsCmd,
-			"Stop Node: "+stopCmd,
 		)
 	}
 	w.Flush()
+
+	fmt.Println("")
+
+	displayVolumeInfo()
+
+	fmt.Println("\nHelpful Commands:\n")
+
+	fmt.Println("nodevin stop <network>")
+	fmt.Println("nodevin shell <network>")
+	fmt.Println("nodevin logs <network> --tail 50")
+
+}
+
+func displayVolumeInfo() {
+	fmt.Println("Node Data:\n")
+
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		logger.LogError("Failed to create Docker client: " + err.Error())
+		return
+	}
+
+	volumeList, err := cli.VolumeList(context.Background(), volume.ListOptions{})
+	if err != nil {
+		logger.LogError("Failed to list Docker volumes: " + err.Error())
+		return
+	}
+
+	if len(volumeList.Volumes) < 1 {
+		fmt.Println("No blockchain node data found.")
+		return
+	}
+
+	// Set up tabwriter for nicely formatted output
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.Debug)
+	fmt.Fprintln(w, "| VOLUME NAME\t SIZE\t MOUNTPOINT")
+
+	for _, vol := range volumeList.Volumes {
+		size, err := getVolumeSize(vol.Mountpoint)
+		sizeDescription := "unknown"
+		if err == nil {
+			sizeDescription = getSizeDescription(size)
+		} else {
+			if err.Error() == "exit status 1" {
+				fmt.Println("Failed to get size for volume " + vol.Name + ", do you have proper permissions?")
+			} else {
+				logger.LogError("Failed to get size for volume " + vol.Name + ": " + err.Error())
+			}
+		}
+
+		fmt.Fprintf(w, "| %s\t %s\t %s\n",
+			vol.Name,
+			sizeDescription,
+			vol.Mountpoint,
+		)
+	}
+	w.Flush()
+}
+
+func getVolumeSize(mountpoint string) (int64, error) {
+	cmd := exec.Command("du", "-sb", mountpoint)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return 0, err
+	}
+
+	// Parse the output to get the size in bytes
+	fields := strings.Fields(string(output))
+	if len(fields) == 0 {
+		return 0, fmt.Errorf("unexpected du output: %s", string(output))
+	}
+
+	size, err := strconv.ParseInt(fields[0], 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	return size, nil
 }
 
 func formatPorts(ports string) string {
@@ -125,18 +201,9 @@ func formatPorts(ports string) string {
 	return strings.Join(formattedPorts, ", ")
 }
 
-func getNetworkFromImage(image string) string {
-	for network, container := range networkContainerMap {
-		if strings.Contains(image, container) {
-			return network
-		}
-	}
-	return "unknown"
-}
-
 func getSizeDescription(size int64) string {
 	if size <= 0 {
-		return "unknown (do you have permissions?)"
+		return "unknown (do you have proper permissions?)"
 	}
 
 	const (

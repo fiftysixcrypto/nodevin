@@ -1,10 +1,7 @@
 # Binaries for programs and plugins
-nodevin
 nodevin.exe
 nodevin-darwin
 nodevin-linux
-nodevin-new
-nodevin*
 
 # Environment variables
 *.env

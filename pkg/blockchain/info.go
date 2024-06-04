@@ -58,7 +58,7 @@ func displayInfo() {
 		displayVolumeInfo()
 
 		fmt.Println("\nHelpful Commands:\n")
-		fmt.Println("nodevin delete <volume-name>")
+		fmt.Println("nodevin delete <volume-name>\n")
 		return
 	}
 
@@ -110,12 +110,12 @@ func displayInfo() {
 
 	fmt.Println("nodevin stop <network>")
 	fmt.Println("nodevin shell <network>")
-	fmt.Println("nodevin logs <network> --tail 50")
+	fmt.Println("nodevin logs <network> --tail 50\n")
 
 }
 
 func displayVolumeInfo() {
-	fmt.Println("Node Data:\n")
+	fmt.Println("Volume Data:\n")
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {

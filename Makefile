@@ -14,6 +14,9 @@ test:
 build-linux:
 	GOOS=linux GOARCH=amd64 go build -o $(BINARY_NAME)-linux $(MAIN_PACKAGE)
 
+build-darwin:
+	GOOS=darwin GOARCH=amd64 go build -o $(BINARY_NAME)-darwin $(MAIN_PACKAGE)
+
 clean:
 	go clean
 	rm -f $(BINARY_NAME)-linux $(BINARY_NAME)-darwin $(BINARY_NAME).exe

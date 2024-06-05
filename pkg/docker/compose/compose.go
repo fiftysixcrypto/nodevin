@@ -124,7 +124,7 @@ func CreateComposeFile(nodeName string, cwd string, config NetworkConfig) (strin
 	composeFile := ComposeFile{
 		Version: "3.9",
 		Services: map[string]Service{
-			"main-service": service,
+			nodeName: service,
 		},
 		Networks: finalConfig.NetworkDefs,
 		Volumes:  finalConfig.VolumeDefs,

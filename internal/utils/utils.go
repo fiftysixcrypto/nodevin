@@ -3,6 +3,8 @@ package utils
 import (
 	"sort"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 var networkContainerMap = map[string]string{
@@ -38,5 +40,12 @@ func GetAllSupportedNetworks() string {
 }
 
 func CheckIfTestnetOrTestnetNetwork() bool {
-	return true
+	networkFlag := viper.GetString("network")
+	testnetFlag := viper.GetBool("testnet")
+
+	if testnetFlag || networkFlag == "testnet" {
+		return true
+	}
+
+	return false
 }

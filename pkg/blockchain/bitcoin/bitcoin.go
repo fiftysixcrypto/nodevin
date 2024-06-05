@@ -1,19 +1,14 @@
 package bitcoin
 
 import (
+	"github.com/curveballdaniel/nodevin/internal/utils"
 	"github.com/curveballdaniel/nodevin/pkg/docker/compose"
-	"github.com/spf13/viper"
 )
 
 func CreateBitcoinComposeFile(cwd string) (string, error) {
-	bitcoinNetwork := viper.GetString("network")
-	baseTestnet := viper.GetBool("testnet")
-
 	var network string
 
-	if bitcoinNetwork != "" {
-		network = "bitcoin-" + bitcoinNetwork
-	} else if baseTestnet {
+	if utils.CheckIfTestnetOrTestnetNetwork() {
 		network = "bitcoin-testnet"
 	} else {
 		network = "bitcoin"
@@ -24,7 +19,7 @@ func CreateBitcoinComposeFile(cwd string) (string, error) {
 		return "", err
 	}
 
-	composeFilePath, err := compose.CreateComposeFile("bitcoin-core", cwd, bitcoinBaseComposeConfig)
+	composeFilePath, err := compose.CreateComposeFile(bitcoinBaseComposeConfig.ContainerName, cwd, bitcoinBaseComposeConfig)
 	if err != nil {
 		return "", err
 	}

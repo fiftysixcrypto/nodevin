@@ -18,10 +18,13 @@ var stopNodeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			logger.LogError("No network specified. To stop a node, specify the network explicitly.")
+			logger.LogInfo("")
 			availableNetworks := utils.GetAllSupportedNetworks()
 
 			logger.LogInfo("List of available networks: " + availableNetworks)
 			logger.LogInfo("Example usage: `nodevin stop <network>`")
+			logger.LogInfo("Example usage: `nodevin stop <network> --testnet`")
+			logger.LogInfo("Example usage: `nodevin stop <network> --network=\"goerli\"`")
 			return
 		}
 
@@ -43,6 +46,11 @@ func stopNode(network string) {
 
 	// Stop the node
 	composeFilePath := fmt.Sprintf("docker-compose_%s.yml", containerName)
+
+	if utils.CheckIfTestnetOrTestnetNetworkFlag() {
+		composeFilePath = fmt.Sprintf("docker-compose_%s.yml", containerName+"-testnet")
+	}
+
 	cmd := exec.Command("docker-compose", "-f", composeFilePath, "down")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

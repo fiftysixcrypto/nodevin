@@ -93,7 +93,7 @@ func displayInfo() {
 		formattedPorts := formatPorts(container.Ports)
 
 		fmt.Fprintf(w, "| %s\t %s\t %s\t %s\t %s\n",
-			imageName,
+			container.Names,
 			version,
 			container.Command,
 			container.Status,

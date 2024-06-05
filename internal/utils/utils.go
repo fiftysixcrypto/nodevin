@@ -39,7 +39,7 @@ func GetAllSupportedNetworks() string {
 	return strings.Join(keys, ", ")
 }
 
-func CheckIfTestnetOrTestnetNetwork() bool {
+func CheckIfTestnetOrTestnetNetworkFlag() bool {
 	networkFlag := viper.GetString("network")
 	testnetFlag := viper.GetBool("testnet")
 

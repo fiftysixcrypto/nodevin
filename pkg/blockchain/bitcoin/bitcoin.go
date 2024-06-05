@@ -8,7 +8,7 @@ import (
 func CreateBitcoinComposeFile(cwd string) (string, error) {
 	var network string
 
-	if utils.CheckIfTestnetOrTestnetNetwork() {
+	if utils.CheckIfTestnetOrTestnetNetworkFlag() {
 		network = "bitcoin-testnet"
 	} else {
 		network = "bitcoin"

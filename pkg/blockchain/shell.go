@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/curveballdaniel/nodevin/internal/utils"
+
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +25,7 @@ var shellCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		network := args[0]
-		containerName, exists := getFiftysixLocalMappedContainerName(network)
+		containerName, exists := utils.GetFiftysixLocalMappedContainerName(network)
 		if !exists {
 			fmt.Printf("Unsupported blockchain network: %s\n", network)
 			return

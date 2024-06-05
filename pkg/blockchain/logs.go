@@ -5,6 +5,7 @@ import (
 	"os/exec"
 
 	"github.com/curveballdaniel/nodevin/internal/logger"
+	"github.com/curveballdaniel/nodevin/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -18,7 +19,7 @@ var logsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			logger.LogError("No network specified. To fetch logs, specify the network explicitly.")
-			availableNetworks := getAllSupportedNetworks()
+			availableNetworks := utils.GetAllSupportedNetworks()
 			logger.LogInfo("List of available networks: " + availableNetworks)
 			logger.LogInfo("Example usage: `nodevin logs <network>`")
 			return
@@ -57,7 +58,7 @@ func fetchLogs(network string) {
 }
 
 func getOutputLogsContainerName(network string) (string, bool) {
-	for net, container := range networkContainerMap {
+	for net, container := range utils.NetworkContainerMap() {
 		if net == network {
 			return container, true
 		}

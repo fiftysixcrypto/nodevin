@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"github.com/curveballdaniel/nodevin/internal/logger"
+	"github.com/curveballdaniel/nodevin/internal/utils"
 	"github.com/curveballdaniel/nodevin/pkg/docker"
 	"github.com/spf13/cobra"
 )
@@ -38,7 +39,7 @@ var deleteVolumeCmd = &cobra.Command{
 		}
 
 		if !completed {
-			_, exists := getFiftysixDockerhubContainerName(passedVolumeArg)
+			_, exists := utils.GetFiftysixDockerhubContainerName(passedVolumeArg)
 
 			if !exists {
 				logger.LogError("To delete a volume list the volume name explicitly.")

@@ -6,8 +6,10 @@ import (
 	"os/exec"
 
 	"github.com/curveballdaniel/nodevin/internal/logger"
+	"github.com/curveballdaniel/nodevin/internal/utils"
 	"github.com/curveballdaniel/nodevin/pkg/blockchain/bitcoin"
 	"github.com/curveballdaniel/nodevin/pkg/docker"
+
 	"github.com/spf13/cobra"
 )
 
@@ -22,14 +24,14 @@ var startNodeCmd = &cobra.Command{
 
 func startNode(args []string) {
 	if len(args) == 0 {
-		logger.LogError("No network provided. Nodevin supports any of the following: " + getAllSupportedNetworks())
+		logger.LogError("No network provided. Nodevin supports any of the following: " + utils.GetAllSupportedNetworks())
 		logger.LogInfo("Example usage: `nodevin start <network>`")
 		return
 	}
 
 	network := args[0]
 
-	containerName, exists := getFiftysixDockerhubContainerName(network)
+	containerName, exists := utils.GetFiftysixDockerhubContainerName(network)
 	if !exists {
 		logger.LogError("Unsupported blockchain network: " + network)
 		return

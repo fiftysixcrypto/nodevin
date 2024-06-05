@@ -6,6 +6,8 @@ import (
 	"os/exec"
 
 	"github.com/curveballdaniel/nodevin/internal/logger"
+	"github.com/curveballdaniel/nodevin/internal/utils"
+
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +18,7 @@ var stopNodeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			logger.LogError("No network specified. To stop a node, specify the network explicitly.")
-			availableNetworks := getAllSupportedNetworks()
+			availableNetworks := utils.GetAllSupportedNetworks()
 
 			logger.LogInfo("List of available networks: " + availableNetworks)
 			logger.LogInfo("Example usage: `nodevin stop <network>`")
@@ -33,7 +35,7 @@ var stopNodeCmd = &cobra.Command{
 func stopNode(network string) {
 	logger.LogInfo("Stopping blockchain node...")
 
-	containerName, exists := getFiftysixLocalMappedContainerName(network)
+	containerName, exists := utils.GetFiftysixLocalMappedContainerName(network)
 	if !exists {
 		logger.LogError("Unsupported blockchain network: " + network)
 		return

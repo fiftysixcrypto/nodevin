@@ -25,13 +25,15 @@ var versionCmd = &cobra.Command{
 func init() {
 	// Define flags and configuration settings
 	rootCmd.PersistentFlags().String("command", "", "Initial command to run the node")
+	rootCmd.PersistentFlags().Bool("testnet", false, "Run assumed network testnet")
+	rootCmd.PersistentFlags().String("network", "", "Run node attached to a specific network (network name -- ex: goerli, testnet3)")
 	rootCmd.PersistentFlags().StringSlice("ports", []string{}, "Ports to bind to the node")
 	rootCmd.PersistentFlags().StringSlice("volumes", []string{}, "Docker volumes to mount for compose file")
 	rootCmd.PersistentFlags().StringSlice("volume-definitions", []string{}, "Docker volume definitions for compose file")
 	rootCmd.PersistentFlags().String("image", "", "Docker image to use for the node (image name -- ex: fiftysix/bitcoin-core)")
 	rootCmd.PersistentFlags().String("version", "", "Version of Docker image to use for the node (tag -- ex: latest, 27.0)")
 	rootCmd.PersistentFlags().String("container-name", "", "Docker container name for compose file")
-	rootCmd.PersistentFlags().StringSlice("networks", []string{}, "Docker networks to connect to for compose file")
+	rootCmd.PersistentFlags().StringSlice("docker-networks", []string{}, "Docker networks to connect to for compose file")
 	rootCmd.PersistentFlags().String("network-driver", "", "Docker network driver for compose file")
 	rootCmd.PersistentFlags().StringToString("volume-labels", map[string]string{}, "Docker volume labels for compose file")
 
@@ -42,13 +44,15 @@ func init() {
 
 	// Bind flags to viper
 	viper.BindPFlag("command", rootCmd.PersistentFlags().Lookup("command"))
+	viper.BindPFlag("testnet", rootCmd.PersistentFlags().Lookup("testnet"))
+	viper.BindPFlag("network", rootCmd.PersistentFlags().Lookup("network"))
 	viper.BindPFlag("ports", rootCmd.PersistentFlags().Lookup("ports"))
 	viper.BindPFlag("volumes", rootCmd.PersistentFlags().Lookup("volumes"))
 	viper.BindPFlag("volume-definitions", rootCmd.PersistentFlags().Lookup("volume-definitions"))
 	viper.BindPFlag("image", rootCmd.PersistentFlags().Lookup("image"))
 	viper.BindPFlag("version", rootCmd.PersistentFlags().Lookup("version"))
 	viper.BindPFlag("container-name", rootCmd.PersistentFlags().Lookup("container-name"))
-	viper.BindPFlag("networks", rootCmd.PersistentFlags().Lookup("networks"))
+	viper.BindPFlag("docker-networks", rootCmd.PersistentFlags().Lookup("docker-networks"))
 	viper.BindPFlag("network-driver", rootCmd.PersistentFlags().Lookup("network-driver"))
 	viper.BindPFlag("volume-labels", rootCmd.PersistentFlags().Lookup("volume-labels"))
 

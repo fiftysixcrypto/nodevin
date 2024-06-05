@@ -64,13 +64,13 @@ func isDeploySet(deploy Deploy) bool {
 }
 
 func CreateComposeFile(nodeName string, cwd string, config NetworkConfig) (string, error) {
-	networks := viper.GetStringSlice("networks")
+	dockerNetworks := viper.GetStringSlice("docker-networks")
 	volumeDefinitions := viper.GetStringSlice("volume-definitions")
 
 	networkDefs := make(map[string]NetworkDetails)
 	volumeDefs := make(map[string]VolumeDetails)
 
-	for _, network := range networks {
+	for _, network := range dockerNetworks {
 		if network != "" {
 			networkDefs[network] = NetworkDetails{Driver: viper.GetString("network-driver")}
 		}
@@ -89,7 +89,7 @@ func CreateComposeFile(nodeName string, cwd string, config NetworkConfig) (strin
 		Command:       viper.GetString("command"),
 		Ports:         viper.GetStringSlice("ports"),
 		Volumes:       viper.GetStringSlice("volumes"),
-		Networks:      networks,
+		Networks:      dockerNetworks,
 		Deploy: Deploy{
 			Resources: Resources{
 				Limits: ResourceDetails{

@@ -9,6 +9,7 @@ import (
 )
 
 var (
+	BackupCmd       = backupCmd
 	RestartNodeCmd  = restartNodeCmd
 	ShellCmd        = shellCmd
 	StartNodeCmd    = startNodeCmd

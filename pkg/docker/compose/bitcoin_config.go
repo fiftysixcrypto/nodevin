@@ -19,7 +19,7 @@ func GetBitcoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 		VolumeDefs: map[string]VolumeDetails{
 			"bitcoin-core-data": {
 				Labels: map[string]string{
-					"blockchain.software": "bitcoin-core",
+					"nodevin.blockchain.software": "bitcoin-core",
 				},
 			},
 		},
@@ -43,7 +43,7 @@ func GetBitcoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 		baseConfig.VolumeDefs = map[string]VolumeDetails{
 			"bitcoin-core-testnet-data": {
 				Labels: map[string]string{
-					"blockchain.software": "bitcoin-core",
+					"nodevin.blockchain.software": "bitcoin-core",
 				},
 			},
 		}

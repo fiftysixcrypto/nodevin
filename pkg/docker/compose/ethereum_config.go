@@ -21,7 +21,7 @@ func GetEthereumNetworkComposeConfig(network string) (NetworkConfig, error) {
 			VolumeDefs: map[string]VolumeDetails{
 				"ethereum-node-data": {
 					Labels: map[string]string{
-						"blockchain.software": "ethereum-node",
+						"nodevin.blockchain.software": "ethereum-node",
 					},
 				},
 			},

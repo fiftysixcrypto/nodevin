@@ -54,7 +54,7 @@ func ListVolumeDetails(network string) (*VolumeDetails, error) {
 
 	ctx := context.Background()
 	volumes, err := dockerClient.VolumeList(ctx, volume.ListOptions{
-		Filters: filters.NewArgs(filters.Arg("label", fmt.Sprintf("blockchain.software=%s", network))),
+		Filters: filters.NewArgs(filters.Arg("label", fmt.Sprintf("nodevin.blockchain.software=%s", network))),
 	})
 
 	if err != nil {

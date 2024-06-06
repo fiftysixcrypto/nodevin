@@ -25,6 +25,7 @@ var stopNodeCmd = &cobra.Command{
 			logger.LogInfo("Example usage: `nodevin stop <network>`")
 			logger.LogInfo("Example usage: `nodevin stop <network> --testnet`")
 			logger.LogInfo("Example usage: `nodevin stop <network> --network=\"goerli\"`")
+			logger.LogInfo("Example usage: `nodevin stop all`")
 			return
 		}
 

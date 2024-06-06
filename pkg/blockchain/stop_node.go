@@ -28,10 +28,12 @@ var stopNodeCmd = &cobra.Command{
 			return
 		}
 
-		// TODO: add (no nodes are running!)
-
 		network := args[0]
-		stopNode(network)
+		if network == "all" {
+			stopAllNodes()
+		} else {
+			stopNode(network)
+		}
 	},
 }
 
@@ -58,4 +60,28 @@ func stopNode(network string) {
 	if err := cmd.Run(); err != nil {
 		logger.LogError("Failed to stop Docker Compose services: " + err.Error())
 	}
+}
+
+func stopAllNodes() {
+	logger.LogInfo("Stopping all Docker containers...")
+
+	stopCmd := exec.Command("sh", "-c", "docker stop $(docker ps -aq)")
+	stopCmd.Stdout = os.Stdout
+	stopCmd.Stderr = os.Stderr
+
+	if err := stopCmd.Run(); err != nil {
+		logger.LogError("Failed to stop all Docker containers: " + err.Error())
+		return
+	}
+
+	rmCmd := exec.Command("sh", "-c", "docker rm $(docker ps -aq)")
+	rmCmd.Stdout = os.Stdout
+	rmCmd.Stderr = os.Stderr
+
+	if err := rmCmd.Run(); err != nil {
+		logger.LogError("Failed to remove all Docker containers: " + err.Error())
+		return
+	}
+
+	logger.LogInfo("All Docker containers stopped and removed successfully.")
 }

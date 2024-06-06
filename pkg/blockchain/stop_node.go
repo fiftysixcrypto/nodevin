@@ -46,11 +46,22 @@ func stopNode(network string) {
 		return
 	}
 
-	// Stop the node
 	composeFilePath := fmt.Sprintf("docker-compose_%s.yml", containerName)
-
 	if utils.CheckIfTestnetOrTestnetNetworkFlag() {
 		composeFilePath = fmt.Sprintf("docker-compose_%s.yml", containerName+"-testnet")
+	}
+
+	// Check if there are any running containers for this compose file
+	psCmd := exec.Command("docker-compose", "-f", composeFilePath, "ps", "-q")
+	psOut, err := psCmd.Output()
+	if err != nil {
+		logger.LogError("Failed to check Docker Compose services: " + err.Error())
+		return
+	}
+
+	if len(psOut) == 0 {
+		logger.LogInfo("No running containers found for the specified network.")
+		return
 	}
 
 	cmd := exec.Command("docker-compose", "-f", composeFilePath, "down")
@@ -59,11 +70,26 @@ func stopNode(network string) {
 
 	if err := cmd.Run(); err != nil {
 		logger.LogError("Failed to stop Docker Compose services: " + err.Error())
+		return
 	}
+
+	logger.LogInfo("Blockchain node stopped successfully.")
 }
 
 func stopAllNodes() {
 	logger.LogInfo("Stopping all Docker containers...")
+
+	psCmd := exec.Command("sh", "-c", "docker ps -q")
+	psOut, err := psCmd.Output()
+	if err != nil {
+		logger.LogError("Failed to list running Docker containers: " + err.Error())
+		return
+	}
+
+	if len(psOut) == 0 {
+		logger.LogInfo("No running Docker containers found.")
+		return
+	}
 
 	stopCmd := exec.Command("sh", "-c", "docker stop $(docker ps -aq)")
 	stopCmd.Stdout = os.Stdout

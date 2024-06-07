@@ -49,7 +49,7 @@ func displayInfo() {
 		return
 	}
 
-	fmt.Println("Running Nodes:\n")
+	fmt.Println("-- Running Nodes:\n")
 
 	// Parse the output
 	containers := strings.Split(string(output), "\n")
@@ -57,7 +57,9 @@ func displayInfo() {
 		fmt.Println("No running blockchain nodes found.\n")
 		displayVolumeInfo()
 
-		fmt.Println("\nHelpful Commands:\n")
+		fmt.Println("\n-- Helpful Commands:\n")
+		fmt.Println("nodevin start <network>")
+		fmt.Println("nodevin start <network> --testnet")
 		fmt.Println("nodevin delete <volume-name>\n")
 		return
 	}
@@ -106,7 +108,7 @@ func displayInfo() {
 
 	displayVolumeInfo()
 
-	fmt.Println("\nHelpful Commands:\n")
+	fmt.Println("\n-- Helpful Commands:\n")
 
 	fmt.Println("nodevin stop <network>")
 	fmt.Println("nodevin shell <network>")
@@ -115,7 +117,7 @@ func displayInfo() {
 }
 
 func displayVolumeInfo() {
-	fmt.Println("Volume Data:\n")
+	fmt.Println("-- Volume Data:\n")
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -182,7 +184,6 @@ func getVolumeSize(mountpoint string) (int64, error) {
 }
 
 func formatPorts(ports string) string {
-	// Split the ports field by commas
 	portSegments := strings.Split(ports, ",")
 	formattedPorts := []string{}
 	uniquePorts := make(map[string]bool)

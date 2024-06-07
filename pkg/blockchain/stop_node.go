@@ -61,7 +61,7 @@ func stopNode(network string) {
 	}
 
 	if len(psOut) == 0 {
-		logger.LogInfo("No running containers found for the specified network.")
+		logger.LogInfo("No running containers found for the specified network (did you mean to add --testnet?)")
 		return
 	}
 

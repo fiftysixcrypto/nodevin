@@ -9,6 +9,7 @@ import (
 )
 
 var (
+	RemoveImageCmd  = removeImageCmd
 	BackupCmd       = backupCmd
 	RestartNodeCmd  = restartNodeCmd
 	ShellCmd        = shellCmd

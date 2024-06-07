@@ -14,14 +14,8 @@ import (
 var backupCmd = &cobra.Command{
 	Use:   "backup [volume-name] [destination-path]",
 	Short: "Backup a Docker volume",
-	Args:  cobra.MaximumNArgs(2),
+	Args:  cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) < 2 {
-			logger.LogError("Volume name and destination path are required. To backup a volume, specify the volume name and the destination path explicitly.")
-			logger.LogInfo("Example usage: `nodevin backup <volume-name> <destination-path>`")
-			return
-		}
-
 		volumeName := args[0]
 		destinationPath := args[1]
 
@@ -54,13 +48,13 @@ func volumeExists(volumeName string) (bool, error) {
 func backupVolume(volumeName string, destinationPath string) {
 	logger.LogInfo("Backing up Docker volume...")
 
-	volumeExists, err := volumeExists(volumeName)
+	exists, err := volumeExists(volumeName)
 	if err != nil {
 		logger.LogError("Failed to check if volume exists: " + err.Error())
 		return
 	}
 
-	if !volumeExists {
+	if !exists {
 		logger.LogError("Specified volume does not exist: " + volumeName)
 		return
 	}
@@ -71,7 +65,7 @@ func backupVolume(volumeName string, destinationPath string) {
 		return
 	}
 
-	cmd := exec.Command("docker", "run", "--rm", "-v", volumeName+":/volume", "-v", absoluteDestinationPath+":/backup", "alpine", "sh", "-c", "cp -r /volume/* /backup/")
+	cmd := exec.Command("docker", "run", "--rm", "-v", volumeName+":/volume", "-v", absoluteDestinationPath+":/backup", "alpine", "sh", "-c", "tar czf /backup/backup.tar.gz -C /volume .")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

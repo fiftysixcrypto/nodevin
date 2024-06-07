@@ -60,7 +60,7 @@ func displayInfo() {
 		fmt.Println("\n-- Helpful Commands:\n")
 		fmt.Println("nodevin start <network>")
 		fmt.Println("nodevin start <network> --testnet")
-		fmt.Println("nodevin delete <volume-name>\n")
+		fmt.Println("nodevin delete <volume-or-image>\n")
 		return
 	}
 

@@ -25,6 +25,7 @@ var deleteVolumeCmd = &cobra.Command{
 			}
 			logger.LogInfo("List of current volumes: " + dockerVolumes)
 			logger.LogInfo("Example usage: `nodevin delete <volume-or-image>`")
+			logger.LogInfo("Example usage: `nodevin delete fiftysix/<image-name>:<tag>`")
 			logger.LogInfo("Example usage: `nodevin delete all`")
 			return
 		}
@@ -54,10 +55,20 @@ func deleteVolume(volumeName string) {
 		return
 	}
 
-	if !strings.Contains(volumes, volumeName) {
+	volumeList := strings.Split(volumes, "\n")
+	found := false
+	for _, volume := range volumeList {
+		if volume == volumeName {
+			found = true
+			break
+		}
+	}
+
+	if !found {
 		logger.LogError("Volume name not found: " + volumeName)
 		logger.LogInfo("List of current volumes: " + volumes)
 		logger.LogInfo("Example usage: `nodevin delete <volume-name>`")
+		logger.LogInfo("Example usage: `nodevin delete fiftysix/<image-name>:<tag>`")
 		logger.LogInfo("Example usage: `nodevin delete all`")
 		return
 	}
@@ -70,7 +81,7 @@ func deleteVolume(volumeName string) {
 
 	if completed {
 		logger.LogInfo("Successfully removed volume: " + volumeName)
-		removeNetworkImages(volumeName)
+		//removeNetworkImages(volumeName)
 	} else {
 		logger.LogError("Failed to remove volume: " + volumeName)
 	}

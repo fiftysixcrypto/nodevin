@@ -27,6 +27,9 @@ func init() {
 	rootCmd.PersistentFlags().String("command", "", "Initial command to run the node")
 	rootCmd.PersistentFlags().Bool("testnet", false, "Run assumed network testnet")
 	rootCmd.PersistentFlags().String("network", "", "Run node attached to a specific network (network name -- ex: goerli, testnet3)")
+	rootCmd.PersistentFlags().String("rpc-user", "user", "Username passed in via command for JSON RPC -- (default: user)")
+	rootCmd.PersistentFlags().String("rpc-pass", "fiftysix", "Username passed in via command for JSON RPC -- (default: fiftysix)")
+	rootCmd.PersistentFlags().Bool("cookie-auth", false, "Default to  -- (default: false)")
 	rootCmd.PersistentFlags().StringSlice("ports", []string{}, "Ports to bind to the node")
 	rootCmd.PersistentFlags().StringSlice("volumes", []string{}, "Docker volumes to mount for compose file")
 	rootCmd.PersistentFlags().StringSlice("volume-definitions", []string{}, "Docker volume definitions for compose file")
@@ -46,6 +49,9 @@ func init() {
 	viper.BindPFlag("command", rootCmd.PersistentFlags().Lookup("command"))
 	viper.BindPFlag("testnet", rootCmd.PersistentFlags().Lookup("testnet"))
 	viper.BindPFlag("network", rootCmd.PersistentFlags().Lookup("network"))
+	viper.BindPFlag("rpc-user", rootCmd.PersistentFlags().Lookup("rpc-user"))
+	viper.BindPFlag("rpc-pass", rootCmd.PersistentFlags().Lookup("rpc-pass"))
+	viper.BindPFlag("cookie-auth", rootCmd.PersistentFlags().Lookup("cookie-auth"))
 	viper.BindPFlag("ports", rootCmd.PersistentFlags().Lookup("ports"))
 	viper.BindPFlag("volumes", rootCmd.PersistentFlags().Lookup("volumes"))
 	viper.BindPFlag("volume-definitions", rootCmd.PersistentFlags().Lookup("volume-definitions"))
@@ -62,6 +68,7 @@ func init() {
 	viper.BindPFlag("mem-reservation", rootCmd.PersistentFlags().Lookup("mem-reservation"))
 
 	// Add blockchain commands
+	rootCmd.AddCommand(blockchain.RequestCmd)
 	rootCmd.AddCommand(blockchain.BackupCmd)
 	rootCmd.AddCommand(blockchain.RestartNodeCmd)
 	rootCmd.AddCommand(blockchain.ShellCmd)

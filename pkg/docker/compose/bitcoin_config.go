@@ -2,6 +2,8 @@ package compose
 
 import (
 	"fmt"
+
+	"github.com/spf13/viper"
 )
 
 func GetBitcoinNetworkComposeConfig(network string) (NetworkConfig, error) {
@@ -49,6 +51,24 @@ func GetBitcoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 		}
 	default:
 		return NetworkConfig{}, fmt.Errorf("unknown network: %s", network)
+	}
+
+	cookieAuth := viper.GetBool("cookie-auth")
+
+	if !cookieAuth {
+		// Add RPC user/pass to command
+		rpcUsername := viper.GetString("rpc-user")
+		rpcPassword := viper.GetString("rpc-pass")
+
+		if rpcUsername == "" {
+			rpcUsername = "user"
+		}
+
+		if rpcPassword == "" {
+			rpcPassword = "fiftysix"
+		}
+
+		baseConfig.Command = baseConfig.Command + " " + fmt.Sprintf("-rpcuser=%s", rpcUsername) + " " + fmt.Sprintf("-rpcpassword=%s", rpcPassword)
 	}
 
 	return baseConfig, nil

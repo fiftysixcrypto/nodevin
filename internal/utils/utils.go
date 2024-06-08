@@ -8,15 +8,26 @@ import (
 )
 
 var networkContainerMap = map[string]string{
-	"bitcoin":         "bitcoin-core",
-	"ethereum":        "geth",
-	"ethereumclassic": "core-geth",
-	"litecoin":        "litecoin-core",
-	"dogecoin":        "dogecoin-core",
+	"bitcoin":          "bitcoin-core",
+	"bitcoin-testnet":  "bitcoin-core-testnet",
+	"ethereum":         "geth",
+	"ethereum-classic": "core-geth",
+	"litecoin":         "litecoin-core",
+	"dogecoin":         "dogecoin-core",
+}
+
+var networkDefaultRPCPorts = map[string]int{
+	"bitcoin":         8332,
+	"bitcoin-testnet": 18332,
+	"ethereum":        8545,
 }
 
 func NetworkContainerMap() map[string]string {
 	return networkContainerMap
+}
+
+func NetworkDefaultRPCPorts() map[string]int {
+	return networkDefaultRPCPorts
 }
 
 func GetFiftysixLocalMappedContainerName(network string) (string, bool) {

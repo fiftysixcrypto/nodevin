@@ -33,7 +33,15 @@ var logsCmd = &cobra.Command{
 func fetchLogs(network string) {
 	logger.LogInfo("Fetching logs for blockchain node...")
 
-	containerName, exists := getOutputLogsContainerName(network)
+	properNetwork := network
+
+	if utils.CheckIfTestnetOrTestnetNetworkFlag() {
+		if network == "bitcoin" {
+			properNetwork = "bitcoin-testnet"
+		}
+	}
+
+	containerName, exists := getOutputLogsContainerName(properNetwork)
 	if !exists {
 		logger.LogError("Unsupported blockchain network: " + network)
 		return

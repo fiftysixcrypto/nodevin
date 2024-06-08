@@ -52,7 +52,8 @@ var requestCmd = &cobra.Command{
 }
 
 func printUsageAndExample() {
-	fmt.Println("Usage: nodevin request [network] --method <http-method> --params <json-data> --header <optional-extra-headers> --endpoint <optional-api-endpoint>")
+	fmt.Println("Usage: nodevin request [network] --method <http-method> --params <json-data> --rpc-user <rpc-username> --rpc-pass <rpc-password> --header <optional-extra-headers> --endpoint <optional-api-endpoint>")
+	fmt.Println("Example: nodevin request bitcoin --method getblockcount")
 	fmt.Println("Example: nodevin request bitcoin --method getblockheader --params '[\"00000000c937983704a73af28acdec37b049d214adbda81d7e2a3dd146f6ed09\"]'")
 }
 
@@ -105,6 +106,9 @@ func makeRequest(network, url, method, params, headers, user, pass string) error
 		body, _ := io.ReadAll(resp.Body)
 		if resp.StatusCode == 401 {
 			return fmt.Errorf("request failed with status code %d: Unauthorized\nMaybe consider using the --user and --pass flags?", resp.StatusCode)
+		} else if strings.Contains(string(body), "error") {
+			fmt.Print(string(body))
+			return nil
 		}
 		return fmt.Errorf("request failed with status code %d: %s", resp.StatusCode, string(body))
 	}
@@ -121,14 +125,10 @@ func init() {
 	requestCmd.Flags().StringP("header", "H", "", "Optional extra headers")
 	requestCmd.Flags().StringP("endpoint", "e", "http://127.0.0.1", "Optional API endpoint")
 	requestCmd.Flags().IntP("port", "P", 0, "Optional port to override the default")
-	requestCmd.Flags().StringP("user", "u", "", "Optional user for authentication")
-	requestCmd.Flags().StringP("pass", "w", "", "Optional password for authentication")
 
 	viper.BindPFlag("method", requestCmd.Flags().Lookup("method"))
 	viper.BindPFlag("params", requestCmd.Flags().Lookup("params"))
 	viper.BindPFlag("header", requestCmd.Flags().Lookup("header"))
 	viper.BindPFlag("endpoint", requestCmd.Flags().Lookup("endpoint"))
 	viper.BindPFlag("port", requestCmd.Flags().Lookup("port"))
-	viper.BindPFlag("user", requestCmd.Flags().Lookup("user"))
-	viper.BindPFlag("pass", requestCmd.Flags().Lookup("pass"))
 }

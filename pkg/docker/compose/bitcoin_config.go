@@ -35,13 +35,13 @@ func GetBitcoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 		baseConfig.ContainerName = "bitcoin-core-testnet"
 		baseConfig.Command = "bitcoind --testnet --server=1 --rpcbind=0.0.0.0 --rpcport=18332 --rpcallowip=0.0.0.0/0"
 		baseConfig.Ports = []string{"18332:18332", "18333:18333"}
+		baseConfig.Volumes = []string{"bitcoin-core-testnet-data:/node/bitcoin-core"}
 		baseConfig.Networks = []string{"bitcoin-testnet-net"}
 		baseConfig.NetworkDefs = map[string]NetworkDetails{
 			"bitcoin-testnet-net": {
 				Driver: "bridge",
 			},
 		}
-		baseConfig.Volumes = []string{"bitcoin-core-testnet-data:/node/bitcoin-core"}
 		baseConfig.VolumeDefs = map[string]VolumeDetails{
 			"bitcoin-core-testnet-data": {
 				Labels: map[string]string{

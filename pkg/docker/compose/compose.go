@@ -63,7 +63,66 @@ func isDeploySet(deploy Deploy) bool {
 		deploy.Resources.Reservations.Memory != ""
 }
 
-func CreateComposeFile(nodeName string, cwd string, config NetworkConfig) (string, error) {
+func createExtraServices(extraServiceNames []string, extraServiceConfigs []NetworkConfig, extraNetworkDefs map[string]NetworkDetails, extraVolumeDefs map[string]VolumeDetails) (map[string]Service, map[string]NetworkDetails, map[string]VolumeDetails) {
+	services := make(map[string]Service)
+	networkDefs := make(map[string]NetworkDetails)
+	volumeDefs := make(map[string]VolumeDetails)
+
+	for i, serviceName := range extraServiceNames {
+		config := extraServiceConfigs[i]
+
+		override := NetworkConfig{
+			Image:         viper.GetString(fmt.Sprintf("%s-image", serviceName)),
+			Version:       viper.GetString(fmt.Sprintf("%s-version", serviceName)),
+			ContainerName: viper.GetString(fmt.Sprintf("%s-container-name", serviceName)),
+			Command:       viper.GetString(fmt.Sprintf("%s-command", serviceName)),
+			Ports:         viper.GetStringSlice(fmt.Sprintf("%s-ports", serviceName)),
+			Volumes:       viper.GetStringSlice(fmt.Sprintf("%s-volumes", serviceName)),
+			Networks:      viper.GetStringSlice(fmt.Sprintf("%s-networks", serviceName)),
+			Deploy: Deploy{
+				Resources: Resources{
+					Limits: ResourceDetails{
+						CPUs:   viper.GetString(fmt.Sprintf("%s-cpu-limit", serviceName)),
+						Memory: viper.GetString(fmt.Sprintf("%s-mem-limit", serviceName)),
+					},
+					Reservations: ResourceDetails{
+						CPUs:   viper.GetString(fmt.Sprintf("%s-cpu-reservation", serviceName)),
+						Memory: viper.GetString(fmt.Sprintf("%s-mem-reservation", serviceName)),
+					},
+				},
+			},
+			NetworkDefs: extraNetworkDefs,
+			VolumeDefs:  extraVolumeDefs,
+		}
+
+		finalConfig := mergeConfigs(config, override)
+
+		service := Service{
+			Image:         finalConfig.Image + ":" + finalConfig.Version,
+			ContainerName: finalConfig.ContainerName,
+			Command:       finalConfig.Command,
+			Ports:         finalConfig.Ports,
+			Volumes:       finalConfig.Volumes,
+			Networks:      finalConfig.Networks,
+		}
+
+		if isDeploySet(finalConfig.Deploy) {
+			service.Deploy = &Deploy{Resources: finalConfig.Deploy.Resources}
+		}
+
+		services[serviceName] = service
+		for k, v := range finalConfig.NetworkDefs {
+			networkDefs[k] = v
+		}
+		for k, v := range finalConfig.VolumeDefs {
+			volumeDefs[k] = v
+		}
+	}
+
+	return services, networkDefs, volumeDefs
+}
+
+func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames []string, extraServiceConfigs []NetworkConfig, cwd string) (string, error) {
 	dockerNetworks := viper.GetStringSlice("docker-networks")
 	volumeDefinitions := viper.GetStringSlice("volume-definitions")
 
@@ -121,13 +180,33 @@ func CreateComposeFile(nodeName string, cwd string, config NetworkConfig) (strin
 		service.Deploy = &Deploy{Resources: finalConfig.Deploy.Resources}
 	}
 
+	services := map[string]Service{
+		nodeName: service,
+	}
+
+	// Initialize extra network and volume definitions with the values from finalConfig
+	extraNetworkDefs := finalConfig.NetworkDefs
+	extraVolumeDefs := finalConfig.VolumeDefs
+
+	if len(extraServiceNames) > 0 && len(extraServiceConfigs) > 0 {
+		extraServices, extraNetworks, extraVolumes := createExtraServices(extraServiceNames, extraServiceConfigs, extraNetworkDefs, extraVolumeDefs)
+		for k, v := range extraServices {
+			services[k] = v
+		}
+
+		for k, v := range extraNetworks {
+			extraNetworkDefs[k] = v
+		}
+		for k, v := range extraVolumes {
+			extraVolumeDefs[k] = v
+		}
+	}
+
 	composeFile := ComposeFile{
-		Version: "3.9",
-		Services: map[string]Service{
-			nodeName: service,
-		},
-		Networks: finalConfig.NetworkDefs,
-		Volumes:  finalConfig.VolumeDefs,
+		Version:  "3.9",
+		Services: services,
+		Networks: extraNetworkDefs,
+		Volumes:  extraVolumeDefs,
 	}
 
 	composeFileName := fmt.Sprintf("docker-compose_%s.yml", nodeName)

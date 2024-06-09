@@ -13,6 +13,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var ord bool
+
 var startNodeCmd = &cobra.Command{
 	Use:   "start [network]",
 	Short: "Start a blockchain node",

@@ -33,7 +33,7 @@ func GetOrdNetworkComposeConfig(network string) (NetworkConfig, error) {
 		baseConfig.Command = "ord --bitcoin-rpc-url http://bitcoin-core:8332"
 	case "ord-testnet":
 		baseConfig.ContainerName = "ord-testnet"
-		baseConfig.Command = "ord --testnet --bitcoin-rpc-url http://bitcoin-core:18332"
+		baseConfig.Command = "ord --testnet --bitcoin-rpc-url http://bitcoin-core-testnet:18332"
 		baseConfig.Volumes = []string{"bitcoin-core-testnet-data:/node/bitcoin-core", "ord-testnet-data:/node/ord"}
 		baseConfig.Networks = []string{"bitcoin-testnet-net"}
 		baseConfig.NetworkDefs = map[string]NetworkDetails{

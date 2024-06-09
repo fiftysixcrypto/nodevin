@@ -12,7 +12,7 @@ import (
 )
 
 var deleteVolumeCmd = &cobra.Command{
-	Use:   "delete [volume-or-image]",
+	Use:   "delete [volume-name-or-image-name]",
 	Short: "Delete a Docker volume and its associated images, or a delete specific image",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -24,7 +24,7 @@ var deleteVolumeCmd = &cobra.Command{
 				return
 			}
 			logger.LogInfo("List of current volumes: " + dockerVolumes)
-			logger.LogInfo("Example usage: `nodevin delete <volume-or-image>`")
+			logger.LogInfo("Example usage: `nodevin delete <volume-name-or-image-name>`")
 			logger.LogInfo("Example usage: `nodevin delete fiftysix/<image-name>:<tag>`")
 			logger.LogInfo("Example usage: `nodevin delete all`")
 			return

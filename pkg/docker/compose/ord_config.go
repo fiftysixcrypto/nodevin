@@ -30,10 +30,10 @@ func GetOrdNetworkComposeConfig(network string) (NetworkConfig, error) {
 	switch network {
 	case "ord":
 		baseConfig.ContainerName = "ord"
-		baseConfig.Command = "ord --bitcoin-rpc-url http://bitcoin-core:8332 server"
+		baseConfig.Command = "ord --bitcoin-rpc-url http://bitcoin-core:8332"
 	case "ord-testnet":
 		baseConfig.ContainerName = "ord-testnet"
-		baseConfig.Command = "ord --testnet --bitcoin-rpc-url http://bitcoin-core:18332 server"
+		baseConfig.Command = "ord --testnet --bitcoin-rpc-url http://bitcoin-core:18332"
 		baseConfig.Volumes = []string{"bitcoin-core-testnet-data:/node/bitcoin-core", "ord-testnet-data:/node/ord"}
 		baseConfig.Networks = []string{"bitcoin-testnet-net"}
 		baseConfig.NetworkDefs = map[string]NetworkDetails{
@@ -67,8 +67,10 @@ func GetOrdNetworkComposeConfig(network string) (NetworkConfig, error) {
 			rpcPassword = "fiftysix"
 		}
 
-		baseConfig.Command = baseConfig.Command + " " + fmt.Sprintf("--bitcoin-rpc-username=%s", rpcUsername) + " " + fmt.Sprintf("--bitcoin-rpc-password=%s", rpcPassword)
+		baseConfig.Command = baseConfig.Command + " " + fmt.Sprintf("--bitcoin-rpc-username %s", rpcUsername) + " " + fmt.Sprintf("--bitcoin-rpc-password %s", rpcPassword)
 	}
+
+	baseConfig.Command = baseConfig.Command + " server"
 
 	return baseConfig, nil
 }

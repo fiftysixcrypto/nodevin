@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"regexp"
@@ -11,11 +13,11 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/docker/docker/client"
-
 	"github.com/curveballdaniel/nodevin/internal/logger"
 	"github.com/docker/docker/api/types/volume"
+	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 type ContainerInfo struct {
@@ -27,6 +29,17 @@ type ContainerInfo struct {
 	Status     string `json:"Status"`
 	Ports      string `json:"Ports"`
 	Names      string `json:"Names"`
+}
+
+type RPCResponse struct {
+	Result interface{} `json:"result"`
+	Error  *RPCError   `json:"error"`
+	ID     string      `json:"id"`
+}
+
+type RPCError struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }
 
 var infoCmd = &cobra.Command{
@@ -66,7 +79,7 @@ func displayInfo() {
 
 	// Set up tabwriter for nicely formatted output
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.Debug)
-	fmt.Fprintln(w, "| BLOCKCHAIN\t VERSION\t COMMAND\t STATUS\t PORTS")
+	fmt.Fprintln(w, "| BLOCKCHAIN\t VERSION\t COMMAND\t STATUS\t PORTS\t PEERS\t LATEST BLOCK")
 
 	for _, containerJSON := range containers {
 		if strings.TrimSpace(containerJSON) == "" {
@@ -94,12 +107,24 @@ func displayInfo() {
 
 		formattedPorts := formatPorts(container.Ports)
 
-		fmt.Fprintf(w, "| %s\t %s\t %s\t %s\t %s\n",
+		localLatestBlock := 0
+		globalLatestBlock := 0
+		peers := 0
+
+		if container.Names == "bitcoin-core" {
+			localLatestBlock, globalLatestBlock = getLatestBlocks()
+			peers = getPeers()
+		}
+
+		fmt.Fprintf(w, "| %s\t %s\t %s\t %s\t %s\t %d\t %d/%d\n",
 			container.Names,
 			version,
 			container.Command,
 			container.Status,
 			formattedPorts,
+			peers,
+			localLatestBlock,
+			globalLatestBlock,
 		)
 	}
 	w.Flush()
@@ -113,7 +138,108 @@ func displayInfo() {
 	fmt.Println("nodevin stop <network>")
 	fmt.Println("nodevin shell <network>")
 	fmt.Println("nodevin logs <network> --tail 50\n")
+}
 
+func getLatestBlocks() (int, int) {
+	localLatestBlock := getLocalLatestBlock()
+	globalLatestBlock := getGlobalLatestBlock()
+
+	return localLatestBlock, globalLatestBlock
+}
+
+func getLocalLatestBlock() int {
+	url := "http://127.0.0.1:8332"
+	method := "getblockcount"
+	params := "[]"
+	user := viper.GetString("rpc-user")
+	pass := viper.GetString("rpc-pass")
+
+	response, err := makeRequest("bitcoin", url, method, params, "", user, pass)
+	if err != nil {
+		logger.LogError("Failed to get local latest block: " + err.Error())
+		return 0
+	}
+
+	var rpcResponse RPCResponse
+	if err := json.Unmarshal(response, &rpcResponse); err != nil {
+		logger.LogError("Failed to parse RPC response: " + err.Error())
+		return 0
+	}
+
+	if rpcResponse.Error != nil {
+		logger.LogError("RPC Error: " + rpcResponse.Error.Message)
+		return 0
+	}
+
+	blockCount, ok := rpcResponse.Result.(float64)
+	if !ok {
+		logger.LogError("Failed to parse block count")
+		return 0
+	}
+
+	return int(blockCount)
+}
+
+func getGlobalLatestBlock() int {
+	resp, err := http.Get("https://blockchain.info/latestblock")
+	if err != nil {
+		logger.LogError("Failed to fetch global latest block: " + err.Error())
+		return 0
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		logger.LogError("Failed to read response body: " + err.Error())
+		return 0
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		logger.LogError("Failed to parse response body: " + err.Error())
+		return 0
+	}
+
+	blockCount, ok := result["height"].(float64)
+	if !ok {
+		logger.LogError("Failed to parse global block count")
+		return 0
+	}
+
+	return int(blockCount)
+}
+
+func getPeers() int {
+	url := "http://127.0.0.1:8332"
+	method := "getconnectioncount"
+	params := "[]"
+	user := viper.GetString("rpc-user")
+	pass := viper.GetString("rpc-pass")
+
+	response, err := makeRequest("bitcoin", url, method, params, "", user, pass)
+	if err != nil {
+		logger.LogError("Failed to get peer count: " + err.Error())
+		return 0
+	}
+
+	var rpcResponse RPCResponse
+	if err := json.Unmarshal(response, &rpcResponse); err != nil {
+		logger.LogError("Failed to parse RPC response: " + err.Error())
+		return 0
+	}
+
+	if rpcResponse.Error != nil {
+		logger.LogError("RPC Error: " + rpcResponse.Error.Message)
+		return 0
+	}
+
+	peerCount, ok := rpcResponse.Result.(float64)
+	if !ok {
+		logger.LogError("Failed to parse peer count")
+		return 0
+	}
+
+	return int(peerCount)
 }
 
 func displayVolumeInfo() {
@@ -147,6 +273,8 @@ func displayVolumeInfo() {
 			sizeDescription = getSizeDescription(size)
 		} else {
 			if err.Error() == "exit status 1" {
+				fmt.Println("Failed to get size for volume " + vol.Name + ", do you have proper permissions?")
+			} else if err.Error() == "exit status 64" {
 				fmt.Println("Failed to get size for volume " + vol.Name + ", do you have proper permissions?")
 			} else {
 				logger.LogError("Failed to get size for volume " + vol.Name + ": " + err.Error())
@@ -229,4 +357,11 @@ func getSizeDescription(size int64) string {
 	default:
 		return fmt.Sprintf("%d B", size)
 	}
+}
+
+func init() {
+	viper.SetDefault("rpc-user", "user")
+	viper.SetDefault("rpc-pass", "fiftysix")
+	viper.BindEnv("rpc-user", "RPC_USER")
+	viper.BindEnv("rpc-pass", "RPC_PASS")
 }

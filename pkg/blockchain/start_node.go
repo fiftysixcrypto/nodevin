@@ -78,6 +78,10 @@ func startNode(args []string) {
 	}
 
 	logger.LogInfo("Successfully started blockchain node for network: " + network)
+
+	startMessage, _ := utils.GetStartMessage(network)
+
+	fmt.Printf("\n%s\n", startMessage)
 }
 
 func createComposeFileForNetwork(network string, cwd string) (string, error) {

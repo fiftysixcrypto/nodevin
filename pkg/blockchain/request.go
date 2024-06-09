@@ -45,7 +45,7 @@ var requestCmd = &cobra.Command{
 
 		url := fmt.Sprintf("%s:%d", endpoint, port)
 
-		if err := makeRequest(network, url, method, params, headers, user, pass); err != nil {
+		if _, err := makeRequest(network, url, method, params, headers, user, pass); err != nil {
 			logger.LogError("Failed to make request: " + err.Error())
 		}
 	},
@@ -57,7 +57,7 @@ func printUsageAndExample() {
 	fmt.Println("Example: nodevin request bitcoin --method getblockheader --params '[\"00000000c937983704a73af28acdec37b049d214adbda81d7e2a3dd146f6ed09\"]'")
 }
 
-func makeRequest(network, url, method, params, headers, user, pass string) error {
+func makeRequest(network, url, method, params, headers, user, pass string) ([]byte, error) {
 	jsonData := map[string]interface{}{
 		"jsonrpc": "1.0",
 		"id":      "nodevin",
@@ -67,7 +67,7 @@ func makeRequest(network, url, method, params, headers, user, pass string) error
 	var jsonParams []interface{}
 	if params != "" {
 		if err := json.Unmarshal([]byte(params), &jsonParams); err != nil {
-			return fmt.Errorf("invalid params: %w", err)
+			return nil, fmt.Errorf("invalid params: %w", err)
 		}
 	} else {
 		jsonParams = []interface{}{}
@@ -78,7 +78,7 @@ func makeRequest(network, url, method, params, headers, user, pass string) error
 	jsonValue, _ := json.Marshal(jsonData)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonValue))
 	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -98,25 +98,20 @@ func makeRequest(network, url, method, params, headers, user, pass string) error
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("failed to make request: %w", err)
+		return nil, fmt.Errorf("failed to make request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
 		if resp.StatusCode == 401 {
-			return fmt.Errorf("request failed with status code %d: Unauthorized\nMaybe consider using the --user and --pass flags?", resp.StatusCode)
-		} else if strings.Contains(string(body), "error") {
-			fmt.Print(string(body))
-			return nil
+			return nil, fmt.Errorf("request failed with status code %d: Unauthorized\nMaybe consider using the --user and --pass flags?", resp.StatusCode)
 		}
-		return fmt.Errorf("request failed with status code %d: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("request failed with status code %d: %s", resp.StatusCode, string(body))
 	}
 
 	body, _ := io.ReadAll(resp.Body)
-	fmt.Print(string(body))
-
-	return nil
+	return body, nil
 }
 
 func init() {

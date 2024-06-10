@@ -358,10 +358,3 @@ func getSizeDescription(size int64) string {
 		return fmt.Sprintf("%d B", size)
 	}
 }
-
-func init() {
-	viper.SetDefault("rpc-user", "user")
-	viper.SetDefault("rpc-pass", "fiftysix")
-	viper.BindEnv("rpc-user", "RPC_USER")
-	viper.BindEnv("rpc-pass", "RPC_PASS")
-}

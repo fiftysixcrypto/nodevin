@@ -5,6 +5,7 @@ import (
 
 	"github.com/curveballdaniel/nodevin/internal/version"
 	"github.com/curveballdaniel/nodevin/pkg/blockchain"
+	"github.com/curveballdaniel/nodevin/pkg/update"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -83,6 +84,9 @@ func init() {
 	rootCmd.AddCommand(blockchain.StopNodeCmd)
 	rootCmd.AddCommand(blockchain.LogsCmd)
 	rootCmd.AddCommand(blockchain.InfoCmd)
+
+	// Add update commands
+	rootCmd.AddCommand(update.UpdateCmd)
 }
 
 func Execute() error {

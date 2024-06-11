@@ -1,100 +1,32 @@
-package daemon
+package update
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"os/exec"
-	"os/signal"
 	"strings"
-	"syscall"
-	"time"
 
 	"github.com/curveballdaniel/nodevin/internal/logger"
-	"github.com/curveballdaniel/nodevin/pkg/update"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
-	"github.com/spf13/cobra"
 )
 
-var Cmd = &cobra.Command{
-	Use:   "daemon",
-	Short: "Run the NodeVin daemon",
-	Run: func(cmd *cobra.Command, args []string) {
-		runDaemon()
-	},
-}
-
-func runDaemon() {
-	logger.LogInfo("Starting NodeVin daemon...")
-
-	// Set up signal handling for graceful shutdown
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-
-	// Set up a ticker to check for updates periodically
-	updateTicker := time.NewTicker(24 * time.Hour)
-	imageCheckTicker := time.NewTicker(1 * time.Hour)
-
-	go func() {
-		for {
-			select {
-			case <-updateTicker.C:
-				logger.LogInfo("Checking for updates...")
-				updateNeeded, err := update.CheckForUpdates()
-				if err != nil {
-					logger.LogError("Failed to check for updates: " + err.Error())
-					continue
-				}
-				if updateNeeded {
-					logger.LogInfo("Update downloaded. Applying update...")
-					if err := update.ApplyUpdate(); err != nil {
-						logger.LogError("Failed to apply update: " + err.Error())
-						continue
-					}
-					logger.LogInfo("Update applied successfully. Please restart the application.")
-				} else {
-					logger.LogInfo("Nodevin is up to date.")
-				}
-			case <-imageCheckTicker.C:
-				logger.LogInfo("Checking for Docker image updates...")
-				if err := checkAndUpdateDockerImages(); err != nil {
-					logger.LogError("Failed to check/update Docker images: " + err.Error())
-				}
-			}
-		}
-	}()
-
-	// Block until a signal is received
-	sig := <-sigs
-	logger.LogInfo("Received signal: " + sig.String())
-
-	// Perform cleanup and shutdown
-	shutdownDaemon()
-	logger.LogInfo("Shutting down NodeVin daemon...")
-}
-
-func shutdownDaemon() {
-	// Implement the cleanup and shutdown logic here
-}
-
-func Execute() error {
-	return Cmd.Execute()
-}
-
-func checkAndUpdateDockerImages() error {
+func CheckAndUpdateDockerImages() error {
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return fmt.Errorf("failed to create Docker client: %w", err)
 	}
 
 	containers, err := cli.ContainerList(context.Background(), container.ListOptions{All: true})
-
 	if err != nil {
 		return fmt.Errorf("failed to list Docker containers: %w", err)
+	}
+
+	if len(containers) == 0 {
+		return fmt.Errorf("no Docker containers running!%s", "")
 	}
 
 	for _, container := range containers {
@@ -157,11 +89,14 @@ func getLocalImageDigest(cli *client.Client, image string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if len(inspect.RepoDigests) == 0 {
+		return "", fmt.Errorf("no repo digests found for image %s", image)
+	}
 	return inspect.RepoDigests[0], nil
 }
 
 func updateDockerImage(cli *client.Client, container types.Container, image string) error {
-	composeFilePath := fmt.Sprintf("docker-compose_%s.yml", container.Names[0])
+	composeFilePath := fmt.Sprintf("docker-compose_%s.yml", strings.TrimPrefix(container.Names[0], "/"))
 
 	cmd := exec.Command("docker-compose", "-f", composeFilePath, "down")
 	if err := cmd.Run(); err != nil {

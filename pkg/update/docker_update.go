@@ -26,7 +26,8 @@ func CheckAndUpdateDockerImages() error {
 	}
 
 	if len(containers) == 0 {
-		return fmt.Errorf("no Docker containers running!%s", "")
+		logger.LogInfo("No Docker containers running!")
+		return nil
 	}
 
 	for _, container := range containers {

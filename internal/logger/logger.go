@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"io"
 	"log"
 	"os"
 )
@@ -21,4 +22,9 @@ func LogInfo(message string) {
 
 func LogError(message string) {
 	ErrorLogger.Println(message)
+}
+
+func SetOutput(output io.Writer) {
+	InfoLogger.SetOutput(output)
+	ErrorLogger.SetOutput(output)
 }

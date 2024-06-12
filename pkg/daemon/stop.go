@@ -49,5 +49,5 @@ func stopDaemon() {
 		return
 	}
 
-	logger.LogInfo("Nodevin daemon successfully stopped.\n")
+	logger.LogInfo("Nodevin daemon successfully stopped.")
 }

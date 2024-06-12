@@ -22,6 +22,7 @@ func runDaemon() {
 	multiWriter := io.MultiWriter(os.Stdout, logFile)
 	logger.SetOutput(multiWriter)
 
+	logger.LogInfo("")
 	logger.LogInfo("Starting nodevin daemon...")
 
 	sigs := make(chan os.Signal, 1)
@@ -47,5 +48,5 @@ func runDaemon() {
 	sig := <-sigs
 	logger.LogInfo("Received signal: " + sig.String())
 
-	logger.LogInfo("Shutting down nodevin daemon...\n")
+	logger.LogInfo("Shutting down nodevin daemon...")
 }

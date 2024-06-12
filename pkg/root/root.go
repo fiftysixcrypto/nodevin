@@ -5,6 +5,7 @@ import (
 
 	"github.com/curveballdaniel/nodevin/internal/version"
 	"github.com/curveballdaniel/nodevin/pkg/blockchain"
+	"github.com/curveballdaniel/nodevin/pkg/daemon"
 	"github.com/curveballdaniel/nodevin/pkg/update"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -12,14 +13,14 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "nodevin",
-	Short: "Nodevin CLI",
+	Short: "nodevin CLI",
 }
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version number of NodeVin",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Nodevin CLI v" + version.Version)
+		fmt.Println("nodevin CLI v" + version.Version)
 	},
 }
 
@@ -85,8 +86,11 @@ func init() {
 	rootCmd.AddCommand(blockchain.LogsCmd)
 	rootCmd.AddCommand(blockchain.InfoCmd)
 
-	// Add update commands
+	// Add manual update commands
 	rootCmd.AddCommand(update.UpdateCmd)
+
+	// Add daemon commands
+	rootCmd.AddCommand(daemon.DaemonCmd)
 }
 
 func Execute() error {

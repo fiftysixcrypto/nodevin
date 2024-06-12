@@ -31,7 +31,7 @@ func CheckAndUpdateDockerImages() error {
 
 	for _, container := range containers {
 		if strings.HasPrefix(container.Image, "fiftysix/") {
-			image := strings.Split(container.Image, ":")[0]
+			image := strings.TrimPrefix(strings.Split(container.Image, ":")[0], "fiftysix/")
 			latestDigest, err := getDockerHubImageDigest("fiftysix", image, "latest")
 			if err != nil {
 				logger.LogError(fmt.Sprintf("Failed to get latest digest for image %s: %v", image, err))
@@ -45,10 +45,13 @@ func CheckAndUpdateDockerImages() error {
 			}
 
 			if latestDigest != localDigest {
-				logger.LogInfo(fmt.Sprintf("Updating image %s to latest version", container.Image))
-				if err := updateDockerImage(cli, container, image); err != nil {
-					logger.LogError(fmt.Sprintf("Failed to update image %s: %v", container.Image, err))
+				logger.LogInfo(fmt.Sprintf("New version of %s found!", image))
+				logger.LogInfo(fmt.Sprintf("Attempting to update %s to latest version", image))
+				if err := updateDockerImage(container, container.Image); err != nil {
+					logger.LogError(fmt.Sprintf("Failed to update image %s: %v", image, err))
 				}
+			} else {
+				logger.LogInfo(fmt.Sprintf("Local image %s is on latest version", image))
 			}
 		}
 	}
@@ -92,22 +95,31 @@ func getLocalImageDigest(cli *client.Client, image string) (string, error) {
 	if len(inspect.RepoDigests) == 0 {
 		return "", fmt.Errorf("no repo digests found for image %s", image)
 	}
-	return inspect.RepoDigests[0], nil
+	localDigest := inspect.RepoDigests[0]
+	if parts := strings.Split(localDigest, "@"); len(parts) > 1 {
+		return parts[1], nil
+	}
+	return localDigest, nil
 }
 
-func updateDockerImage(cli *client.Client, container types.Container, image string) error {
-	composeFilePath := fmt.Sprintf("docker-compose_%s.yml", strings.TrimPrefix(container.Names[0], "/"))
+func updateDockerImage(container types.Container, image string) error {
+	imageShorthandName := strings.TrimPrefix(container.Names[0], "/")
+	composeFilePath := fmt.Sprintf("docker-compose_%s.yml", imageShorthandName)
 
+	logger.LogInfo(fmt.Sprintf("Shutting down %s...", imageShorthandName))
 	cmd := exec.Command("docker-compose", "-f", composeFilePath, "down")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to stop Docker Compose services: %w", err)
 	}
 
-	pullCmd := exec.Command("docker", "pull", image+":latest")
+	logger.LogInfo(fmt.Sprintf("Pulling latest image for %s...", imageShorthandName))
+	pullCmd := exec.Command("docker", "pull", image)
 	if err := pullCmd.Run(); err != nil {
 		return fmt.Errorf("failed to pull latest Docker image: %w", err)
 	}
+	logger.LogInfo(fmt.Sprintf("Successfully pulled latest image for %s", imageShorthandName))
 
+	logger.LogInfo(fmt.Sprintf("Starting %s back up on latest version...", imageShorthandName))
 	cmd = exec.Command("docker-compose", "-f", composeFilePath, "up", "-d")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to start Docker Compose services: %w", err)

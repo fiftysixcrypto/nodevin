@@ -86,6 +86,8 @@ func startNode(args []string) {
 
 func createComposeFileForNetwork(network string, cwd string) (string, error) {
 	switch network {
+	case "daemon":
+		return "", nil // start the daemon
 	case "bitcoin":
 		return bitcoin.CreateBitcoinComposeFile(cwd)
 	case "ethereum":

@@ -9,7 +9,7 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/curveballdaniel/nodevin/internal/logger"
+	"github.com/fiftysixcrypto/nodevin/internal/logger"
 )
 
 const (

@@ -7,11 +7,11 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/curveballdaniel/nodevin/internal/logger"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
+	"github.com/fiftysixcrypto/nodevin/internal/logger"
 )
 
 var dockerClient *client.Client

@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/curveballdaniel/nodevin/internal/logger"
-	"github.com/curveballdaniel/nodevin/pkg/docker"
+	"github.com/fiftysixcrypto/nodevin/internal/logger"
+	"github.com/fiftysixcrypto/nodevin/pkg/docker"
 	"github.com/spf13/cobra"
 )
 

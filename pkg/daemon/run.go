@@ -7,8 +7,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/curveballdaniel/nodevin/internal/logger"
-	"github.com/curveballdaniel/nodevin/pkg/update"
+	"github.com/fiftysixcrypto/nodevin/internal/logger"
+	"github.com/fiftysixcrypto/nodevin/pkg/update"
 )
 
 func runDaemon() {

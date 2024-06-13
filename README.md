@@ -9,7 +9,7 @@ NodeVin is a command-line interface (CLI) daemon that simplifies the process of 
 
 ## Installation
 
-1. Download the appropriate binary for your operating system from the [releases page](https://github.com/curveballdaniel/nodevin/releases).
+1. Download the appropriate binary for your operating system from the [releases page](https://github.com/fiftysixcrypto/nodevin/releases).
 2. Extract the binary and place it in a directory included in your `PATH`.
 
 ## Usage
@@ -82,7 +82,7 @@ For support, please open an issue on the [GitHub repository](https://github.com/
 
 ## Installation
 
-1. Download the appropriate binary for your operating system from the [releases page](https://github.com/curveballdaniel/nodevin/releases).
+1. Download the appropriate binary for your operating system from the [releases page](https://github.com/fiftysixcrypto/nodevin/releases).
 2. Extract the binary and place it in a directory included in your `PATH`.
 
 ## Configuration

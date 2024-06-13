@@ -2,16 +2,17 @@ package update
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os/exec"
 	"strings"
 
-	"github.com/curveballdaniel/nodevin/internal/logger"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
+	"github.com/fiftysixcrypto/nodevin/internal/logger"
 )
 
 func CheckAndUpdateDockerImages() error {
@@ -62,7 +63,22 @@ func CheckAndUpdateDockerImages() error {
 
 func getDockerHubImageDigest(namespace, repository, tag string) (string, error) {
 	url := fmt.Sprintf("https://hub.docker.com/v2/namespaces/%s/repositories/%s/tags/%s", namespace, repository, tag)
-	resp, err := http.Get(url)
+
+	/*
+		Currently setting InsecureSkipVerify to true
+		in order to dodge a macOS error:
+
+		Failed to get latest digest for image bitcoin-core:
+		Get "https://hub.docker.com/v2/namespaces/fiftysix/repositories/bitcoin-core/tags/latest":
+		tls: failed to verify certificate: SecPolicyCreateSSL error: 0
+	*/
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
+	resp, err := httpClient.Get(url)
 	if err != nil {
 		return "", err
 	}

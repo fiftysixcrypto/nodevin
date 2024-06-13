@@ -1,8 +1,8 @@
 package bitcoin
 
 import (
-	"github.com/curveballdaniel/nodevin/internal/utils"
-	"github.com/curveballdaniel/nodevin/pkg/docker/compose"
+	"github.com/fiftysixcrypto/nodevin/internal/utils"
+	"github.com/fiftysixcrypto/nodevin/pkg/docker/compose"
 	"github.com/spf13/viper"
 )
 

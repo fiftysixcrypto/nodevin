@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/curveballdaniel/nodevin/internal/config"
+	"github.com/fiftysixcrypto/nodevin/internal/config"
 	"github.com/spf13/cobra"
 )
 

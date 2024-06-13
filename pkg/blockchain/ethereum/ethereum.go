@@ -5,9 +5,9 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/curveballdaniel/nodevin/internal/config"
-	"github.com/curveballdaniel/nodevin/internal/logger"
-	"github.com/curveballdaniel/nodevin/pkg/blockchain"
+	"github.com/fiftysixcrypto/nodevin/internal/config"
+	"github.com/fiftysixcrypto/nodevin/internal/logger"
+	"github.com/fiftysixcrypto/nodevin/pkg/blockchain"
 )
 
 type Bitcoin struct{}

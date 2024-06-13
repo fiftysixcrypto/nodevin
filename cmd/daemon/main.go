@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/curveballdaniel/nodevin/internal/config"
-	"github.com/curveballdaniel/nodevin/internal/logger"
-	"github.com/curveballdaniel/nodevin/pkg/daemon"
+	"github.com/fiftysixcrypto/nodevin/internal/config"
+	"github.com/fiftysixcrypto/nodevin/internal/logger"
+	"github.com/fiftysixcrypto/nodevin/pkg/daemon"
 )
 
 func main() {

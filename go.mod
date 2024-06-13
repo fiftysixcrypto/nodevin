@@ -1,4 +1,4 @@
-module github.com/curveballdaniel/nodevin
+module github.com/fiftysixcrypto/nodevin
 
 go 1.22.3
 

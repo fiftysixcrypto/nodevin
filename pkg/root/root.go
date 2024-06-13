@@ -3,10 +3,10 @@ package root
 import (
 	"fmt"
 
-	"github.com/curveballdaniel/nodevin/internal/version"
-	"github.com/curveballdaniel/nodevin/pkg/blockchain"
-	"github.com/curveballdaniel/nodevin/pkg/daemon"
-	"github.com/curveballdaniel/nodevin/pkg/update"
+	"github.com/fiftysixcrypto/nodevin/internal/version"
+	"github.com/fiftysixcrypto/nodevin/pkg/blockchain"
+	"github.com/fiftysixcrypto/nodevin/pkg/daemon"
+	"github.com/fiftysixcrypto/nodevin/pkg/update"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

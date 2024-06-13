@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/curveballdaniel/nodevin/internal/logger"
+	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/spf13/cobra"
 )
 

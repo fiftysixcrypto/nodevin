@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/curveballdaniel/nodevin/internal/utils"
+	"github.com/fiftysixcrypto/nodevin/internal/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -68,7 +68,7 @@ func runShell(containerName string) {
 
 func init() {
 	shellCmd.Flags().BoolVarP(&detach, "detach", "d", false, "Run command in the background")
-	shellCmd.Flags().StringVarP(&user, "user", "u", "", "Username or UID to run the command as")
+	shellCmd.Flags().StringVarP(&user, "docker-user", "u", "", "Username or UID to run the command as")
 	shellCmd.Flags().StringVarP(&workdir, "workdir", "w", "", "Working directory inside the container")
 	shellCmd.Flags().StringArrayVarP(&envVars, "env", "e", nil, "Set environment variables")
 	shellCmd.Flags().StringVar(&envFile, "env-file", "", "Read environment variables from a file")

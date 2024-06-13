@@ -14,7 +14,7 @@ import (
 
 const (
 	updateURL      = "https://github.com/fiftysixcrypto/nodevin/releases/latest/download/nodevin"
-	currentVersion = "1.0.0" // Replace with the current version of your application
+	currentVersion = "1.0.0"
 )
 
 func CheckForUpdates() (bool, error) {

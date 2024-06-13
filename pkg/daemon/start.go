@@ -38,6 +38,7 @@ func startDaemonDetached() {
 	cmd := exec.Command(os.Args[0], "daemon", "start")
 	cmd.Stdout = nil
 	cmd.Stderr = nil
+	cmd.Env = os.Environ()
 	cmd.Start()
 
 	err := os.WriteFile(pidFilePath, []byte(fmt.Sprintf("%d", cmd.Process.Pid)), 0644)

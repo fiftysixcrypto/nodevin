@@ -152,6 +152,14 @@ func installDocker() error {
 			brew install --cask docker &&
 			open /Applications/Docker.app &&
 			while ! docker system info > /dev/null 2>&1; do sleep 1; done`)
+	case "windows":
+		installCmd = exec.Command("powershell", "-Command", `
+			$ErrorActionPreference = 'Stop'; 
+			Invoke-WebRequest -UseBasicParsing -OutFile docker-desktop-installer.exe https://desktop.docker.com/win/stable/Docker%20Desktop%20Installer.exe;
+			Start-Process -FilePath docker-desktop-installer.exe -Wait -ArgumentList @("--quiet");
+			Remove-Item -Force docker-desktop-installer.exe;
+			Start-Process "Docker Desktop" -Wait;
+			while ((docker version) -eq $null) { Start-Sleep -Seconds 5 }`)
 	default:
 		return fmt.Errorf("unsupported OS: %s", runtime.GOOS)
 	}
@@ -176,6 +184,11 @@ func installDockerCompose() error {
 			docker-compose --version`)
 	case "darwin":
 		installCmd = exec.Command("sh", "-c", "brew install docker-compose")
+	case "windows":
+		installCmd = exec.Command("powershell", "-Command", `
+			$ErrorActionPreference = 'Stop'; 
+			Invoke-WebRequest "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-Windows-x86_64.exe" -OutFile "$env:ProgramFiles\Docker\Docker\resources\bin\docker-compose.exe";
+			& "$env:ProgramFiles\Docker\Docker\resources\bin\docker-compose.exe" --version`)
 	default:
 		return fmt.Errorf("unsupported OS: %s", runtime.GOOS)
 	}

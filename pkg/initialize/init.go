@@ -140,9 +140,18 @@ func installDocker() error {
 
 	switch runtime.GOOS {
 	case "linux":
-		installCmd = exec.Command("sh", "-c", "curl -fsSL https://get.docker.com | sh")
+		installCmd = exec.Command("sh", "-c", `
+			sudo apt update &&
+			sudo apt install -y apt-transport-https ca-certificates curl software-properties-common &&
+			curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - &&
+			sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" &&
+			sudo apt update &&
+			sudo apt install -y docker-ce`)
 	case "darwin":
-		installCmd = exec.Command("sh", "-c", "brew install --cask docker")
+		installCmd = exec.Command("sh", "-c", `
+			brew install --cask docker &&
+			open /Applications/Docker.app &&
+			while ! docker system info > /dev/null 2>&1; do sleep 1; done`)
 	default:
 		return fmt.Errorf("unsupported OS: %s", runtime.GOOS)
 	}
@@ -161,7 +170,10 @@ func installDockerCompose() error {
 
 	switch runtime.GOOS {
 	case "linux":
-		installCmd = exec.Command("sh", "-c", "sudo curl -L \"https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-$(uname -s)-$(uname -m)\" -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose && docker-compose --version")
+		installCmd = exec.Command("sh", "-c", `
+			sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose &&
+			sudo chmod +x /usr/local/bin/docker-compose &&
+			docker-compose --version`)
 	case "darwin":
 		installCmd = exec.Command("sh", "-c", "brew install docker-compose")
 	default:

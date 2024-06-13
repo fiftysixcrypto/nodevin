@@ -6,6 +6,7 @@ import (
 	"github.com/fiftysixcrypto/nodevin/internal/version"
 	"github.com/fiftysixcrypto/nodevin/pkg/blockchain"
 	"github.com/fiftysixcrypto/nodevin/pkg/daemon"
+	"github.com/fiftysixcrypto/nodevin/pkg/initialize"
 	"github.com/fiftysixcrypto/nodevin/pkg/update"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -85,6 +86,9 @@ func init() {
 	rootCmd.AddCommand(blockchain.StopNodeCmd)
 	rootCmd.AddCommand(blockchain.LogsCmd)
 	rootCmd.AddCommand(blockchain.InfoCmd)
+
+	// Add init command
+	rootCmd.AddCommand(initialize.InitCmd)
 
 	// Add manual update commands
 	rootCmd.AddCommand(update.UpdateCmd)

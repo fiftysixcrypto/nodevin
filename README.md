@@ -1,195 +1,114 @@
-2. **Write a user manual (`docs/user_manual.md`):**
+# Nodevin
 
-```md
-# NodeVin User Manual
+Nodevin allows anyone to run blockchain nodes effortlessly. It simplifies the process of setting up and managing nodes for various blockchains, ensuring they are always up-to-date with the latest software versions. With Nodevin, you can run nodes for Bitcoin, Ethereum, Litecoin, and more with ease.
 
-## Introduction
+## Features
 
-NodeVin is a command-line interface (CLI) daemon that simplifies the process of setting up, managing, and running blockchain nodes.
+- **Easy Setup:** Quickly set up blockchain nodes with a single command.
+- **Automatic Updates:** The Nodevin daemon ensures your nodes are always running the latest software versions.
+- **System Inspection:** Checks your system for the required Docker and Docker Compose versions, and installs them if necessary.
+- **Cross-Platform Support:** Works on Linux, macOS, and Windows.
+- **Detailed Logs:** Provides detailed logs for monitoring node activity and daemon status.
 
 ## Installation
 
-1. Download the appropriate binary for your operating system from the [releases page](https://github.com/fiftysixcrypto/nodevin/releases).
-2. Extract the binary and place it in a directory included in your `PATH`.
+To get started with Nodevin, you need to have Docker and Docker Compose installed on your system. If you don't have them installed, Nodevin can help you set them up.
 
-## Usage
+### Prerequisites
+
+- Docker 20+
+- Docker Compose
+
+### Installation
+
+Download the latest version of Nodevin from the [releases page](https://github.com/fiftysixcrypto/nodevin/releases).
+
+```sh
+chmod +x nodevin
+sudo mv nodevin /usr/local/bin/
+```
+
+## Getting Started
+
+1. **Initialize Nodevin:**
+
+Run the following command to initialize Nodevin and check your system capabilities:
+
+```sh
+nodevin init
+```
+
+This command will check if you have the proper versions of Docker and Docker Compose installed. If not, it will prompt you to install them.
+
+2. **Start a Blockchain Node:**
+
+Once Nodevin is initialized, you can start a blockchain node. For example, to start a Bitcoin node, run:
+
+```sh
+nodevin start bitcoin
+```
+
+## Nodevin Daemon
+
+The Nodevin daemon runs in the background and ensures your blockchain nodes are always up-to-date. It checks for updates every hour and automatically updates the nodes if a new version is available.
 
 ### Starting the Daemon
 
-To start the NodeVin daemon, use the following command:
+To start the daemon, run:
 
 ```sh
-nodevin daemon --network <network> --storage_path <path> --port <port> --resource_limit <limit>
+nodevin daemon start
 ```
 
-Example:
+To start the daemon in detached mode (background):
 
 ```sh
-nodevin daemon --network bitcoin --storage_path /tmp/bitcoin --port 40404 --resource_limit 1GB
+nodevin daemon start -d
 ```
 
-### Managing Docker Volumes
+### Stopping the Daemon
 
-#### Create a Volume
+To stop the daemon, run:
 
 ```sh
-nodevin volume create <volume_name>
+nodevin daemon stop
 ```
 
-#### List Volumes
+### Viewing Daemon Logs
+
+To view the logs of the running daemon, run:
 
 ```sh
-nodevin volume list
+nodevin daemon logs
 ```
 
-#### Remove a Volume
+## Commands
 
-```sh
-nodevin volume remove <volume_name>
-```
+Here are some of the key commands you can use with Nodevin:
 
-### Checking for Updates
+- `nodevin init`: Initialize Nodevin and check system capabilities.
+- `nodevin start <network>`: Start a blockchain node (e.g., `nodevin start bitcoin`).
+- `nodevin stop <network>`: Stop a running blockchain node.
+- `nodevin shell <network>`: Open a shell to the running node container.
+- `nodevin logs <network>`: View logs for a specific node.
+- `nodevin delete <volume-name-or-image-name>`: Delete a Docker volume or image.
+- `nodevin request <network> --method <http-method> --params <json-data>`: Make an RPC request to a blockchain network.
+- `nodevin daemon start`: Start the Nodevin daemon.
+- `nodevin daemon stop`: Stop the Nodevin daemon.
+- `nodevin daemon logs`: Show logs of the Nodevin daemon.
 
-```sh
-nodevin update
-```
+## Contributing
 
-## Configuration
+Contributions are welcome! Please feel free to submit a Pull Request or open an Issue on GitHub.
 
-Configuration can be provided via command-line arguments or a configuration file (`config.yaml`). Here is an example configuration file:
+## License
 
-```yaml
-network: "mainnet"
-storage_path: "/var/lib/nodevin"
-port: 30303
-resource_limit: "2GB"
-```
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## Support
+## Contact
 
-For support, please open an issue on the [GitHub repository](https://github.com/yourusername/nodevin/issues).
-```
+For any questions or suggestions, feel free to contact us at [nodes@fiftysix.xyz](mailto:nodes@fiftysix.xyz).
 
-3. **Write a setup guide (`docs/setup_guide.md`):**
+---
 
-```md
-# NodeVin Setup Guide
-
-## Prerequisites
-
-- Docker installed and running
-- Sufficient permissions to manage Docker containers
-
-## Installation
-
-1. Download the appropriate binary for your operating system from the [releases page](https://github.com/fiftysixcrypto/nodevin/releases).
-2. Extract the binary and place it in a directory included in your `PATH`.
-
-## Configuration
-
-Create a configuration file (`config.yaml`) in the same directory as the NodeVin binary. Here is an example configuration file:
-
-```yaml
-network: "mainnet"
-storage_path: "/var/lib/nodevin"
-port: 30303
-resource_limit: "2GB"
-```
-
-## Starting the Daemon
-
-To start the NodeVin daemon, use the following command:
-
-```sh
-nodevin daemon --network <network> --storage_path <path> --port <port> --resource_limit <limit>
-```
-
-Example:
-
-```sh
-nodevin daemon --network bitcoin --storage_path /tmp/bitcoin --port 40404 --resource_limit 1GB
-```
-
-## Managing Docker Volumes
-
-#### Create a Volume
-
-```sh
-nodevin volume create <volume_name>
-```
-
-#### List Volumes
-
-```sh
-nodevin volume list
-```
-
-#### Remove a Volume
-
-```sh
-nodevin volume remove <volume_name>
-```
-
-## Checking for Updates
-
-```sh
-nodevin update
-```
-```
-
-
-#################################################
-#################################################
-### Step 11.2: API Documentation
-
-1. **Write API documentation (`docs/api.md`):**
-
-```md
-# NodeVin API Documentation
-
-## Command-Line Interface (CLI)
-
-### Daemon
-
-```sh
-nodevin daemon --network <network> --storage_path <path> --port <port> --resource_limit <limit>
-```
-
-- `--network`: Blockchain network to connect to (e.g., `bitcoin`, `ethereum`)
-- `--storage_path`: Path to store blockchain data
-- `--port`: Port to bind the node
-- `--resource_limit`: Resource limit for the node (e.g., `1GB`, `2GB`)
-
-### Volume Management
-
-#### Create Volume
-
-```sh
-nodevin volume create <volume_name>
-```
-
-- `<volume_name>`: Name of the Docker volume to create
-
-#### List Volumes
-
-```sh
-nodevin volume list
-```
-
-#### Remove Volume
-
-```sh
-nodevin volume remove <volume_name>
-```
-
-- `<volume_name>`: Name of the Docker volume to remove
-
-### Update
-
-```sh
-nodevin update
-```
-
-- Checks for updates and applies them if available
-```
-
+Thank you for using Nodevin! Happy node running!

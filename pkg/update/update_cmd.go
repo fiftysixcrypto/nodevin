@@ -33,7 +33,7 @@ var updateCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			// Update NodeVin software
+			// Update Nodevin software
 			CommandCheckForUpdatesWorkflow()
 		} else if args[0] == "docker" {
 			// Update Docker images

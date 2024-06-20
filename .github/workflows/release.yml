@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
           go-version: '1.22.4'
 
@@ -31,7 +31,7 @@ jobs:
 
       - name: Create release
         id: create_release
-        uses: actions/create-release@v1.14.0
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -42,7 +42,7 @@ jobs:
           prerelease: false
 
       - name: Upload Linux binary
-        uses: actions/upload-release-asset@v1.1.3
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -52,7 +52,7 @@ jobs:
           asset_content_type: application/octet-stream
 
       - name: Upload macOS binary
-        uses: actions/upload-release-asset@v1.1.3
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -62,7 +62,7 @@ jobs:
           asset_content_type: application/octet-stream
 
       - name: Upload Windows binary
-        uses: actions/upload-release-asset@v1.1.3
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

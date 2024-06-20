@@ -23,15 +23,11 @@ jobs:
         run: |
           make build
 
-      - name: Install github-changelog-generator
+      - name: Get release notes from commits
+        id: release_notes
         run: |
-          gem install github_changelog_generator
-
-      - name: Generate Changelog
-        id: changelog
-        run: |
-          github_changelog_generator -u fiftysixcrypto -p nodevin
-          echo "::set-output name=changelog::$(cat CHANGELOG.md)"
+          notes=$(git log -1 --pretty=format:"%s%n%b" ${{ github.ref }})
+          echo "notes=${notes}" >> $GITHUB_ENV
 
       - name: Create release
         id: create_release
@@ -41,7 +37,7 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
-          body: ${{ steps.changelog.outputs.changelog }}
+          body: ${{ env.notes }}
           draft: false
           prerelease: false
 

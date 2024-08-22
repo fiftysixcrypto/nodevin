@@ -107,6 +107,8 @@ This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE
 
 ## Contact
 
+Join the Nodevin [Discord](https://discord.com/invite/XuhW2ykW3D).
+
 For any questions or suggestions, feel free to contact us at [nodes@fiftysix.xyz](mailto:nodes@fiftysix.xyz).
 
 ---

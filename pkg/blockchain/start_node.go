@@ -26,6 +26,7 @@ import (
 	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/fiftysixcrypto/nodevin/internal/utils"
 	"github.com/fiftysixcrypto/nodevin/pkg/blockchain/bitcoin"
+	"github.com/fiftysixcrypto/nodevin/pkg/blockchain/litecoin"
 	"github.com/fiftysixcrypto/nodevin/pkg/docker"
 
 	"github.com/spf13/cobra"
@@ -115,7 +116,7 @@ func createComposeFileForNetwork(network string, cwd string) (string, error) {
 	case "ethereumclassic":
 		return "", nil // createEthereumClassicComposeFile(cwd)
 	case "litecoin":
-		return "", nil // createLitecoinComposeFile(cwd)
+		return litecoin.CreateLitecoinComposeFile(cwd)
 	default:
 		return "", fmt.Errorf("unsupported network: %s", network)
 	}

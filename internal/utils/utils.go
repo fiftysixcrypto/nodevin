@@ -57,6 +57,11 @@ var networkInfoMap = map[string]NetworkInfo{
 		RPCPort:       9332,
 		StartMessage:  "\"Litecoin is the silver to Bitcoin's gold.\" -- Charlie Lee",
 	},
+	"litecoin-testnet": {
+		ContainerName: "litecoin-core-testnet",
+		RPCPort:       19332,
+		StartMessage:  "\"Testing is the lifeblood of innovation and security.\"",
+	},
 	"dogecoin": {
 		ContainerName: "dogecoin-core",
 		RPCPort:       22555,

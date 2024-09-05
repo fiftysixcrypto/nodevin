@@ -56,6 +56,8 @@ func fetchLogs(network string) {
 	if utils.CheckIfTestnetOrTestnetNetworkFlag() {
 		if network == "bitcoin" {
 			properNetwork = "bitcoin-testnet"
+		} else if network == "litecoin" {
+			properNetwork = "litecoin-testnet"
 		}
 	}
 

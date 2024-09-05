@@ -67,7 +67,10 @@ func init() {
 	rootCmd.PersistentFlags().String("mem-reservation", "", "Reserve a set amount of memory for use (positive integer followed by 'b', 'k', 'm', 'g', to indicate bytes, kilobytes, megabytes, or gigabytes -- ex: 50m)")
 
 	// Bitcoin specific flags
-	rootCmd.PersistentFlags().Bool("ord", false, "Run ordinal software ord alongside the bitcoin node")
+	rootCmd.PersistentFlags().Bool("ord", false, "Run ordinal software ord alongside the Bitcoin/Litecoin node")
+
+	// Litecoin specific flags
+	rootCmd.PersistentFlags().Bool("ord-litecoin", false, "Run ordinal software ord alongside the Litecoin node")
 
 	// Bind flags to viper
 	viper.BindPFlag("command", rootCmd.PersistentFlags().Lookup("command"))
@@ -93,6 +96,9 @@ func init() {
 
 	// Bitcoin specific flags
 	viper.BindPFlag("ord", rootCmd.PersistentFlags().Lookup("ord"))
+
+	// Litecoin specific flags
+	viper.BindPFlag("ord-litecoin", rootCmd.PersistentFlags().Lookup("ord-litecoin"))
 
 	// Add blockchain commands
 	rootCmd.AddCommand(blockchain.RequestCmd)

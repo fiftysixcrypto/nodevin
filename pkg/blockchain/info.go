@@ -254,11 +254,11 @@ func getGlobalEndpointByContainerName(containerName string) string {
 	if containerName == "bitcoin-core" {
 		globalFetchLink = "https://blockchain.info/latestblock"
 	} else if containerName == "bitcoin-core-testnet" {
-		globalFetchLink = "http://127.0.0.1:18332"
+		globalFetchLink = "https://api.blockcypher.com/v1/btc/test3"
 	} else if containerName == "litecoin-core" {
-		globalFetchLink = "http://127.0.0.1:9332"
+		globalFetchLink = "https://api.blockcypher.com/v1/ltc/main"
 	} else if containerName == "litecoin-core-testnet" {
-		globalFetchLink = "http://127.0.0.1:19332"
+		globalFetchLink = ""
 	}
 
 	return globalFetchLink

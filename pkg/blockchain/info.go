@@ -133,10 +133,8 @@ func displayInfo() {
 		globalLatestBlock := 0
 		peers := 0
 
-		if container.Names == "bitcoin-core" {
-			localLatestBlock, globalLatestBlock = getLatestBlocks()
-			peers = getPeers()
-		}
+		localLatestBlock, globalLatestBlock = getLatestBlocks(container.Names)
+		peers = getPeers(container.Names)
 
 		fmt.Fprintf(w, "| %s\t %s\t %s\t %s\t %s\t %d\t %d/%d\n",
 			container.Names,
@@ -179,21 +177,21 @@ func displayPIDInfo() {
 	}
 }
 
-func getLatestBlocks() (int, int) {
-	localLatestBlock := getLocalLatestBlock()
-	globalLatestBlock := getGlobalLatestBlock()
+func getLatestBlocks(containerName string) (int, int) {
+	localLatestBlock := getLocalLatestBlock(containerName)
+	globalLatestBlock := getGlobalLatestBlock(containerName)
 
 	return localLatestBlock, globalLatestBlock
 }
 
-func getLocalLatestBlock() int {
-	url := "http://127.0.0.1:8332"
+func getLocalLatestBlock(containerName string) int {
+	url := getLocalEndpointByContainerName(containerName)
 	method := "getblockcount"
 	params := "[]"
 	user := viper.GetString("rpc-user")
 	pass := viper.GetString("rpc-pass")
 
-	response, err := makeRequest("bitcoin", url, method, params, "", user, pass)
+	response, err := makeRequest("", url, method, params, "", user, pass)
 	if err != nil {
 		logger.LogError("Failed to get local latest block: " + err.Error())
 		return 0
@@ -219,8 +217,10 @@ func getLocalLatestBlock() int {
 	return int(blockCount)
 }
 
-func getGlobalLatestBlock() int {
-	resp, err := http.Get("https://blockchain.info/latestblock")
+func getGlobalLatestBlock(containerName string) int {
+	globalFetchLink := getGlobalEndpointByContainerName(containerName)
+
+	resp, err := http.Get(globalFetchLink)
 	if err != nil {
 		logger.LogError("Failed to fetch global latest block: " + err.Error())
 		return 0
@@ -248,8 +248,40 @@ func getGlobalLatestBlock() int {
 	return int(blockCount)
 }
 
-func getPeers() int {
-	url := "http://127.0.0.1:8332"
+func getGlobalEndpointByContainerName(containerName string) string {
+	globalFetchLink := ""
+
+	if containerName == "bitcoin-core" {
+		globalFetchLink = "https://blockchain.info/latestblock"
+	} else if containerName == "bitcoin-core-testnet" {
+		globalFetchLink = "http://127.0.0.1:18332"
+	} else if containerName == "litecoin-core" {
+		globalFetchLink = "http://127.0.0.1:9332"
+	} else if containerName == "litecoin-core-testnet" {
+		globalFetchLink = "http://127.0.0.1:19332"
+	}
+
+	return globalFetchLink
+}
+
+func getLocalEndpointByContainerName(containerName string) string {
+	url := "http://127.0.0.1"
+
+	if containerName == "bitcoin-core" {
+		url = "http://127.0.0.1:8332"
+	} else if containerName == "bitcoin-core-testnet" {
+		url = "http://127.0.0.1:18332"
+	} else if containerName == "litecoin-core" {
+		url = "http://127.0.0.1:9332"
+	} else if containerName == "litecoin-core-testnet" {
+		url = "http://127.0.0.1:19332"
+	}
+
+	return url
+}
+
+func getPeers(containerName string) int {
+	url := getLocalEndpointByContainerName(containerName)
 	method := "getconnectioncount"
 	params := "[]"
 	user := viper.GetString("rpc-user")

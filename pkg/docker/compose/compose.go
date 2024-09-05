@@ -37,6 +37,9 @@ func mergeConfigs(defaultConfig, overrideConfig NetworkConfig) NetworkConfig {
 	if overrideConfig.ContainerName != "" {
 		defaultConfig.ContainerName = overrideConfig.ContainerName
 	}
+	if overrideConfig.Restart != "" {
+		defaultConfig.Restart = overrideConfig.Restart
+	}
 	if overrideConfig.Command != "" {
 		defaultConfig.Command = overrideConfig.Command
 	}
@@ -93,6 +96,7 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 			Image:         viper.GetString(fmt.Sprintf("%s-image", serviceName)),
 			Version:       viper.GetString(fmt.Sprintf("%s-version", serviceName)),
 			ContainerName: viper.GetString(fmt.Sprintf("%s-container-name", serviceName)),
+			Restart:       viper.GetString(fmt.Sprintf("%s-restart", serviceName)),
 			Command:       viper.GetString(fmt.Sprintf("%s-command", serviceName)),
 			Ports:         viper.GetStringSlice(fmt.Sprintf("%s-ports", serviceName)),
 			Volumes:       viper.GetStringSlice(fmt.Sprintf("%s-volumes", serviceName)),
@@ -118,6 +122,7 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 		service := Service{
 			Image:         finalConfig.Image + ":" + finalConfig.Version,
 			ContainerName: finalConfig.ContainerName,
+			Restart:       finalConfig.Restart,
 			Command:       finalConfig.Command,
 			Ports:         finalConfig.Ports,
 			Volumes:       finalConfig.Volumes,
@@ -162,6 +167,7 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 	override := NetworkConfig{
 		Image:         viper.GetString("image"),
 		Version:       viper.GetString("version"),
+		Restart:       viper.GetString("restart"),
 		ContainerName: viper.GetString("container-name"),
 		Command:       viper.GetString("command"),
 		Ports:         viper.GetStringSlice("ports"),
@@ -188,6 +194,7 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 	service := Service{
 		Image:         finalConfig.Image + ":" + finalConfig.Version,
 		ContainerName: finalConfig.ContainerName,
+		Restart:       finalConfig.Restart,
 		Command:       finalConfig.Command,
 		Ports:         finalConfig.Ports,
 		Volumes:       finalConfig.Volumes,

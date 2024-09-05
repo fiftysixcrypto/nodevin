@@ -28,6 +28,7 @@ func GetOrdNetworkComposeConfig(network string) (NetworkConfig, error) {
 	baseConfig := NetworkConfig{
 		Image:    "fiftysix/ord",
 		Version:  "latest",
+		Restart:  "always",
 		Ports:    []string{"80:80"},
 		Volumes:  []string{"bitcoin-core-data:/node/bitcoin-core", "ord-data:/node/ord"},
 		Networks: []string{"bitcoin-net"},

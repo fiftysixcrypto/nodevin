@@ -121,7 +121,7 @@ func deleteAllVolumes() {
 	logger.LogInfo("Volumes with label 'nodevin.blockchain.software' removed.")
 
 	removeAllImages()
-	logger.LogInfo("Successfully deleted all docker volumes.")
+	logger.LogInfo("Successfully deleted docker volumes.")
 }
 
 func removeSpecificImage(image string) {

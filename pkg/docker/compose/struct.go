@@ -35,6 +35,7 @@ type Deploy struct {
 type Service struct {
 	Image         string   `yaml:"image"`
 	ContainerName string   `yaml:"container_name"`
+	Restart       string   `yaml:"restart"`
 	Command       string   `yaml:"command"`
 	Ports         []string `yaml:"ports"`
 	Volumes       []string `yaml:"volumes"`
@@ -62,6 +63,7 @@ type NetworkConfig struct {
 	Version       string
 	ContainerName string
 	Command       string
+	Restart       string
 	Ports         []string
 	Volumes       []string
 	Networks      []string

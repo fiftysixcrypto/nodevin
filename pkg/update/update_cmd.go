@@ -29,7 +29,7 @@ var (
 
 var updateCmd = &cobra.Command{
 	Use:   "update [target]",
-	Short: "Update NodeVin software or Docker images",
+	Short: "Update Nodevin software or Docker images",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {

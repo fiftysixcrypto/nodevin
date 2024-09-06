@@ -37,7 +37,7 @@ var rootCmd = &cobra.Command{
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print the version number of NodeVin",
+	Short: "Print the version number of Nodevin",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("nodevin CLI v" + version.Version)
 	},

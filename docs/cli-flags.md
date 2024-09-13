@@ -27,7 +27,7 @@ nodevin start bitcoin \
   --mem-reservation=512m
 ```
 
-## GLOBAL OPTIONS
+## START OPTIONS
 
 ### Command and Network Flags
 

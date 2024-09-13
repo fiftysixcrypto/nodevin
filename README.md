@@ -50,7 +50,7 @@ nodevin start bitcoin
 
 3. **Advanced Features:**
 
-Nodevin allows for full customization in node startup. View the full list of flags for configuration details [here](./docs/flags.md). For example, this command runs a Bitcoin Testnet node with a specified command, docker image and tag (version), unique volume definitions, and more:
+Nodevin allows for full customization in node startup. View the full list of flags for configuration details [here](./docs). For example, this command runs a Bitcoin Testnet node with a specified command, docker image and tag (version), unique volume definitions, and more:
 
 ```sh
 nodevin start bitcoin \

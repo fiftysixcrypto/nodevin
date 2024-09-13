@@ -48,6 +48,29 @@ Once Nodevin is initialized, you can start a blockchain node. For example, to st
 nodevin start bitcoin
 ```
 
+3. **Advanced Features:**
+
+Nodevin allows for full customization in node startup. View the full list of flags for configuration details [here](./docs/flags.md). For example, this command runs a Bitcoin Testnet node with a specified command, docker image and tag (version), unique volume definitions, and more:
+
+```sh
+nodevin start bitcoin \
+  --ord \
+  --command="--rpcallowip=0.0.0.0/0 -rpcuser=user -rpcpassword=pass" \
+  --testnet \
+  --image=fiftysix/bitcoin-core \
+  --version=27.0 \
+  --container-name=bitcoin-node \
+  --ports="8332:8332,8333:8333,18332:18332,18333:18333" \
+  --volumes="bitcoin-core-data-2:/node/bitcoin-core" \
+  --volume-definitions="bitcoin-core-data-2" \
+  --volume-labels="nodevin.blockchain.software=bitcoin-core-testnet,remember-to-delete=yes" \
+  --restart=always \
+  --cpu-limit=2.0 \
+  --mem-limit=1g \
+  --cpu-reservation=1.0 \
+  --mem-reservation=512m
+```
+
 ## Nodevin Daemon
 
 The Nodevin daemon runs in the background and ensures your blockchain nodes are always up-to-date. It checks for updates every hour and automatically updates the nodes if a new version is available.

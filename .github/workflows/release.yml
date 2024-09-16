@@ -28,7 +28,13 @@ jobs:
       - name: Gather commit logs
         id: gather_commits
         run: |
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^)
+          # Find the previous tag, fallback to the first commit if no previous tag exists
+          if git describe --tags --abbrev=0 HEAD^ > /dev/null 2>&1; then
+            PREV_TAG=$(git describe --tags --abbrev=0 HEAD^)
+          else
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD)  # First commit
+          fi
+          # Collect the commit logs between the previous tag and the current tag
           COMMITS=$(git log $PREV_TAG..HEAD --pretty=format:"%h %s")
           echo "commits=$COMMITS" >> $GITHUB_ENV
 

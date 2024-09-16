@@ -1,6 +1,8 @@
 # Nodevin
 
-Nodevin allows anyone to run blockchain nodes effortlessly. It simplifies the process of setting up and managing nodes for various blockchains, ensuring they are always up-to-date with the latest software versions. With Nodevin, you can run nodes for Bitcoin, Ethereum, Litecoin, and more with ease.
+Nodevin allows anyone to run blockchain nodes effortlessly. It simplifies the process of setting up and managing nodes for various blockchains, ensuring they are always up-to-date with the latest software versions. With Nodevin, you can run nodes for Bitcoin, Litecoin, and more with ease.
+
+Our goal is to facilitate blockchain node standup and maintenance for every chain in the world.
 
 ## Features
 
@@ -48,7 +50,7 @@ Once Nodevin is initialized, you can start a blockchain node. For example, to st
 nodevin start bitcoin
 ```
 
-3. **Advanced Features:**
+3. **(Optional) - Advanced Features:**
 
 Nodevin allows for full customization in node startup. View the full list of flags for configuration details [here](./docs). For example, this command runs a Bitcoin Testnet node with a specified command, docker image and tag (version), unique volume definitions, and more:
 
@@ -130,9 +132,12 @@ This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE
 
 ## Contact
 
-Join the Nodevin [Discord](https://discord.com/invite/XuhW2ykW3D).
+Socials:
+- [Website](https://nodevin.xyz)
+- [Discord](https://discord.com/invite/XuhW2ykW3D)
+- [Twitter/X](https://x.com/nodevin_)
 
-For any questions or suggestions, feel free to contact us at [nodes@fiftysix.xyz](mailto:nodes@fiftysix.xyz).
+This repository is maintaned by [Fiftysix](https://fiftysix.xyz). For any questions or suggestions, feel free to contact us at [nodes@fiftysix.xyz](mailto:nodes@fiftysix.xyz).
 
 ---
 

@@ -14,27 +14,30 @@ build-macos:
 	GOOS=darwin GOARCH=amd64 go build -o $(BINARY_NAME)-macos $(MAIN_PACKAGE)
 
 build-windows:
-	GOOS=windows GOARCH=amd64 go build -o $(BINARY_NAME).exe $(MAIN_PACKAGE)
+	GOOS=windows GOARCH=amd64 go build -o $(BINARY_NAME)-windows.exe $(MAIN_PACKAGE)
 
 package-linux:
 	@mkdir -p release
-	tar -czvf release/$(BINARY_NAME)-linux-$(VERSION).tar.gz $(BINARY_NAME)-linux
+	@mv $(BINARY_NAME)-linux $(BINARY_NAME)
+	tar -czvf release/$(BINARY_NAME)-linux-$(VERSION).tar.gz $(BINARY_NAME)
 	shasum -a 256 release/$(BINARY_NAME)-linux-$(VERSION).tar.gz > release/$(BINARY_NAME)-linux-$(VERSION).tar.gz.sha256
-	rm $(BINARY_NAME)-linux
+	rm $(BINARY_NAME)
 
 package-macos:
 	@mkdir -p release
-	tar -czvf release/$(BINARY_NAME)-macos-$(VERSION).tar.gz $(BINARY_NAME)-macos
+	@mv $(BINARY_NAME)-macos $(BINARY_NAME)
+	tar -czvf release/$(BINARY_NAME)-macos-$(VERSION).tar.gz $(BINARY_NAME)
 	shasum -a 256 release/$(BINARY_NAME)-macos-$(VERSION).tar.gz > release/$(BINARY_NAME)-macos-$(VERSION).tar.gz.sha256
-	rm $(BINARY_NAME)-macos
+	rm $(BINARY_NAME)
 
 package-windows:
 	@mkdir -p release
+	@mv $(BINARY_NAME)-windows.exe $(BINARY_NAME).exe
 	zip release/$(BINARY_NAME)-windows-$(VERSION).zip $(BINARY_NAME).exe
 	shasum -a 256 release/$(BINARY_NAME)-windows-$(VERSION).zip > release/$(BINARY_NAME)-windows-$(VERSION).zip.sha256
 	rm $(BINARY_NAME).exe
 
 clean:
-	rm -rf release $(BINARY_NAME)-linux $(BINARY_NAME)-macos $(BINARY_NAME).exe $(BINARY_NAME).sha256
+	rm -rf release $(BINARY_NAME)-linux $(BINARY_NAME)-macos $(BINARY_NAME)-windows.exe $(BINARY_NAME).sha256
 
 .PHONY: all build-linux build-macos build-windows package-linux package-macos package-windows checksum clean

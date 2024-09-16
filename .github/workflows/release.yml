@@ -31,7 +31,7 @@ jobs:
             make build-windows package-windows
           fi
 
-      - name: Create release with GitHub auto-generated notes
+      - name: Create or update release
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -40,9 +40,9 @@ jobs:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
           body: "Automated release notes."
-          generate_release_notes: true
           draft: false
           prerelease: false
+          generate_release_notes: true
 
       - name: Upload binary for ${{ matrix.os }}
         uses: actions/upload-release-asset@v1
@@ -50,8 +50,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/nodevin-${{ matrix.os == 'ubuntu-latest' && 'linux' || matrix.os == 'macos-latest' && 'macos' || 'windows' }}-$(git describe --tags --abbrev=0).tar.gz
-          asset_name: nodevin-${{ matrix.os == 'ubuntu-latest' && 'linux' || matrix.os == 'macos-latest' && 'macos' || 'windows' }}-$(git describe --tags --abbrev=0).tar.gz
+          asset_path: ./release/nodevin-${{ matrix.os == 'ubuntu-latest' && 'linux' || matrix.os == 'macos-latest' && 'macos' || 'windows-latest' && 'windows' }}-$(git describe --tags --abbrev=0).tar.gz
+          asset_name: nodevin-${{ matrix.os == 'ubuntu-latest' && 'linux' || matrix.os == 'macos-latest' && 'macos' || 'windows-latest' && 'windows' }}-$(git describe --tags --abbrev=0).tar.gz
           asset_content_type: application/gzip
 
       - name: Upload checksum for ${{ matrix.os }}
@@ -60,6 +60,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/nodevin-${{ matrix.os == 'ubuntu-latest' && 'linux' || matrix.os == 'macos-latest' && 'macos' || 'windows' }}-$(git describe --tags --abbrev=0).tar.gz.sha256
-          asset_name: nodevin-${{ matrix.os == 'ubuntu-latest' && 'linux' || matrix.os == 'macos-latest' && 'macos' || 'windows' }}-$(git describe --tags --abbrev=0).tar.gz.sha256
+          asset_path: ./release/nodevin-${{ matrix.os == 'ubuntu-latest' && 'linux' || matrix.os == 'macos-latest' && 'macos' || 'windows-latest' && 'windows' }}-$(git describe --tags --abbrev=0).tar.gz.sha256
+          asset_name: nodevin-${{ matrix.os == 'ubuntu-latest' && 'linux' || matrix.os == 'macos-latest' && 'macos' || 'windows-latest' && 'windows' }}-$(git describe --tags --abbrev=0).tar.gz.sha256
           asset_content_type: text/plain

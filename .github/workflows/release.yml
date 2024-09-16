@@ -19,9 +19,9 @@ jobs:
         with:
           go-version: '1.22.4'
 
-      - name: Build binaries
+      - name: Build and package binaries
         run: |
-          make build
+          make package
 
       - name: Get release notes from commits
         id: release_notes
@@ -47,9 +47,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./nodevin-linux
-          asset_name: nodevin-linux
-          asset_content_type: application/octet-stream
+          asset_path: ./release/nodevin-linux-$(git describe --tags --abbrev=0).tar.gz
+          asset_name: nodevin-linux-$(git describe --tags --abbrev=0).tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload Linux checksum
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/nodevin-linux-$(git describe --tags --abbrev=0).tar.gz.sha256
+          asset_name: nodevin-linux-$(git describe --tags --abbrev=0).tar.gz.sha256
+          asset_content_type: text/plain
 
       - name: Upload macOS binary
         uses: actions/upload-release-asset@v1
@@ -57,9 +67,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./nodevin-darwin
-          asset_name: nodevin-darwin
-          asset_content_type: application/octet-stream
+          asset_path: ./release/nodevin-macos-$(git describe --tags --abbrev=0).tar.gz
+          asset_name: nodevin-macos-$(git describe --tags --abbrev=0).tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload macOS checksum
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/nodevin-macos-$(git describe --tags --abbrev=0).tar.gz.sha256
+          asset_name: nodevin-macos-$(git describe --tags --abbrev=0).tar.gz.sha256
+          asset_content_type: text/plain
 
       - name: Upload Windows binary
         uses: actions/upload-release-asset@v1
@@ -67,6 +87,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./nodevin.exe
-          asset_name: nodevin.exe
-          asset_content_type: application/octet-stream
+          asset_path: ./release/nodevin-windows-$(git describe --tags --abbrev=0).zip
+          asset_name: nodevin-windows-$(git describe --tags --abbrev=0).zip
+          asset_content_type: application/zip
+
+      - name: Upload Windows checksum
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/nodevin-windows-$(git describe --tags --abbrev=0).zip.sha256
+          asset_name: nodevin-windows-$(git describe --tags --abbrev=0).zip.sha256
+          asset_content_type: text/plain

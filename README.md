@@ -122,6 +122,8 @@ Here are some of the key commands you can use with Nodevin:
 - `nodevin daemon stop`: Stop the Nodevin daemon.
 - `nodevin daemon logs`: Show logs of the Nodevin daemon.
 
+More documentation [here](./docs/).
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request or open an Issue on GitHub.

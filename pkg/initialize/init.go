@@ -62,8 +62,8 @@ func runInit() {
 	fmt.Println("")
 
 	// outro
-	fmt.Println("Thank you for using nodevin!")
 	fmt.Println("It's time to start your own Bitcoin node. Run `nodevin start bitcoin` to get started.")
+	fmt.Println("Thank you for using nodevin!")
 }
 
 func performInspection() error {
@@ -164,7 +164,9 @@ func installDocker() error {
 			curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - &&
 			sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" &&
 			sudo apt update &&
-			sudo apt install -y docker-ce`)
+			sudo apt install -y docker-ce &&
+   			sudo usermod -aG docker $USER &&
+			newgrp docker`)
 	case "darwin":
 		installCmd = exec.Command("sh", "-c", `
 			brew install --cask docker &&

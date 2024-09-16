@@ -42,7 +42,6 @@ jobs:
           body: "Automated release notes."
           draft: false
           prerelease: false
-          generate_release_notes: true
 
       - name: Upload binary for ${{ matrix.os }}
         uses: actions/upload-release-asset@v1

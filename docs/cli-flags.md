@@ -7,6 +7,8 @@ Nodevin is a command-line interface (CLI) daemon that simplifies the setup, mana
 nodevin command [command options] [arguments...]
 ```
 
+## START OPTIONS
+
 ### Example:
 ```bash
 nodevin start bitcoin \
@@ -26,8 +28,6 @@ nodevin start bitcoin \
   --cpu-reservation=1.0 \
   --mem-reservation=512m
 ```
-
-## START OPTIONS
 
 ### Command and Network Flags
 
@@ -151,3 +151,109 @@ nodevin start bitcoin \
   *Description*: Run ordinal software `ord` alongside the Litecoin node.  
   *Default*: `false`  
   *Usage*: `--ord-litecoin`  
+
+## REQUEST OPTIONS
+
+### Example:
+```bash
+nodevin request bitcoin --method getblockcount
+```
+
+- **`nodevin request <network> --method <http-method> --params <json-data>`**  
+  *Description*: Makes an RPC request to a specified blockchain network.  
+  *Usage*: `nodevin request <network> --method <http-method> --params <json-data>`  
+  *Example*: `nodevin request bitcoin --method getblockcount`  
+  *Example with parameters*: `nodevin request bitcoin --method getblockheader --params '[\"00000000c937983704a73af28acdec37b049d214adbda81d7e2a3dd146f6ed09\"]'`  
+  - **`--method`**  
+    *Description*: Specifies the HTTP method to use for the request (e.g., GET, POST).  
+    *Usage*: `--method=<http-method>`  
+    *Example*: `--method=getblockcount`  
+  - **`--params`**  
+    *Description*: JSON data to send as parameters in the request body.  
+    *Usage*: `--params=<json-data>`  
+    *Example*: `--params='[\"param1\", \"param2\"]'`  
+  - **`--header`**  
+    *Description*: Adds optional extra headers to the request.  
+    *Usage*: `--header=<key:value>`  
+  - **`--endpoint`**  
+    *Description*: Specify an optional API endpoint (default is `http://127.0.0.1`).  
+    *Usage*: `--endpoint=<url>`  
+  - **`--port`**  
+    *Description*: Optional port to override the default RPC port for the network.  
+    *Usage*: `--port=<port>`
+
+## SHELL OPTIONS
+
+### Example:
+```bash
+nodevin shell bitcoin
+```
+
+- **`nodevin shell <network>`**  
+  *Description*: Opens an interactive shell in the running container for the specified blockchain network.  
+  *Usage*: `nodevin shell <network>`  
+  *Example*: `nodevin shell bitcoin`  
+  - **`--detach`**: Run the shell in detached mode (in the background).  
+    *Usage*: `nodevin shell <network> --detach`  
+  - **`--docker-user=<user>`**: Specifies the username or UID to run the shell as inside the container.  
+    *Usage*: `nodevin shell <network> --docker-user=root`  
+  - **`--workdir=<path>`**: Set the working directory inside the container.  
+    *Usage*: `nodevin shell <network> --workdir=/node`  
+  - **`--env=<key=value>`**: Set environment variables.  
+    *Usage*: `nodevin shell <network> --env=KEY=VALUE`  
+  - **`--env-file=<file>`**: Read environment variables from a file.  
+    *Usage*: `nodevin shell <network> --env-file=./env.list`  
+  - **`--privileged`**: Run the shell with extended privileges.  
+    *Usage*: `nodevin shell <network> --privileged`  
+
+## STOP OPTIONS
+
+### Example:
+```bash
+nodevin stop bitcoin
+```
+
+- **`nodevin stop <network>`**  
+  *Description*: Stops a running blockchain node for the specified network.  
+  *Usage*: `nodevin stop <network>`  
+  *Example*: `nodevin stop bitcoin`  
+  If no network is specified, it will list the available networks and usage examples.  
+  - **`stop all`**  
+    *Description*: Stops **all** Docker containers.  
+    *Usage*: `nodevin delete all` 
+  - **`--testnet`**: Stops the node running on a test network.  
+    *Usage*: `nodevin stop <network> --testnet`  
+  - **`--network=<network>`**: Specify a custom network.  
+    *Usage*: `nodevin stop <network> --network="goerli"`  
+
+## DELETE OPTIONS
+
+### Example:
+```bash
+nodevin delete all
+```
+
+- **`nodevin delete <volume-name-or-image-name>`**  
+  *Description*: Deletes a Docker volume and its associated images, or deletes a specific Docker image.  
+  *Usage*: `nodevin delete <volume-name-or-image-name>`  
+  *Example*: `nodevin delete fiftysix/bitcoin-core:27.0`  
+  If no volume or image name is provided, it will list the available volumes and images.  
+  - **`delete all`**  
+    *Description*: Deletes all Docker volumes with the label `nodevin.blockchain.software`.  
+    *Usage*: `nodevin delete all`  
+
+## LOG OPTIONS
+
+### Example:
+```bash
+nodevin logs bitcoin
+```
+
+- **`nodevin logs <network>`**  
+  *Description*: Fetches logs for a running blockchain node.  
+  *Usage*: `nodevin logs <network>`  
+  *Example*: `nodevin logs bitcoin`  
+  - **`--follow`**: Continuously stream the logs in real-time.  
+    *Usage*: `nodevin logs <network> --follow`  
+  - **`--tail=<value>`**: Shows a specific number of lines from the end of the logs.  
+    *Usage*: `nodevin logs <network> --tail=100`  

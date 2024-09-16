@@ -12,7 +12,7 @@ nodevin command [command options] [arguments...]
 nodevin start daemon -d
 ```
 
-## GLOBAL OPTIONS
+## DAEMON OPTIONS
 
 ### Command and Network Flags
 

@@ -23,13 +23,7 @@ jobs:
         run: |
           make package
 
-      - name: Get release notes from commits
-        id: release_notes
-        run: |
-          notes=$(git log -1 --pretty=format:"%s%n%b" ${{ github.ref }})
-          echo "notes=${notes}" >> $GITHUB_ENV
-
-      - name: Create release
+      - name: Create release with GitHub auto-generated notes
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -37,7 +31,8 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
-          body: ${{ env.notes }}
+          body: "Automated release notes."
+          generate_release_notes: true
           draft: false
           prerelease: false
 

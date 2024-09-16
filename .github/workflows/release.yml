@@ -58,9 +58,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
+          release_name: ${{ github.ref_name }}
           body: |
-            Automated release notes for version ${{ github.ref_name }}:
+            Nodevin version ${{ github.ref_name }} release notes:
 
             Commits included in this release:
             ${{ env.commits }}

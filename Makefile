@@ -8,7 +8,7 @@ checksum:
 	shasum -a 256 $(BINARY_NAME) > $(BINARY_NAME).sha256 || true
 
 build-linux:
-	GOOS=linux GOARCH=amd64 go build -o $(BINARY_NAME)-linux $(MAIN_PACKAGE)
+	GOOS=linux GOARCH=amd64 go build -o $(BINARY_NAME)-linux-amd64 $(MAIN_PACKAGE)
 
 build-macos:
 	GOOS=darwin GOARCH=amd64 go build -o $(BINARY_NAME)-macos $(MAIN_PACKAGE)
@@ -18,9 +18,9 @@ build-windows:
 
 package-linux:
 	@mkdir -p release
-	@mv $(BINARY_NAME)-linux $(BINARY_NAME)
-	tar -czvf release/$(BINARY_NAME)-linux-$(VERSION).tar.gz $(BINARY_NAME)
-	shasum -a 256 release/$(BINARY_NAME)-linux-$(VERSION).tar.gz > release/$(BINARY_NAME)-linux-$(VERSION).tar.gz.sha256
+	@mv $(BINARY_NAME)-linux-amd64 $(BINARY_NAME)
+	tar -czvf release/$(BINARY_NAME)-linux-amd64-$(VERSION).tar.gz $(BINARY_NAME)
+	shasum -a 256 release/$(BINARY_NAME)-linux-amd64-$(VERSION).tar.gz > release/$(BINARY_NAME)-linux-amd64-$(VERSION).tar.gz.sha256
 	rm $(BINARY_NAME)
 
 package-macos:

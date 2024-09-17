@@ -74,8 +74,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/nodevin-linux-${{ github.ref_name }}.tar.gz
-          asset_name: nodevin-linux-${{ github.ref_name }}.tar.gz
+          asset_path: ./release/nodevin-linux-amd64-${{ github.ref_name }}.tar.gz
+          asset_name: nodevin-linux-amd64-${{ github.ref_name }}.tar.gz
           asset_content_type: application/gzip
 
       - name: Upload Linux checksum
@@ -84,8 +84,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/nodevin-linux-${{ github.ref_name }}.tar.gz.sha256
-          asset_name: nodevin-linux-${{ github.ref_name }}.tar.gz.sha256
+          asset_path: ./release/nodevin-linux-amd64-${{ github.ref_name }}.tar.gz.sha256
+          asset_name: nodevin-linux-amd64-${{ github.ref_name }}.tar.gz.sha256
           asset_content_type: text/plain
 
       # Upload macOS binary and checksum

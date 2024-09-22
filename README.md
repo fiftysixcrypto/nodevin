@@ -8,9 +8,8 @@ Our goal is to facilitate blockchain node standup and maintenance for every chai
 
 - **Easy Setup:** Quickly set up blockchain nodes with a single command.
 - **Automatic Updates:** The Nodevin daemon ensures your nodes are always running the latest software versions.
-- **System Inspection:** Checks your system for the required Docker and Docker Compose versions, and installs them if necessary.
+- **Maximum Customization:** Set unique ports, data storage, networking, images, or even run multiple nodes at once.
 - **Cross-Platform Support:** Works on Linux, macOS, and Windows.
-- **Detailed Logs:** Provides detailed logs for monitoring node activity and daemon status.
 
 ## Installation
 
@@ -109,20 +108,32 @@ nodevin daemon logs
 
 ## Commands
 
-Here are some of the key commands you can use with Nodevin:
+Here are some key commands you can use with Nodevin:
 
 - `nodevin init`: Initialize Nodevin and check system capabilities.
 - `nodevin start <network>`: Start a blockchain node (e.g., `nodevin start bitcoin`).
 - `nodevin stop <network>`: Stop a running blockchain node.
+
 - `nodevin shell <network>`: Open a shell to the running node container.
 - `nodevin logs <network>`: View logs for a specific node.
 - `nodevin delete <volume-name-or-image-name>`: Delete a Docker volume or image.
 - `nodevin request <network> --method <http-method> --params <json-data>`: Make an RPC request to a blockchain network.
-- `nodevin daemon start`: Start the Nodevin daemon.
-- `nodevin daemon stop`: Stop the Nodevin daemon.
-- `nodevin daemon logs`: Show logs of the Nodevin daemon.
 
 More documentation [here](./docs/).
+
+## Integrating Your Blockchain
+
+Adding your blockchain to Nodevin requires a small one-time grant. For more information, visit [https://nodevin.xyz/#/business](https://nodevin.xyz/#/business).
+
+### Extra Features
+
+For more features, such as:
+- 90% faster sync times
+- Universally available data snapshots
+- Open source Docker images
+- Docker image support and documentation
+
+Visit [https://nodevin.xyz/#/business](https://nodevin.xyz/#/business).
 
 ## Contributing
 
@@ -136,10 +147,13 @@ This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE
 
 Socials:
 - [Website](https://nodevin.xyz)
+- [Business](https://nodevin.xyz/#/business)
 - [Discord](https://discord.com/invite/XuhW2ykW3D)
 - [Twitter/X](https://x.com/nodevin_)
 
-This repository is maintaned by [Fiftysix](https://fiftysix.xyz). For any questions or suggestions, feel free to contact us at [nodes@fiftysix.xyz](mailto:nodes@fiftysix.xyz).
+This repository is maintaned by [Fiftysix](https://fiftysix.xyz).
+
+For any questions or suggestions, feel free to contact us at [nodes@fiftysix.xyz](mailto:nodes@fiftysix.xyz).
 
 ---
 

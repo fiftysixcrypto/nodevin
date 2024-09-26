@@ -18,39 +18,63 @@
 
 package compose
 
+// ResourceDetails defines CPU and memory limits and reservations.
 type ResourceDetails struct {
 	CPUs   string `yaml:"cpus,omitempty"`
 	Memory string `yaml:"memory,omitempty"`
 }
 
+// Resources defines resource limits and reservations for a service.
 type Resources struct {
 	Limits       ResourceDetails `yaml:"limits,omitempty"`
 	Reservations ResourceDetails `yaml:"reservations,omitempty"`
 }
 
+// Deploy holds the resource deployment configuration for a service.
 type Deploy struct {
 	Resources Resources `yaml:"resources,omitempty"`
 }
 
-type Service struct {
-	Image         string   `yaml:"image"`
-	ContainerName string   `yaml:"container_name"`
-	Restart       string   `yaml:"restart"`
-	Command       string   `yaml:"command"`
-	Ports         []string `yaml:"ports"`
-	Volumes       []string `yaml:"volumes"`
-	Networks      []string `yaml:"networks"`
-	Deploy        *Deploy  `yaml:"deploy,omitempty"`
+// Healthcheck defines the parameters for a health check.
+type Healthcheck struct {
+	Test        []string `yaml:"test"`
+	Interval    string   `yaml:"interval"`
+	Timeout     string   `yaml:"timeout"`
+	Retries     int      `yaml:"retries"`
+	StartPeriod string   `yaml:"start_period,omitempty"`
 }
 
+// ServiceDependsOnCondition defines the health condition for depends_on.
+type ServiceDependsOnCondition struct {
+	Condition string `yaml:"condition"`
+}
+
+// Service defines the configuration of a service in the Docker Compose file.
+type Service struct {
+	Image         string                               `yaml:"image"`
+	ContainerName string                               `yaml:"container_name"`
+	Restart       string                               `yaml:"restart"`
+	Command       string                               `yaml:"command"`
+	Entrypoint    string                               `yaml:"entrypoint,omitempty"`
+	Ports         []string                             `yaml:"ports"`
+	Volumes       []string                             `yaml:"volumes"`
+	Networks      []string                             `yaml:"networks"`
+	Healthcheck   *Healthcheck                         `yaml:"healthcheck,omitempty"`
+	DependsOn     map[string]ServiceDependsOnCondition `yaml:"depends_on,omitempty"`
+	Deploy        *Deploy                              `yaml:"deploy,omitempty"`
+}
+
+// NetworkDetails defines the network configuration for a service.
 type NetworkDetails struct {
 	Driver string `yaml:"driver"`
 }
 
+// VolumeDetails defines the volume configuration for a service.
 type VolumeDetails struct {
 	Labels map[string]string `yaml:"labels"`
 }
 
+// ComposeFile defines the top-level structure of the Docker Compose file.
 type ComposeFile struct {
 	Version  string                    `yaml:"version"`
 	Services map[string]Service        `yaml:"services"`
@@ -58,6 +82,7 @@ type ComposeFile struct {
 	Volumes  map[string]VolumeDetails  `yaml:"volumes"`
 }
 
+// NetworkConfig holds the configuration used to override or define services.
 type NetworkConfig struct {
 	Image         string
 	Version       string

@@ -66,19 +66,34 @@ func stopNode(network string) {
 		return
 	}
 
-	// Get nodevin absolute path
-	composeCreatePath, err := os.Executable()
-	if err != nil {
-		cwd, wdErr := os.Getwd()
-		if wdErr != nil {
-			composeCreatePath = ""
-		} else {
-			composeCreatePath = cwd
+	// Check if ~/.nodevin exists
+	homeDir := os.Getenv("HOME")
+	var composeCreateDir string
+
+	if homeDir != "" {
+		nodevinDir := filepath.Join(homeDir, ".nodevin")
+		if _, err := os.Stat(nodevinDir); err == nil {
+			composeCreateDir = nodevinDir
+		} else if !os.IsNotExist(err) {
+			logger.LogError(fmt.Sprintf("Error accessing ~/.nodevin: ", err))
 		}
 	}
 
-	// Get the directory where the executable is located
-	composeCreateDir := filepath.Dir(composeCreatePath)
+	// Fallback to nodevin executable directory if ~/.nodevin does not exist
+	if composeCreateDir == "" {
+		composeCreatePath, err := os.Executable()
+		if err != nil {
+			cwd, wdErr := os.Getwd()
+			if wdErr != nil {
+				logger.LogError("Unable to determine executable or working directory")
+				return
+			}
+			composeCreateDir = cwd
+		} else {
+			// Use the directory where the executable is located
+			composeCreateDir = filepath.Dir(composeCreatePath)
+		}
+	}
 
 	composeFileName := fmt.Sprintf("docker-compose_%s.yml", containerName)
 	if utils.CheckIfTestnetOrTestnetNetworkFlag() {

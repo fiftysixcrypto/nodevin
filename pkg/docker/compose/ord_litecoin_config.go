@@ -20,40 +20,58 @@ package compose
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/spf13/viper"
 )
 
 func GetOrdLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
+	// Get base nodevin data directory
+	nodevinDataDir, err := GetNodevinDataDir()
+	if err != nil {
+		return NetworkConfig{}, err
+	}
+
+	// Define the base configuration for ord-litecoin
 	baseConfig := NetworkConfig{
 		Image:    "fiftysix/ord-litecoin",
 		Version:  "latest",
 		Restart:  "always",
 		Ports:    []string{"80:80"},
-		Volumes:  []string{"litecoin-core-data:/node/litecoin-core", "ord-litecoin-data:/node/ord-litecoin"},
+		Volumes:  []string{},
 		Networks: []string{"litecoin-net"},
 		NetworkDefs: map[string]NetworkDetails{
 			"litecoin-net": {
 				Driver: "bridge",
 			},
 		},
-		VolumeDefs: map[string]VolumeDetails{
+		VolumeDefs: map[string]VolumeDetails{},
+	}
+
+	// Set the container name and command based on the network
+	switch network {
+	case "ord-litecoin":
+		baseConfig.ContainerName = "ord-litecoin"
+		baseConfig.Command = "ord --litecoin-rpc-url http://litecoin-core:9332"
+		baseConfig.Volumes = []string{
+			fmt.Sprintf("%s:/node/litecoin-core", filepath.Join(nodevinDataDir, "litecoin-core")),
+			fmt.Sprintf("%s:/node/ord-litecoin", filepath.Join(nodevinDataDir, "ord-litecoin")),
+		}
+		baseConfig.VolumeDefs = map[string]VolumeDetails{
 			"ord-litecoin-data": {
 				Labels: map[string]string{
 					"nodevin.blockchain.software": "ord-litecoin",
 				},
 			},
-		},
-	}
+		}
 
-	switch network {
-	case "ord-litecoin":
-		baseConfig.ContainerName = "ord-litecoin"
-		baseConfig.Command = "ord --litecoin-rpc-url http://litecoin-core:9332"
 	case "ord-litecoin-testnet":
 		baseConfig.ContainerName = "ord-litecoin-testnet"
 		baseConfig.Command = "ord --testnet --litecoin-rpc-url http://litecoin-core-testnet:19332"
-		baseConfig.Volumes = []string{"litecoin-core-testnet-data:/node/litecoin-core", "ord-litecoin-testnet-data:/node/ord-litecoin"}
+		baseConfig.Volumes = []string{
+			fmt.Sprintf("%s:/node/litecoin-core", filepath.Join(nodevinDataDir, "litecoin-core-testnet")),
+			fmt.Sprintf("%s:/node/ord-litecoin", filepath.Join(nodevinDataDir, "ord-litecoin-testnet")),
+		}
 		baseConfig.Networks = []string{"litecoin-testnet-net"}
 		baseConfig.NetworkDefs = map[string]NetworkDetails{
 			"litecoin-testnet-net": {
@@ -67,14 +85,14 @@ func GetOrdLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 				},
 			},
 		}
+
 	default:
 		return NetworkConfig{}, fmt.Errorf("unknown network: %s", network)
 	}
 
+	// Optionally add RPC authentication to the command
 	cookieAuth := viper.GetBool("ord-litecoin-cookie-auth") || viper.GetBool("ord-cookie-auth")
-
 	if !cookieAuth {
-		// Add RPC user/pass to command
 		rpcUsername := viper.GetString("ord-litecoin-rpc-user")
 		rpcPassword := viper.GetString("ord-litecoin-rpc-pass")
 
@@ -92,7 +110,7 @@ func GetOrdLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 			}
 		}
 
-		baseConfig.Command = baseConfig.Command + " " + fmt.Sprintf("--litecoin-rpc-username %s", rpcUsername) + " " + fmt.Sprintf("--litecoin-rpc-password %s", rpcPassword)
+		baseConfig.Command = fmt.Sprintf("%s --litecoin-rpc-username %s --litecoin-rpc-password %s", baseConfig.Command, rpcUsername, rpcPassword)
 	}
 
 	baseConfig.Command = baseConfig.Command + " server"

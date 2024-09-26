@@ -21,8 +21,10 @@ package compose
 import (
 	"fmt"
 	"os"
+	"os/user"
 	"path/filepath"
 
+	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
@@ -146,6 +148,32 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 }
 
 func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames []string, extraServiceConfigs []NetworkConfig, cwd string) (string, error) {
+	// Get the home directory dynamically
+	homeDir := os.Getenv("HOME")
+	if homeDir == "" {
+		return "", fmt.Errorf("home directory not found")
+	}
+
+	// Ensure that the ~/.nodevin directory exists and create it if not
+	nodevinDir := filepath.Join(homeDir, ".nodevin")
+	err := os.MkdirAll(nodevinDir, 0755)
+	if err != nil {
+		logger.LogInfo("Unable to create ~/.nodevin directory, creating Dockerfile locally...")
+		nodevinDir, err = os.Getwd() // Use current working directory as fallback
+		if err != nil {
+			return "", fmt.Errorf("failed to create fallback directory: %w", err)
+		}
+	}
+
+	// Dynamically generate the sub-directory for this specific image within ~/.nodevin
+	imageName := viper.GetString("image")
+	imageDir := filepath.Join(nodevinDir, "data", imageName)
+	err = os.MkdirAll(imageDir, 0755)
+	if err != nil {
+		return "", fmt.Errorf("failed to create image-specific directory: %w", err)
+	}
+
+	// Create the volumes for the services
 	dockerNetworks := viper.GetStringSlice("docker-networks")
 	volumeDefinitions := viper.GetStringSlice("volume-definitions")
 
@@ -165,7 +193,7 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 	}
 
 	override := NetworkConfig{
-		Image:         viper.GetString("image"),
+		Image:         imageName,
 		Version:       viper.GetString("version"),
 		Restart:       viper.GetString("restart"),
 		ContainerName: viper.GetString("container-name"),
@@ -191,7 +219,8 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 
 	finalConfig := mergeConfigs(config, override)
 
-	service := Service{
+	// Main service configuration
+	mainService := Service{
 		Image:         finalConfig.Image + ":" + finalConfig.Version,
 		ContainerName: finalConfig.ContainerName,
 		Restart:       finalConfig.Restart,
@@ -199,17 +228,74 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 		Ports:         finalConfig.Ports,
 		Volumes:       finalConfig.Volumes,
 		Networks:      finalConfig.Networks,
+		DependsOn: map[string]ServiceDependsOnCondition{
+			fmt.Sprintf("init-copy-files-%s", nodeName): {
+				Condition: "service_healthy",
+			},
+		},
 	}
 
 	if isDeploySet(finalConfig.Deploy) {
-		service.Deploy = &Deploy{Resources: finalConfig.Deploy.Resources}
+		mainService.Deploy = &Deploy{Resources: finalConfig.Deploy.Resources}
 	}
 
+	var uid, gid string
+
+	// Get the current user's UID and GID
+	currentUser, err := user.Current()
+	if err != nil {
+		fmt.Println("Error fetching current user, setting UID and GID to 0:", err)
+		uid = "0"
+		gid = "0"
+	} else {
+		uid = currentUser.Uid
+		gid = currentUser.Gid
+	}
+
+	// Init container configuration, dynamically named based on the image name
+	initContainerName := fmt.Sprintf("init-copy-files-%s", nodeName)
+
+	// Dynamically generate the volume names based on the image and home directory
+	initVolumeName := fmt.Sprintf("%s-init-volume", nodeName)
+
+	initService := Service{
+		Image:         finalConfig.Image + ":" + finalConfig.Version,
+		ContainerName: initContainerName,
+		Restart:       "no",
+		Command: fmt.Sprintf(`/bin/sh -c "
+if [ -z \"$(ls -A /nodevin-volume)\" ]; then
+  mkdir -p /nodevin-volume && 
+  cp -r * /nodevin-volume &&
+  touch /nodevin-volume/%s/.copy-done &&
+  chown -R %s:%s /nodevin-volume/%s
+  sleep 20
+else
+  echo 'Volume not empty, skipping file copy';
+  touch /nodevin-volume/%s/.copy-done;
+  sleep 20
+fi"`, nodeName, uid, gid, nodeName, nodeName),
+		Volumes: []string{
+			fmt.Sprintf("%s:/init-volume", initVolumeName),
+			fmt.Sprintf("%s:/nodevin-volume", imageDir),
+		},
+		Entrypoint: "",
+		Healthcheck: &Healthcheck{
+			// Ensure that the file copying process has completed by checking if the .copy-done file exists
+			Test:        []string{"CMD", "test", "-f", fmt.Sprintf("/nodevin-volume/%s/.copy-done", nodeName)},
+			Interval:    "1s",
+			Timeout:     "1s",
+			Retries:     5,
+			StartPeriod: "30s",
+		},
+	}
+
+	// Add the services to the compose file
 	services := map[string]Service{
-		nodeName: service,
+		nodeName:          mainService,
+		initContainerName: initService,
 	}
 
-	// Initialize extra network and volume definitions with the values from finalConfig
+	// Include any extra services
 	extraNetworkDefs := finalConfig.NetworkDefs
 	extraVolumeDefs := finalConfig.VolumeDefs
 
@@ -227,32 +313,26 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 		}
 	}
 
+	// Build the compose file structure
 	composeFile := ComposeFile{
 		Version:  "3.9",
 		Services: services,
 		Networks: extraNetworkDefs,
-		Volumes:  extraVolumeDefs,
+		Volumes: map[string]VolumeDetails{
+			initVolumeName: {}, // Dynamically generated named volume for auto-initializing data
+		},
 	}
 
-	// Get nodevin absolute path
-	composeCreatePath, err := os.Executable()
-	if err != nil {
-		composeCreatePath = cwd
-	}
-
-	// Get the directory where the executable is located
-	composeCreateDir := filepath.Dir(composeCreatePath)
-
-	// Create compose file in location
+	// Generate and save the Compose file
 	composeFileName := fmt.Sprintf("docker-compose_%s.yml", nodeName)
-	composeFilePath := filepath.Join(composeCreateDir, composeFileName)
+	composeFilePath := filepath.Join(nodevinDir, composeFileName)
 	composeData, err := yaml.Marshal(&composeFile)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal docker-yml file: %w", err)
+		return "", fmt.Errorf("failed to marshal docker-compose.yml: %w", err)
 	}
 
 	if err = os.WriteFile(composeFilePath, composeData, 0644); err != nil {
-		return "", fmt.Errorf("failed to write docker-yml file: %w", err)
+		return "", fmt.Errorf("failed to write docker-compose.yml: %w", err)
 	}
 
 	return composeFilePath, nil

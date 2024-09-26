@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/fiftysixcrypto/nodevin/internal/utils"
@@ -65,16 +66,32 @@ func stopNode(network string) {
 		return
 	}
 
-	composeFilePath := fmt.Sprintf("docker-compose_%s.yml", containerName)
-	if utils.CheckIfTestnetOrTestnetNetworkFlag() {
-		composeFilePath = fmt.Sprintf("docker-compose_%s.yml", containerName+"-testnet")
+	// Get nodevin absolute path
+	composeCreatePath, err := os.Executable()
+	if err != nil {
+		cwd, wdErr := os.Getwd()
+		if wdErr != nil {
+			composeCreatePath = ""
+		} else {
+			composeCreatePath = cwd
+		}
 	}
+
+	// Get the directory where the executable is located
+	composeCreateDir := filepath.Dir(composeCreatePath)
+
+	composeFileName := fmt.Sprintf("docker-compose_%s.yml", containerName)
+	if utils.CheckIfTestnetOrTestnetNetworkFlag() {
+		composeFileName = fmt.Sprintf("docker-compose_%s.yml", containerName+"-testnet")
+	}
+
+	composeFilePath := filepath.Join(composeCreateDir, composeFileName)
 
 	// Check if there are any running containers for this compose file
 	psCmd := exec.Command("docker-compose", "-f", composeFilePath, "ps", "-q")
 	psOut, err := psCmd.Output()
 	if err != nil {
-		logger.LogError("Failed to check Docker Compose services: " + err.Error())
+		logger.LogError("Failed to find Docker Compose services: " + err.Error())
 		return
 	}
 

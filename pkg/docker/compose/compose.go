@@ -234,8 +234,18 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 		Volumes:  extraVolumeDefs,
 	}
 
+	// Get nodevin absolute path
+	composeCreatePath, err := os.Executable()
+	if err != nil {
+		composeCreatePath = cwd
+	}
+
+	// Get the directory where the executable is located
+	composeCreateDir := filepath.Dir(composeCreatePath)
+
+	// Create compose file in location
 	composeFileName := fmt.Sprintf("docker-compose_%s.yml", nodeName)
-	composeFilePath := filepath.Join(cwd, composeFileName)
+	composeFilePath := filepath.Join(composeCreateDir, composeFileName)
 	composeData, err := yaml.Marshal(&composeFile)
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal docker-yml file: %w", err)

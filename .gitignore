@@ -3,7 +3,7 @@
 
 # Binaries for programs and plugins
 nodevin.exe
-nodevin-darwin
+nodevin-macos
 nodevin-linux
 
 # Environment variables

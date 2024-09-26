@@ -73,7 +73,7 @@ func deleteVolume(volumeName string) {
 		return
 	}
 
-	volumeList := strings.Split(volumes, "\n")
+	volumeList := strings.Split(volumes, ", ")
 	found := false
 	for _, volume := range volumeList {
 		if volume == volumeName {

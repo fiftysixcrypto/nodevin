@@ -71,11 +71,11 @@ func stopNode(network string) {
 	var composeCreateDir string
 
 	if homeDir != "" {
-		nodevinDir := filepath.Join(homeDir, ".nodevin")
+		nodevinDir := filepath.Join(homeDir, ".nodevin", "data")
 		if _, err := os.Stat(nodevinDir); err == nil {
 			composeCreateDir = nodevinDir
 		} else if !os.IsNotExist(err) {
-			logger.LogError(fmt.Sprintf("Error accessing ~/.nodevin: ", err))
+			logger.LogError(fmt.Sprintf("Error accessing ~/.nodevin: %s", err))
 		}
 	}
 

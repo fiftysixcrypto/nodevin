@@ -24,7 +24,6 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
@@ -148,26 +147,13 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 }
 
 func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames []string, extraServiceConfigs []NetworkConfig, cwd string) (string, error) {
-	// Get the home directory dynamically
-	homeDir := os.Getenv("HOME")
-	if homeDir == "" {
-		return "", fmt.Errorf("home directory not found")
-	}
-
-	// Ensure that the ~/.nodevin directory exists and create it if not
-	nodevinDir := filepath.Join(homeDir, ".nodevin")
-	err := os.MkdirAll(nodevinDir, 0755)
+	nodevinDir, err := GetNodevinDataDir()
 	if err != nil {
-		logger.LogInfo("Unable to create ~/.nodevin directory, creating Dockerfile locally...")
-		nodevinDir, err = os.Getwd() // Use current working directory as fallback
-		if err != nil {
-			return "", fmt.Errorf("failed to create fallback directory: %w", err)
-		}
+		return "", fmt.Errorf("failed to create image-specific directory: %w", err)
 	}
 
 	// Dynamically generate the sub-directory for this specific image within ~/.nodevin
-	imageName := viper.GetString("image")
-	imageDir := filepath.Join(nodevinDir, "data", imageName)
+	imageDir := filepath.Join(nodevinDir, nodeName)
 	err = os.MkdirAll(imageDir, 0755)
 	if err != nil {
 		return "", fmt.Errorf("failed to create image-specific directory: %w", err)
@@ -193,7 +179,7 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 	}
 
 	override := NetworkConfig{
-		Image:         imageName,
+		Image:         viper.GetString("image"),
 		Version:       viper.GetString("version"),
 		Restart:       viper.GetString("restart"),
 		ContainerName: viper.GetString("container-name"),
@@ -230,7 +216,7 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 		Networks:      finalConfig.Networks,
 		DependsOn: map[string]ServiceDependsOnCondition{
 			fmt.Sprintf("init-copy-files-%s", nodeName): {
-				Condition: "service_healthy",
+				Condition: "service_completed_successfully",
 			},
 		},
 	}
@@ -265,28 +251,18 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 		Command: fmt.Sprintf(`/bin/sh -c "
 if [ -z \"$(ls -A /nodevin-volume)\" ]; then
   mkdir -p /nodevin-volume && 
-  cp -r * /nodevin-volume &&
-  touch /nodevin-volume/%s/.copy-done &&
-  chown -R %s:%s /nodevin-volume/%s
-  sleep 20
+  cp -r %s/* /nodevin-volume &&
+  touch /nodevin-volume/.copy-done &&
+  chown -R %s:%s /nodevin-volume/
 else
   echo 'Volume not empty, skipping file copy';
-  touch /nodevin-volume/%s/.copy-done;
-  sleep 20
-fi"`, nodeName, uid, gid, nodeName, nodeName),
+  touch /nodevin-volume/.copy-done;
+fi"`, nodeName, uid, gid),
 		Volumes: []string{
 			fmt.Sprintf("%s:/init-volume", initVolumeName),
 			fmt.Sprintf("%s:/nodevin-volume", imageDir),
 		},
 		Entrypoint: "",
-		Healthcheck: &Healthcheck{
-			// Ensure that the file copying process has completed by checking if the .copy-done file exists
-			Test:        []string{"CMD", "test", "-f", fmt.Sprintf("/nodevin-volume/%s/.copy-done", nodeName)},
-			Interval:    "1s",
-			Timeout:     "1s",
-			Retries:     5,
-			StartPeriod: "30s",
-		},
 	}
 
 	// Add the services to the compose file
@@ -319,7 +295,11 @@ fi"`, nodeName, uid, gid, nodeName, nodeName),
 		Services: services,
 		Networks: extraNetworkDefs,
 		Volumes: map[string]VolumeDetails{
-			initVolumeName: {}, // Dynamically generated named volume for auto-initializing data
+			initVolumeName: {
+				Labels: map[string]string{
+					"nodevin.blockchain.software": fmt.Sprintf("%s-init-volume", nodeName),
+				},
+			},
 		},
 	}
 

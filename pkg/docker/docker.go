@@ -171,8 +171,43 @@ func RemoveVolume(volumeName string) (bool, error) {
 	fmt.Println("Removed volume:", volumeName)
 	return true, nil
 }
-
 func PullImage(image string) error {
+	logger.LogInfo("Checking if Docker image exists locally: " + image)
+
+	// List images to check if the desired image already exists locally
+	images, err := dockerClient.ImageList(context.Background(), types.ImageListOptions{})
+	if err != nil {
+		logger.LogError("Failed to list Docker images: " + err.Error())
+		return err
+	}
+
+	// Track if the image is found locally
+	var localDigest string
+	for _, img := range images {
+		for _, tag := range img.RepoTags {
+			if tag == image {
+				localDigest = img.ID
+				logger.LogInfo("Found Docker image locally: " + image)
+				break
+			}
+		}
+	}
+
+	// Check if image needs to be pulled
+	if localDigest != "" {
+		upstreamImage, _, err := dockerClient.ImageInspectWithRaw(context.Background(), image)
+		if err != nil {
+			logger.LogError("Failed to inspect Docker image: " + err.Error())
+			return err
+		}
+
+		if localDigest == upstreamImage.ID {
+			logger.LogInfo("Local Docker image is up to date: " + image)
+			return nil // The image is already the latest version
+		}
+	}
+
+	// If local image is outdated or not found, pull the new image
 	logger.LogInfo("Pulling Docker image: " + image)
 	out, err := dockerClient.ImagePull(context.Background(), image, types.ImagePullOptions{})
 	if err != nil {
@@ -180,6 +215,7 @@ func PullImage(image string) error {
 		return err
 	}
 	defer out.Close()
+
 	fmt.Println(out)
 	return nil
 }

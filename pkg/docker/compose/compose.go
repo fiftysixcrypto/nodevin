@@ -21,7 +21,6 @@ package compose
 import (
 	"fmt"
 	"os"
-	"os/user"
 	"path/filepath"
 
 	"github.com/spf13/viper"
@@ -146,6 +145,8 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 	return services, networkDefs, volumeDefs
 }
 
+const GB = 1 << 30 // 1 GB in bytes
+
 func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames []string, extraServiceConfigs []NetworkConfig, cwd string) (string, error) {
 	nodevinDir, err := GetNodevinDataDir()
 	if err != nil {
@@ -157,6 +158,13 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 	err = os.MkdirAll(imageDir, 0755)
 	if err != nil {
 		return "", fmt.Errorf("failed to create image-specific directory: %w", err)
+	}
+
+	// Check if the total size of files in imageDir is greater than 1 GB
+	filesNeedCopy := false
+	totalSize, err := getDirectorySize(imageDir)
+	if err != nil || totalSize < GB {
+		filesNeedCopy = true
 	}
 
 	// Create the volumes for the services
@@ -214,61 +222,46 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 		Ports:         finalConfig.Ports,
 		Volumes:       finalConfig.Volumes,
 		Networks:      finalConfig.Networks,
-		DependsOn: map[string]ServiceDependsOnCondition{
-			fmt.Sprintf("init-copy-files-%s", nodeName): {
-				Condition: "service_completed_successfully",
-			},
-		},
 	}
 
-	if isDeploySet(finalConfig.Deploy) {
-		mainService.Deploy = &Deploy{Resources: finalConfig.Deploy.Resources}
+	// Initialize services map
+	services := map[string]Service{
+		nodeName: mainService,
 	}
 
-	var uid, gid string
+	if filesNeedCopy {
+		initContainerName := fmt.Sprintf("init-config-%s", nodeName)
+		initVolumeName := fmt.Sprintf("%s-init-volume", nodeName)
 
-	// Get the current user's UID and GID
-	currentUser, err := user.Current()
-	if err != nil {
-		fmt.Println("Error fetching current user, setting UID and GID to 0:", err)
-		uid = "0"
-		gid = "0"
-	} else {
-		uid = currentUser.Uid
-		gid = currentUser.Gid
-	}
-
-	// Init container configuration, dynamically named based on the image name
-	initContainerName := fmt.Sprintf("init-copy-files-%s", nodeName)
-
-	// Dynamically generate the volume names based on the image and home directory
-	initVolumeName := fmt.Sprintf("%s-init-volume", nodeName)
-
-	initService := Service{
-		Image:         finalConfig.Image + ":" + finalConfig.Version,
-		ContainerName: initContainerName,
-		Restart:       "no",
-		Command: fmt.Sprintf(`/bin/sh -c "
+		initService := Service{
+			Image:         finalConfig.Image + ":" + finalConfig.Version,
+			ContainerName: initContainerName,
+			Restart:       "no",
+			Command: fmt.Sprintf(`/bin/sh -c "
 if [ -z \"$(ls -A /nodevin-volume)\" ]; then
   mkdir -p /nodevin-volume && 
   cp -r %s/* /nodevin-volume &&
-  touch /nodevin-volume/.copy-done &&
-  chown -R %s:%s /nodevin-volume/
+  touch /nodevin-volume/.copy-done
 else
   echo 'Volume not empty, skipping file copy';
   touch /nodevin-volume/.copy-done;
-fi"`, nodeName, uid, gid),
-		Volumes: []string{
-			fmt.Sprintf("%s:/init-volume", initVolumeName),
-			fmt.Sprintf("%s:/nodevin-volume", imageDir),
-		},
-		Entrypoint: "",
-	}
+fi"`, nodeName),
+			Volumes: []string{
+				fmt.Sprintf("%s:/init-volume", initVolumeName),
+				fmt.Sprintf("%s:/nodevin-volume", imageDir),
+			},
+			Entrypoint: "",
+		}
 
-	// Add the services to the compose file
-	services := map[string]Service{
-		nodeName:          mainService,
-		initContainerName: initService,
+		// Add init container service to the services map
+		services[initContainerName] = initService
+
+		// Add dependency for mainService to wait for initService
+		mainService.DependsOn = map[string]ServiceDependsOnCondition{
+			initContainerName: {
+				Condition: "service_completed_successfully",
+			},
+		}
 	}
 
 	// Include any extra services
@@ -295,7 +288,7 @@ fi"`, nodeName, uid, gid),
 		Services: services,
 		Networks: extraNetworkDefs,
 		Volumes: map[string]VolumeDetails{
-			initVolumeName: {
+			fmt.Sprintf("%s-init-volume", nodeName): {
 				Labels: map[string]string{
 					"nodevin.blockchain.software": fmt.Sprintf("%s-init-volume", nodeName),
 				},
@@ -316,4 +309,20 @@ fi"`, nodeName, uid, gid),
 	}
 
 	return composeFilePath, nil
+}
+
+// Helper function to calculate the total size of files in a directory
+func getDirectorySize(dir string) (int64, error) {
+	var totalSize int64 = 0
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			// Accumulate file size
+			totalSize += info.Size()
+		}
+		return nil
+	})
+	return totalSize, err
 }

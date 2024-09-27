@@ -53,6 +53,7 @@ type ServiceDependsOnCondition struct {
 type Service struct {
 	Image         string                               `yaml:"image"`
 	ContainerName string                               `yaml:"container_name"`
+	User          string                               `yaml:"user,omitempty"`
 	Restart       string                               `yaml:"restart"`
 	Command       string                               `yaml:"command"`
 	Entrypoint    string                               `yaml:"entrypoint,omitempty"`

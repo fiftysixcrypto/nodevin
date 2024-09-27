@@ -28,6 +28,7 @@ import (
 	"github.com/fiftysixcrypto/nodevin/pkg/blockchain/bitcoin"
 	"github.com/fiftysixcrypto/nodevin/pkg/blockchain/litecoin"
 	"github.com/fiftysixcrypto/nodevin/pkg/docker"
+	"github.com/fiftysixcrypto/nodevin/pkg/docker/compose"
 
 	"github.com/spf13/cobra"
 )
@@ -94,6 +95,13 @@ func startNode(args []string) {
 	if err := cmd.Run(); err != nil {
 		logger.LogError("Failed to start Docker Compose services: " + err.Error())
 		return
+	}
+
+	logger.LogInfo("Cleaning up excess containers and volumes...")
+	if err := compose.RemoveInitContainersAndVolumes(); err != nil {
+		logger.LogError("Failed to clean up excess init containers and volumes: " + err.Error())
+	} else {
+		logger.LogInfo("Successfully cleaned up excess containers and volumes.")
 	}
 
 	logger.LogInfo("Successfully started blockchain node for network: " + network)

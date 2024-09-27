@@ -154,15 +154,14 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 	}
 
 	// Dynamically generate the sub-directory for this specific image within ~/.nodevin
-	imageDir := filepath.Join(nodevinDir, nodeName)
-	err = os.MkdirAll(imageDir, 0755)
+	err = os.MkdirAll(config.LocalPath, 0755)
 	if err != nil {
 		return "", fmt.Errorf("failed to create image-specific directory: %w", err)
 	}
 
 	// Check if the total size of files in imageDir is greater than 1 GB
 	filesNeedCopy := false
-	totalSize, err := getDirectorySize(imageDir)
+	totalSize, err := getDirectorySize(config.LocalPath)
 	if err != nil || totalSize < GB {
 		filesNeedCopy = true
 	}
@@ -238,16 +237,16 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 			Restart:       "no",
 			Command: fmt.Sprintf(`/bin/sh -c "
 if [ -z \"$(ls -A /nodevin-volume)\" ]; then
-  mkdir -p /nodevin-volume && 
-  cp -r %s/* /nodevin-volume &&
+  mkdir -p /nodevin-volume/ &&
+  cp -r * /nodevin-volume/ &&
   touch /nodevin-volume/.copy-done
 else
   echo 'Volume not empty, skipping file copy';
   touch /nodevin-volume/.copy-done;
-fi"`, nodeName),
+fi"`),
 			Volumes: []string{
 				fmt.Sprintf("%s:/init-volume", initVolumeName),
-				fmt.Sprintf("%s:/nodevin-volume", imageDir),
+				fmt.Sprintf("%s:/nodevin-volume", config.LocalPath),
 			},
 			Entrypoint: "",
 		}

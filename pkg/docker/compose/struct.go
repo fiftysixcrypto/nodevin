@@ -96,4 +96,5 @@ type NetworkConfig struct {
 	Deploy        Deploy
 	NetworkDefs   map[string]NetworkDetails
 	VolumeDefs    map[string]VolumeDetails
+	LocalPath     string
 }

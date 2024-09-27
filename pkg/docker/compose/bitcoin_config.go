@@ -50,9 +50,10 @@ func GetBitcoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 	// Set the container name and command based on the network
 	switch network {
 	case "bitcoin":
+		localPath := filepath.Join(nodevinDataDir, "bitcoin-core") // data dir, software type
 		baseConfig.ContainerName = "bitcoin-core"
 		baseConfig.Command = "bitcoind --server=1 --rpcbind=0.0.0.0 --rpcport=8332 --rpcallowip=0.0.0.0/0"
-		baseConfig.Volumes = []string{fmt.Sprintf("%s:/node/bitcoin-core", filepath.Join(nodevinDataDir, "bitcoin-core"))}
+		baseConfig.Volumes = []string{fmt.Sprintf("%s:/node/bitcoin-core", localPath+"/bitcoin-core")}
 		baseConfig.VolumeDefs = map[string]VolumeDetails{
 			"bitcoin-core-data": {
 				Labels: map[string]string{
@@ -60,12 +61,14 @@ func GetBitcoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 				},
 			},
 		}
+		baseConfig.LocalPath = localPath
 
 	case "bitcoin-testnet":
+		localPath := filepath.Join(nodevinDataDir, "bitcoin-core-testnet") // data dir, software type
 		baseConfig.ContainerName = "bitcoin-core-testnet"
 		baseConfig.Command = "bitcoind --testnet --server=1 --rpcbind=0.0.0.0 --rpcport=18332 --rpcallowip=0.0.0.0/0"
 		baseConfig.Ports = []string{"18332:18332", "18333:18333"}
-		baseConfig.Volumes = []string{fmt.Sprintf("%s:/node/bitcoin-core", filepath.Join(nodevinDataDir, "bitcoin-core-testnet"))}
+		baseConfig.Volumes = []string{fmt.Sprintf("%s:/node/bitcoin-core", localPath+"/bitcoin-core")}
 		baseConfig.VolumeDefs = map[string]VolumeDetails{
 			"bitcoin-core-testnet-data": {
 				Labels: map[string]string{
@@ -73,6 +76,7 @@ func GetBitcoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 				},
 			},
 		}
+		baseConfig.LocalPath = localPath
 
 	default:
 		return NetworkConfig{}, fmt.Errorf("unknown network: %s", network)

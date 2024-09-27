@@ -225,10 +225,9 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 	}
 
 	// Initialize services map
-	services := map[string]Service{
-		nodeName: mainService,
-	}
+	services := make(map[string]Service)
 
+	// Add init container service only if files need to be copied
 	if filesNeedCopy {
 		initContainerName := fmt.Sprintf("init-config-%s", nodeName)
 		initVolumeName := fmt.Sprintf("%s-init-volume", nodeName)
@@ -256,13 +255,15 @@ fi"`, nodeName),
 		// Add init container service to the services map
 		services[initContainerName] = initService
 
-		// Add dependency for mainService to wait for initService
+		// Add dependency for mainService to wait for initService to complete
 		mainService.DependsOn = map[string]ServiceDependsOnCondition{
 			initContainerName: {
 				Condition: "service_completed_successfully",
 			},
 		}
 	}
+
+	services[nodeName] = mainService
 
 	// Include any extra services
 	extraNetworkDefs := finalConfig.NetworkDefs
@@ -290,6 +291,7 @@ fi"`, nodeName),
 		Volumes: map[string]VolumeDetails{
 			fmt.Sprintf("%s-init-volume", nodeName): {
 				Labels: map[string]string{
+					"nodevin.init.volume":         "true",
 					"nodevin.blockchain.software": fmt.Sprintf("%s-init-volume", nodeName),
 				},
 			},

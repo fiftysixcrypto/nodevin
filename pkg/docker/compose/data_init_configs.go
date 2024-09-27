@@ -25,6 +25,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/fiftysixcrypto/nodevin/internal/logger"
 )
@@ -48,11 +49,9 @@ func GetNodevinDataDir() (string, error) {
 	return nodevinDataDir, nil
 }
 
-// RemoveInitContainersAndVolumes removes all containers that match "init-config-*" and their associated volumes
+// RemoveInitContainersAndVolumes removes all containers that match "init-config-*" and their associated volumes,
+// deletes volumes with the label "nodevin.init.volume", and anonymous volumes created within the last minute.
 func RemoveInitContainersAndVolumes() error {
-	// Find all containers that match the pattern "init-config-*"
-	logger.LogInfo("Searching for init-config-* containers...")
-
 	listContainersCmd := exec.Command("docker", "ps", "-a", "--filter", "name=init-config-", "--format", "{{.Names}}")
 	var containerListOutput bytes.Buffer
 	listContainersCmd.Stdout = &containerListOutput
@@ -64,37 +63,91 @@ func RemoveInitContainersAndVolumes() error {
 	// Parse the list of container names
 	containerNames := strings.Split(strings.TrimSpace(containerListOutput.String()), "\n")
 	if len(containerNames) == 0 || containerNames[0] == "" {
-		logger.LogInfo("No containers with name pattern init-config-* found.")
-		return nil
+		//
+	} else {
+		// Loop through each container and remove it along with its associated volume
+		for _, containerName := range containerNames {
+			if containerName == "" {
+				continue
+			}
+
+			// Stop and remove the container
+			removeContainerCmd := exec.Command("docker", "rm", "-f", containerName)
+			_, err := removeContainerCmd.CombinedOutput()
+			if err != nil {
+				logger.LogError(fmt.Sprintf("Failed to remove container: %s, Error: %s", containerName, err.Error()))
+				continue // Continue even if one container fails
+			}
+		}
 	}
 
-	// Loop through each container and remove it along with its associated volume
-	for _, containerName := range containerNames {
-		if containerName == "" {
+	// Delete volumes with the label "nodevin.init.volume"
+	listInitVolumesCmd := exec.Command("docker", "volume", "ls", "--filter", "label=nodevin.init.volume=true", "--format", "{{.Name}}")
+	var initVolumeListOutput bytes.Buffer
+	listInitVolumesCmd.Stdout = &initVolumeListOutput
+	if err := listInitVolumesCmd.Run(); err != nil {
+		logger.LogError("Failed to list volumes with label 'nodevin.init.volume': " + err.Error())
+		return err
+	}
+
+	// Parse the list of init volumes and delete them
+	initVolumeNames := strings.Split(strings.TrimSpace(initVolumeListOutput.String()), "\n")
+	for _, volumeName := range initVolumeNames {
+		if volumeName == "" {
 			continue
 		}
-
-		// Stop and remove the container
-		logger.LogInfo(fmt.Sprintf("Stopping and removing container: %s", containerName))
-		removeContainerCmd := exec.Command("docker", "rm", "-f", containerName)
-		removeContainerOutput, err := removeContainerCmd.CombinedOutput()
-		if err != nil {
-			logger.LogError(fmt.Sprintf("Failed to remove container: %s, Error: %s", containerName, err.Error()))
-			continue // Continue even if one container fails
-		}
-		logger.LogInfo(fmt.Sprintf("Container removed: %s", string(removeContainerOutput)))
-
-		// Attempt to find and remove associated volume
-		// Assuming that the volume has a name pattern similar to the container
-		volumeName := fmt.Sprintf("%s-init-volume", containerName)
-		logger.LogInfo(fmt.Sprintf("Attempting to remove associated volume: %s", volumeName))
 		removeVolumeCmd := exec.Command("docker", "volume", "rm", volumeName)
-		removeVolumeOutput, err := removeVolumeCmd.CombinedOutput()
+		_, err := removeVolumeCmd.CombinedOutput()
 		if err != nil {
-			logger.LogError(fmt.Sprintf("Failed to remove volume: %s, Error: %s", volumeName, err.Error()))
+			logger.LogError(fmt.Sprintf("Failed to remove init volume: %s, Error: %s", volumeName, err.Error()))
 			continue
 		}
-		logger.LogInfo(fmt.Sprintf("Volume removed: %s", string(removeVolumeOutput)))
+	}
+
+	// Delete anonymous volumes created within the last minute
+	listAnonymousVolumesCmd := exec.Command("docker", "volume", "ls", "--filter", "label=com.docker.volume.anonymous", "--format", "{{.Name}}")
+	var anonymousVolumeListOutput bytes.Buffer
+	listAnonymousVolumesCmd.Stdout = &anonymousVolumeListOutput
+	if err := listAnonymousVolumesCmd.Run(); err != nil {
+		logger.LogError("Failed to list anonymous volumes: " + err.Error())
+		return err
+	}
+
+	anonymousVolumeNames := strings.Split(strings.TrimSpace(anonymousVolumeListOutput.String()), "\n")
+	currentTime := time.Now()
+
+	// Loop through each anonymous volume and check the CreatedAt time
+	for _, volumeName := range anonymousVolumeNames {
+		if volumeName == "" {
+			continue
+		}
+
+		// Get details of the volume including CreatedAt time
+		inspectVolumeCmd := exec.Command("docker", "volume", "inspect", volumeName, "--format", "{{.CreatedAt}}")
+		var inspectVolumeOutput bytes.Buffer
+		inspectVolumeCmd.Stdout = &inspectVolumeOutput
+		if err := inspectVolumeCmd.Run(); err != nil {
+			logger.LogError(fmt.Sprintf("Failed to inspect volume: %s, Error: %s", volumeName, err.Error()))
+			continue
+		}
+
+		// Parse the CreatedAt time
+		createdAtStr := strings.TrimSpace(inspectVolumeOutput.String())
+		createdAtTime, err := time.Parse(time.RFC3339, createdAtStr)
+		if err != nil {
+			logger.LogError(fmt.Sprintf("Failed to parse CreatedAt time for volume: %s, Error: %s", volumeName, err.Error()))
+			continue
+		}
+
+		// Check if the volume was created within the last minute
+		if currentTime.Sub(createdAtTime).Minutes() <= 1 {
+			removeVolumeCmd := exec.Command("docker", "volume", "rm", volumeName)
+			_, err := removeVolumeCmd.CombinedOutput()
+			if err != nil {
+				logger.LogError(fmt.Sprintf("Failed to remove anonymous volume: %s, Error: %s", volumeName, err.Error()))
+				continue
+			}
+		}
 	}
 
 	return nil

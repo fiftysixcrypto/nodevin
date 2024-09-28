@@ -19,7 +19,9 @@
 package bitcoin
 
 import (
+	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/fiftysixcrypto/nodevin/internal/utils"
+	"github.com/fiftysixcrypto/nodevin/pkg/docker"
 	"github.com/fiftysixcrypto/nodevin/pkg/docker/compose"
 	"github.com/spf13/viper"
 )
@@ -45,6 +47,13 @@ func CreateBitcoinComposeFile(cwd string) (string, error) {
 			ordNetwork = "ord-testnet"
 		} else {
 			ordNetwork = "ord"
+		}
+
+		// Pull the ord Docker image
+		image := viper.GetString("ord-image") + ":" + viper.GetString("ord-version")
+		if err := docker.PullImage(image); err != nil {
+			logger.LogError("Failed to pull Docker image: " + err.Error())
+			return "", err
 		}
 
 		ordComposeConfig, err := compose.GetOrdNetworkComposeConfig(ordNetwork)

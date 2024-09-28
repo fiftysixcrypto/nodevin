@@ -19,7 +19,9 @@
 package litecoin
 
 import (
+	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/fiftysixcrypto/nodevin/internal/utils"
+	"github.com/fiftysixcrypto/nodevin/pkg/docker"
 	"github.com/fiftysixcrypto/nodevin/pkg/docker/compose"
 	"github.com/spf13/viper"
 )
@@ -45,6 +47,13 @@ func CreateLitecoinComposeFile(cwd string) (string, error) {
 			ordLitecoinNetwork = "ord-litecoin-testnet"
 		} else {
 			ordLitecoinNetwork = "ord-litecoin"
+		}
+
+		// Pull the ord Docker image
+		image := viper.GetString("ord-litecoin-image") + ":" + viper.GetString("ord-litecoin-version")
+		if err := docker.PullImage(image); err != nil {
+			logger.LogError("Failed to pull Docker image: " + err.Error())
+			return "", err
 		}
 
 		ordLitecoinComposeConfig, err := compose.GetOrdLitecoinNetworkComposeConfig(ordLitecoinNetwork)

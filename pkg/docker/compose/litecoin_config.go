@@ -50,9 +50,10 @@ func GetLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 	// Set the container name and command based on the network
 	switch network {
 	case "litecoin":
+		localPath := filepath.Join(nodevinDataDir, "litecoin-core") // data dir, software type
 		baseConfig.ContainerName = "litecoin-core"
 		baseConfig.Command = "litecoind --server=1 --rpcbind=0.0.0.0 --rpcport=9332 --rpcallowip=0.0.0.0/0"
-		baseConfig.Volumes = []string{fmt.Sprintf("%s:/node/litecoin-core", filepath.Join(nodevinDataDir, "litecoin-core"))}
+		baseConfig.Volumes = []string{fmt.Sprintf("%s:/node/litecoin-core", localPath+"/litecoin-core")}
 		baseConfig.VolumeDefs = map[string]VolumeDetails{
 			"litecoin-core-data": {
 				Labels: map[string]string{
@@ -60,12 +61,14 @@ func GetLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 				},
 			},
 		}
+		baseConfig.LocalPath = localPath
 
 	case "litecoin-testnet":
+		localPath := filepath.Join(nodevinDataDir, "litecoin-core-testnet") // data dir, software type
 		baseConfig.ContainerName = "litecoin-core-testnet"
 		baseConfig.Command = "litecoind --testnet --server=1 --rpcbind=0.0.0.0 --rpcport=19332 --rpcallowip=0.0.0.0/0"
 		baseConfig.Ports = []string{"19332:19332", "19333:19333"}
-		baseConfig.Volumes = []string{fmt.Sprintf("%s:/node/litecoin-core", filepath.Join(nodevinDataDir, "litecoin-core-testnet"))}
+		baseConfig.Volumes = []string{fmt.Sprintf("%s:/node/litecoin-core", localPath+"/litecoin-core")}
 		baseConfig.VolumeDefs = map[string]VolumeDetails{
 			"litecoin-core-testnet-data": {
 				Labels: map[string]string{
@@ -73,6 +76,7 @@ func GetLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 				},
 			},
 		}
+		baseConfig.LocalPath = localPath
 
 	default:
 		return NetworkConfig{}, fmt.Errorf("unknown network: %s", network)

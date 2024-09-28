@@ -23,6 +23,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
@@ -83,13 +84,28 @@ func isDeploySet(deploy Deploy) bool {
 		deploy.Resources.Reservations.CPUs != "" ||
 		deploy.Resources.Reservations.Memory != ""
 }
-
 func createExtraServices(extraServiceNames []string, extraServiceConfigs []NetworkConfig, extraNetworkDefs map[string]NetworkDetails, extraVolumeDefs map[string]VolumeDetails) (map[string]Service, map[string]NetworkDetails, map[string]VolumeDetails) {
+	// Initialize maps to hold all services, networks, and volumes
 	services := make(map[string]Service)
 	networkDefs := make(map[string]NetworkDetails)
 	volumeDefs := make(map[string]VolumeDetails)
 
 	for i, serviceName := range extraServiceNames {
+		// Dynamically generate the sub-directory for this specific image within ~/.nodevin
+		err := os.MkdirAll(extraServiceConfigs[i].LocalPath, 0755)
+		if err != nil {
+			logger.LogError(fmt.Sprintf("failed to create image-specific directory: %w", err))
+			continue
+		}
+
+		// Check if the total size of files in the directory is greater than 1 GB
+		filesNeedCopy := false
+		totalSize, err := getDirectorySize(extraServiceConfigs[i].LocalPath)
+		if err != nil || totalSize < GB {
+			filesNeedCopy = true
+		}
+
+		// Get configuration for the current service
 		config := extraServiceConfigs[i]
 
 		override := NetworkConfig{
@@ -117,8 +133,10 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 			VolumeDefs:  extraVolumeDefs,
 		}
 
+		// Merge the override configuration into the service configuration
 		finalConfig := mergeConfigs(config, override)
 
+		// Create the main service configuration
 		service := Service{
 			Image:         finalConfig.Image + ":" + finalConfig.Version,
 			ContainerName: finalConfig.ContainerName,
@@ -133,7 +151,57 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 			service.Deploy = &Deploy{Resources: finalConfig.Deploy.Resources}
 		}
 
+		// Add the main service to the services map
 		services[serviceName] = service
+
+		// Add the init container if files need to be copied
+		if filesNeedCopy {
+			initContainerName := fmt.Sprintf("init-config-%s", serviceName)
+			initVolumeName := fmt.Sprintf("%s-init-volume", serviceName)
+
+			initService := Service{
+				Image:         finalConfig.Image + ":" + finalConfig.Version,
+				ContainerName: initContainerName,
+				Restart:       "no",
+				Command: fmt.Sprintf(`/bin/sh -c "
+if [ -z \"$(ls -A /nodevin-volume-%s)\" ]; then
+  mkdir -p /nodevin-volume-%s/ &&
+  cp -r * /nodevin-volume-%s/ &&
+  touch /nodevin-volume-%s/.copy-done
+else
+  echo 'Volume not empty, skipping file copy';
+  touch /nodevin-volume-%s/.copy-done;
+fi"`, serviceName, serviceName, serviceName, serviceName, serviceName),
+				Volumes: []string{
+					fmt.Sprintf("%s:/init-volume-%s", initVolumeName, serviceName),
+					fmt.Sprintf("%s:/nodevin-volume-%s", config.LocalPath, serviceName),
+				},
+				Entrypoint: "",
+			}
+
+			// Add the init container to the services map
+			services[initContainerName] = initService
+
+			// Add dependency for the main service to wait for the init container to complete
+			service.DependsOn = map[string]ServiceDependsOnCondition{
+				initContainerName: {
+					Condition: "service_completed_successfully",
+				},
+			}
+
+			// Update the main service in the services map with the dependency
+			services[serviceName] = service
+
+			// Add volume definitions for the init containers and label them
+			volumeDefs[initVolumeName] = VolumeDetails{
+				Labels: map[string]string{
+					"nodevin.init.volume":         "true",
+					"nodevin.blockchain.software": fmt.Sprintf("%s-init-volume", serviceName),
+				},
+			}
+		}
+
+		// Add network and volume definitions
 		for k, v := range finalConfig.NetworkDefs {
 			networkDefs[k] = v
 		}
@@ -223,8 +291,9 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 		Networks:      finalConfig.Networks,
 	}
 
-	// Initialize services map
+	// Initialize services map and volume labels
 	services := make(map[string]Service)
+	allVolumeDefs := make(map[string]VolumeDetails)
 
 	// Add init container service only if files need to be copied
 	if filesNeedCopy {
@@ -235,7 +304,7 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 			Image:         finalConfig.Image + ":" + finalConfig.Version,
 			ContainerName: initContainerName,
 			Restart:       "no",
-			Command: fmt.Sprintf(`/bin/sh -c "
+			Command: `/bin/sh -c "
 if [ -z \"$(ls -A /nodevin-volume)\" ]; then
   mkdir -p /nodevin-volume/ &&
   cp -r * /nodevin-volume/ &&
@@ -243,7 +312,7 @@ if [ -z \"$(ls -A /nodevin-volume)\" ]; then
 else
   echo 'Volume not empty, skipping file copy';
   touch /nodevin-volume/.copy-done;
-fi"`),
+fi"`,
 			Volumes: []string{
 				fmt.Sprintf("%s:/init-volume", initVolumeName),
 				fmt.Sprintf("%s:/nodevin-volume", config.LocalPath),
@@ -260,11 +329,20 @@ fi"`),
 				Condition: "service_completed_successfully",
 			},
 		}
+
+		// Add the volume definition for the init container
+		allVolumeDefs[initVolumeName] = VolumeDetails{
+			Labels: map[string]string{
+				"nodevin.init.volume":         "true",
+				"nodevin.blockchain.software": fmt.Sprintf("%s-init-volume", nodeName),
+			},
+		}
 	}
 
+	// Add the main service to the services map
 	services[nodeName] = mainService
 
-	// Include any extra services
+	// Include any extra services and their init containers
 	extraNetworkDefs := finalConfig.NetworkDefs
 	extraVolumeDefs := finalConfig.VolumeDefs
 
@@ -280,6 +358,16 @@ fi"`),
 		for k, v := range extraVolumes {
 			extraVolumeDefs[k] = v
 		}
+
+		// Add extra init volumes to the volume definitions
+		for extraVolumeName, volumeDetails := range extraVolumes {
+			allVolumeDefs[extraVolumeName] = volumeDetails
+		}
+	}
+
+	// Add main service's volume definitions to allVolumeDefs (this includes other init volumes)
+	for volumeName, volumeDetails := range volumeDefs {
+		allVolumeDefs[volumeName] = volumeDetails
 	}
 
 	// Build the compose file structure
@@ -287,14 +375,7 @@ fi"`),
 		Version:  "3.9",
 		Services: services,
 		Networks: extraNetworkDefs,
-		Volumes: map[string]VolumeDetails{
-			fmt.Sprintf("%s-init-volume", nodeName): {
-				Labels: map[string]string{
-					"nodevin.init.volume":         "true",
-					"nodevin.blockchain.software": fmt.Sprintf("%s-init-volume", nodeName),
-				},
-			},
-		},
+		Volumes:  allVolumeDefs,
 	}
 
 	// Generate and save the Compose file

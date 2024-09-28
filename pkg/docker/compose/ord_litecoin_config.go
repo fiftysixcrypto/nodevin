@@ -51,11 +51,12 @@ func GetOrdLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 	// Set the container name and command based on the network
 	switch network {
 	case "ord-litecoin":
+		localPath := filepath.Join(nodevinDataDir, "ord-litecoin") // data dir, software type
 		baseConfig.ContainerName = "ord-litecoin"
 		baseConfig.Command = "ord --litecoin-rpc-url http://litecoin-core:9332"
 		baseConfig.Volumes = []string{
-			fmt.Sprintf("%s:/node/litecoin-core", filepath.Join(nodevinDataDir, "litecoin-core")),
-			fmt.Sprintf("%s:/node/ord-litecoin", filepath.Join(nodevinDataDir, "ord-litecoin")),
+			fmt.Sprintf("%s:/node/litecoin-core", filepath.Join(nodevinDataDir, "litecoin-core", "litecoin-core")),
+			fmt.Sprintf("%s:/node/ord-litecoin", localPath+"/ord-litecoin"),
 		}
 		baseConfig.VolumeDefs = map[string]VolumeDetails{
 			"ord-litecoin-data": {
@@ -64,13 +65,15 @@ func GetOrdLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 				},
 			},
 		}
+		baseConfig.LocalPath = localPath
 
 	case "ord-litecoin-testnet":
+		localPath := filepath.Join(nodevinDataDir, "ord-litecoin-testnet") // data dir, software type
 		baseConfig.ContainerName = "ord-litecoin-testnet"
 		baseConfig.Command = "ord --testnet --litecoin-rpc-url http://litecoin-core-testnet:19332"
 		baseConfig.Volumes = []string{
-			fmt.Sprintf("%s:/node/litecoin-core", filepath.Join(nodevinDataDir, "litecoin-core-testnet")),
-			fmt.Sprintf("%s:/node/ord-litecoin", filepath.Join(nodevinDataDir, "ord-litecoin-testnet")),
+			fmt.Sprintf("%s:/node/litecoin-core", filepath.Join(nodevinDataDir, "litecoin-core-testnet", "litecoin-core")),
+			fmt.Sprintf("%s:/node/ord-litecoin", localPath+"/ord-litecoin"),
 		}
 		baseConfig.Networks = []string{"litecoin-testnet-net"}
 		baseConfig.NetworkDefs = map[string]NetworkDetails{
@@ -85,6 +88,7 @@ func GetOrdLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 				},
 			},
 		}
+		baseConfig.LocalPath = localPath
 
 	default:
 		return NetworkConfig{}, fmt.Errorf("unknown network: %s", network)

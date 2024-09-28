@@ -69,9 +69,13 @@ func init() {
 
 	// Bitcoin specific flags
 	rootCmd.PersistentFlags().Bool("ord", false, "Run ordinal software ord alongside the Bitcoin/Litecoin node")
+	rootCmd.PersistentFlags().String("ord-image", "fiftysix/ord", "Docker image to use for ord (image name -- ex: fiftysix/ord)")
+	rootCmd.PersistentFlags().String("ord-version", "latest", "Version of Docker image to use for ord (tag -- ex: latest, 27.0)")
 
 	// Litecoin specific flags
 	rootCmd.PersistentFlags().Bool("ord-litecoin", false, "Run ordinal software ord alongside the Litecoin node")
+	rootCmd.PersistentFlags().String("ord-litecoin-image", "fiftysix/ord-litecoin", "Docker image to use for ord (image name -- ex: fiftysix/ord-litecoin)")
+	rootCmd.PersistentFlags().String("ord-litecoin-version", "latest", "Version of Docker image to use for ord (tag -- ex: latest, 27.0)")
 
 	// Bind flags to viper
 	viper.BindPFlag("command", rootCmd.PersistentFlags().Lookup("command"))
@@ -98,9 +102,13 @@ func init() {
 
 	// Bitcoin specific flags
 	viper.BindPFlag("ord", rootCmd.PersistentFlags().Lookup("ord"))
+	viper.BindPFlag("ord-image", rootCmd.PersistentFlags().Lookup("ord-image"))
+	viper.BindPFlag("ord-version", rootCmd.PersistentFlags().Lookup("ord-version"))
 
 	// Litecoin specific flags
 	viper.BindPFlag("ord-litecoin", rootCmd.PersistentFlags().Lookup("ord-litecoin"))
+	viper.BindPFlag("ord-litecoin-image", rootCmd.PersistentFlags().Lookup("ord-litecoin-image"))
+	viper.BindPFlag("ord-litecoin-version", rootCmd.PersistentFlags().Lookup("ord-litecoin-version"))
 
 	// Add blockchain commands
 	rootCmd.AddCommand(blockchain.RequestCmd)

@@ -61,6 +61,8 @@ func init() {
 	rootCmd.PersistentFlags().StringSlice("docker-networks", []string{}, "Docker networks to connect to for compose file")
 	rootCmd.PersistentFlags().String("network-driver", "", "Docker network driver for compose file")
 	rootCmd.PersistentFlags().StringToString("volume-labels", map[string]string{}, "Docker volume labels for compose file")
+	rootCmd.PersistentFlags().Bool("snapshot-sync", false, "Download chain data from a snapshot url -- (default: false)")
+	rootCmd.PersistentFlags().String("snapshot-sync-command", "", "Init command to be ran to handle snapshot data and place in directory")
 
 	rootCmd.PersistentFlags().String("cpu-limit", "", "Maximum CPU limit of use (amount of CPUs -- ex: 1.5)")
 	rootCmd.PersistentFlags().String("mem-limit", "", "Maximum memory limit of use (positive integer followed by 'b', 'k', 'm', 'g', to indicate bytes, kilobytes, megabytes, or gigabytes -- ex: 50m)")
@@ -94,6 +96,8 @@ func init() {
 	viper.BindPFlag("docker-networks", rootCmd.PersistentFlags().Lookup("docker-networks"))
 	viper.BindPFlag("network-driver", rootCmd.PersistentFlags().Lookup("network-driver"))
 	viper.BindPFlag("volume-labels", rootCmd.PersistentFlags().Lookup("volume-labels"))
+	viper.BindPFlag("snapshot-sync", rootCmd.PersistentFlags().Lookup("snapshot-sync"))
+	viper.BindPFlag("snapshot-sync-command", rootCmd.PersistentFlags().Lookup("snapshot-sync-command"))
 
 	viper.BindPFlag("cpu-limit", rootCmd.PersistentFlags().Lookup("cpu-limit"))
 	viper.BindPFlag("mem-limit", rootCmd.PersistentFlags().Lookup("mem-limit"))

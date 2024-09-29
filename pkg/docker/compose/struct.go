@@ -85,16 +85,20 @@ type ComposeFile struct {
 
 // NetworkConfig holds the configuration used to override or define services.
 type NetworkConfig struct {
-	Image         string
-	Version       string
-	ContainerName string
-	Command       string
-	Restart       string
-	Ports         []string
-	Volumes       []string
-	Networks      []string
-	Deploy        Deploy
-	NetworkDefs   map[string]NetworkDetails
-	VolumeDefs    map[string]VolumeDetails
-	LocalPath     string
+	Image                string
+	Version              string
+	ContainerName        string
+	Command              string
+	Restart              string
+	Ports                []string
+	Volumes              []string
+	Networks             []string
+	Deploy               Deploy
+	NetworkDefs          map[string]NetworkDetails
+	VolumeDefs           map[string]VolumeDetails
+	LocalPath            string
+	SnapshotSyncUrl      string
+	LocalChainDataPath   string
+	SnapshotDataFilename string
+	SnapshotSyncCommand  string
 }

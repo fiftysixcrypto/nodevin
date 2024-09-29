@@ -44,6 +44,21 @@ func mergeConfigs(defaultConfig, overrideConfig NetworkConfig) NetworkConfig {
 	if overrideConfig.Command != "" {
 		defaultConfig.Command = overrideConfig.Command
 	}
+	if overrideConfig.LocalPath != "" {
+		defaultConfig.LocalPath = overrideConfig.LocalPath
+	}
+	if overrideConfig.SnapshotSyncUrl != "" {
+		defaultConfig.SnapshotSyncUrl = overrideConfig.SnapshotSyncUrl
+	}
+	if overrideConfig.LocalChainDataPath != "" {
+		defaultConfig.LocalChainDataPath = overrideConfig.LocalChainDataPath
+	}
+	if overrideConfig.SnapshotDataFilename != "" {
+		defaultConfig.SnapshotDataFilename = overrideConfig.SnapshotDataFilename
+	}
+	if overrideConfig.SnapshotSyncCommand != "" {
+		defaultConfig.SnapshotSyncCommand = overrideConfig.SnapshotSyncCommand
+	}
 	if len(overrideConfig.Ports) > 0 {
 		defaultConfig.Ports = overrideConfig.Ports
 	}
@@ -129,8 +144,13 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 					},
 				},
 			},
-			NetworkDefs: extraNetworkDefs,
-			VolumeDefs:  extraVolumeDefs,
+			NetworkDefs:          extraNetworkDefs,
+			VolumeDefs:           extraVolumeDefs,
+			LocalPath:            viper.GetString(fmt.Sprintf("%s-local-path", serviceName)),
+			SnapshotSyncCommand:  viper.GetString(fmt.Sprintf("%s-snapshot-sync-command", serviceName)),
+			SnapshotSyncUrl:      viper.GetString(fmt.Sprintf("%s-snapshot-sync-url", serviceName)),
+			LocalChainDataPath:   viper.GetString(fmt.Sprintf("%s-snapshot-sync-data-dir", serviceName)),
+			SnapshotDataFilename: viper.GetString(fmt.Sprintf("%s-snapshot-sync-file-name", serviceName)),
 		}
 
 		// Merge the override configuration into the service configuration
@@ -159,6 +179,25 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 			initContainerName := fmt.Sprintf("init-config-%s", serviceName)
 			initVolumeName := fmt.Sprintf("%s-init-volume", serviceName)
 
+			initSnapshotSyncCommand := "echo \"Snapshot sync not enabled. Skipping download.\""
+
+			if viper.GetBool(fmt.Sprintf("%s-snapshot-sync", serviceName)) {
+				if finalConfig.SnapshotSyncUrl != "" {
+					if finalConfig.SnapshotSyncCommand != "" {
+						initSnapshotSyncCommand = finalConfig.SnapshotSyncCommand
+					} else {
+						initSnapshotSyncCommand = fmt.Sprintf("curl -C - -o %s/%s %s && tar -xzf %s/%s -C %s",
+							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
+							finalConfig.SnapshotSyncUrl,
+							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
+							finalConfig.LocalChainDataPath)
+					}
+				} else {
+					initSnapshotSyncCommand = "echo \"Snapshot sync url not found. Skipping download.\""
+					logger.LogInfo("Snapshot sync url not found. Skipping download.")
+				}
+			}
+
 			initService := Service{
 				Image:         finalConfig.Image + ":" + finalConfig.Version,
 				ContainerName: initContainerName,
@@ -167,11 +206,12 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 if [ -z \"$(ls -A /nodevin-volume-%s)\" ]; then
   mkdir -p /nodevin-volume-%s/ &&
   cp -r * /nodevin-volume-%s/ &&
+  %s &&
   touch /nodevin-volume-%s/.copy-done
 else
   echo 'Volume not empty, skipping file copy';
   touch /nodevin-volume-%s/.copy-done;
-fi"`, serviceName, serviceName, serviceName, serviceName, serviceName),
+fi"`, serviceName, serviceName, serviceName, initSnapshotSyncCommand, serviceName, serviceName),
 				Volumes: []string{
 					fmt.Sprintf("%s:/init-volume-%s", initVolumeName, serviceName),
 					fmt.Sprintf("%s:/nodevin-volume-%s", config.LocalPath, serviceName),
@@ -274,8 +314,13 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 				},
 			},
 		},
-		NetworkDefs: networkDefs,
-		VolumeDefs:  volumeDefs,
+		NetworkDefs:          networkDefs,
+		VolumeDefs:           volumeDefs,
+		LocalPath:            viper.GetString("local-path"),
+		SnapshotSyncCommand:  viper.GetString("snapshot-sync-command"),
+		SnapshotSyncUrl:      viper.GetString("snapshot-sync-url"),
+		LocalChainDataPath:   viper.GetString("snapshot-sync-data-dir"),
+		SnapshotDataFilename: viper.GetString("snapshot-sync-file-name"),
 	}
 
 	finalConfig := mergeConfigs(config, override)
@@ -300,19 +345,50 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 		initContainerName := fmt.Sprintf("init-config-%s", nodeName)
 		initVolumeName := fmt.Sprintf("%s-init-volume", nodeName)
 
+		initSnapshotSyncCommand := "echo \"Snapshot sync not enabled. Skipping download.\""
+
+		if viper.GetBool("snapshot-sync") {
+			if finalConfig.SnapshotSyncUrl != "" {
+				if finalConfig.SnapshotSyncCommand != "" {
+					initSnapshotSyncCommand = finalConfig.SnapshotSyncCommand
+				} else {
+					initSnapshotSyncCommand = fmt.Sprintf("curl -C - -o %s/%s %s && tar -xzf %s/%s -C %s",
+						finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
+						finalConfig.SnapshotSyncUrl,
+						finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
+						finalConfig.LocalChainDataPath)
+				}
+			} else {
+				initSnapshotSyncCommand = "echo \"Snapshot sync url not found. Skipping download.\""
+				logger.LogInfo("Snapshot sync url not found. Skipping download.")
+			}
+		}
+
+		print(fmt.Sprintf(`/bin/sh -c "
+		if [ -z \"$(ls -A /nodevin-volume)\" ]; then
+		  mkdir -p /nodevin-volume/ &&
+		  cp -r * /nodevin-volume/ &&
+		  %s &&
+		  touch /nodevin-volume/.copy-done
+		else
+		  echo 'Volume not empty, skipping file copy';
+		  touch /nodevin-volume/.copy-done;
+		fi"`, initSnapshotSyncCommand))
+
 		initService := Service{
 			Image:         finalConfig.Image + ":" + finalConfig.Version,
 			ContainerName: initContainerName,
 			Restart:       "no",
-			Command: `/bin/sh -c "
+			Command: fmt.Sprintf(`/bin/sh -c "
 if [ -z \"$(ls -A /nodevin-volume)\" ]; then
   mkdir -p /nodevin-volume/ &&
   cp -r * /nodevin-volume/ &&
+  %s &&
   touch /nodevin-volume/.copy-done
 else
   echo 'Volume not empty, skipping file copy';
   touch /nodevin-volume/.copy-done;
-fi"`,
+fi"`, initSnapshotSyncCommand),
 			Volumes: []string{
 				fmt.Sprintf("%s:/init-volume", initVolumeName),
 				fmt.Sprintf("%s:/nodevin-volume", config.LocalPath),

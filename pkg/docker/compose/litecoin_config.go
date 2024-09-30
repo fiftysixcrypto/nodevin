@@ -50,10 +50,11 @@ func GetLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 	// Set the container name and command based on the network
 	switch network {
 	case "litecoin":
-		localPath := filepath.Join(nodevinDataDir, "litecoin-core") // data dir, software type
+		localPath := filepath.Join(nodevinDataDir, "litecoin-core")      // nodevin data dir, software type
+		localChainDataPath := filepath.Join(localPath + "litecoin-core") // on-image data dir
 		baseConfig.ContainerName = "litecoin-core"
 		baseConfig.Command = "litecoind --server=1 --rpcbind=0.0.0.0 --rpcport=9332 --rpcallowip=0.0.0.0/0"
-		baseConfig.Volumes = []string{fmt.Sprintf("%s:/node/litecoin-core", localPath+"/litecoin-core")}
+		baseConfig.Volumes = []string{fmt.Sprintf("%s:/node/litecoin-core", localChainDataPath)}
 		baseConfig.VolumeDefs = map[string]VolumeDetails{
 			"litecoin-core-data": {
 				Labels: map[string]string{
@@ -62,13 +63,17 @@ func GetLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 			},
 		}
 		baseConfig.LocalPath = localPath
+		baseConfig.SnapshotSyncUrl = "https://www.dwsamplefiles.com/?dl_id=552"
+		baseConfig.SnapshotDataFilename = "litecoin-mainnet-chain-data.tar.gz"
+		baseConfig.LocalChainDataPath = "/nodevin-volume/litecoin-core/data"
 
 	case "litecoin-testnet":
 		localPath := filepath.Join(nodevinDataDir, "litecoin-core-testnet") // data dir, software type
+		localChainDataPath := filepath.Join(localPath + "litecoin-core")    // on-image data dir
 		baseConfig.ContainerName = "litecoin-core-testnet"
 		baseConfig.Command = "litecoind --testnet --server=1 --rpcbind=0.0.0.0 --rpcport=19332 --rpcallowip=0.0.0.0/0"
 		baseConfig.Ports = []string{"19332:19332", "19333:19333"}
-		baseConfig.Volumes = []string{fmt.Sprintf("%s:/node/litecoin-core", localPath+"/litecoin-core")}
+		baseConfig.Volumes = []string{fmt.Sprintf("%s:/node/litecoin-core", localChainDataPath)}
 		baseConfig.VolumeDefs = map[string]VolumeDetails{
 			"litecoin-core-testnet-data": {
 				Labels: map[string]string{
@@ -77,6 +82,9 @@ func GetLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 			},
 		}
 		baseConfig.LocalPath = localPath
+		baseConfig.SnapshotSyncUrl = "https://www.dwsamplefiles.com/?dl_id=552"
+		baseConfig.SnapshotDataFilename = "litecoin-testnet-chain-data.tar.gz"
+		baseConfig.LocalChainDataPath = "/nodevin-volume/litecoin-core/data"
 
 	default:
 		return NetworkConfig{}, fmt.Errorf("unknown network: %s", network)

@@ -51,12 +51,13 @@ func GetOrdLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 	// Set the container name and command based on the network
 	switch network {
 	case "ord-litecoin":
-		localPath := filepath.Join(nodevinDataDir, "ord-litecoin") // data dir, software type
+		localPath := filepath.Join(nodevinDataDir, "ord-litecoin")      // nodevin data dir, software type
+		localChainDataPath := filepath.Join(localPath + "ord-litecoin") // on-image data dir
 		baseConfig.ContainerName = "ord-litecoin"
 		baseConfig.Command = "ord --litecoin-rpc-url http://litecoin-core:9332"
 		baseConfig.Volumes = []string{
 			fmt.Sprintf("%s:/node/litecoin-core", filepath.Join(nodevinDataDir, "litecoin-core", "litecoin-core")),
-			fmt.Sprintf("%s:/node/ord-litecoin", localPath+"/ord-litecoin"),
+			fmt.Sprintf("%s:/node/ord-litecoin", localChainDataPath),
 		}
 		baseConfig.VolumeDefs = map[string]VolumeDetails{
 			"ord-litecoin-data": {
@@ -66,14 +67,18 @@ func GetOrdLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 			},
 		}
 		baseConfig.LocalPath = localPath
+		baseConfig.SnapshotSyncUrl = "https://www.dwsamplefiles.com/?dl_id=552"
+		baseConfig.SnapshotDataFilename = "ord-litecoin-mainnet-chain-data.tar.gz"
+		baseConfig.LocalChainDataPath = "/nodevin-volume/ord-litecoin/data"
 
 	case "ord-litecoin-testnet":
-		localPath := filepath.Join(nodevinDataDir, "ord-litecoin-testnet") // data dir, software type
+		localPath := filepath.Join(nodevinDataDir, "ord-litecoin-testnet") // nodevin data dir, software type
+		localChainDataPath := filepath.Join(localPath + "ord-litecoin")    // on-image data dir
 		baseConfig.ContainerName = "ord-litecoin-testnet"
 		baseConfig.Command = "ord --testnet --litecoin-rpc-url http://litecoin-core-testnet:19332"
 		baseConfig.Volumes = []string{
 			fmt.Sprintf("%s:/node/litecoin-core", filepath.Join(nodevinDataDir, "litecoin-core-testnet", "litecoin-core")),
-			fmt.Sprintf("%s:/node/ord-litecoin", localPath+"/ord-litecoin"),
+			fmt.Sprintf("%s:/node/ord-litecoin", localChainDataPath),
 		}
 		baseConfig.Networks = []string{"litecoin-testnet-net"}
 		baseConfig.NetworkDefs = map[string]NetworkDetails{
@@ -89,6 +94,9 @@ func GetOrdLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 			},
 		}
 		baseConfig.LocalPath = localPath
+		baseConfig.SnapshotSyncUrl = "https://www.dwsamplefiles.com/?dl_id=552"
+		baseConfig.SnapshotDataFilename = "ord-litecoin-testnet-chain-data.tar.gz"
+		baseConfig.LocalChainDataPath = "/nodevin-volume/ord-litecoin/data"
 
 	default:
 		return NetworkConfig{}, fmt.Errorf("unknown network: %s", network)

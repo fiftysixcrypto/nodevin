@@ -179,24 +179,36 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 			initContainerName := fmt.Sprintf("init-config-%s", serviceName)
 			initVolumeName := fmt.Sprintf("%s-init-volume", serviceName)
 
-			initSnapshotSyncCommand := "echo \"Snapshot sync not enabled. Skipping download.\""
+			initSnapshotSyncCommand := "echo 'Snapshot sync not enabled. Skipping download.'"
 
 			if viper.GetBool(fmt.Sprintf("%s-snapshot-sync", serviceName)) {
 				if finalConfig.SnapshotSyncUrl != "" {
 					if finalConfig.SnapshotSyncCommand != "" {
 						initSnapshotSyncCommand = finalConfig.SnapshotSyncCommand
 					} else {
-						initSnapshotSyncCommand = fmt.Sprintf("curl -C - -o %s/%s %s && tar -xzf %s/%s -C %s",
+						initSnapshotSyncCommand = fmt.Sprintf("curl -C - -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s",
 							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
 							finalConfig.SnapshotSyncUrl,
 							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
-							finalConfig.LocalChainDataPath)
+							finalConfig.LocalChainDataPath,
+							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename)
 					}
 				} else {
-					initSnapshotSyncCommand = "echo \"Snapshot sync url not found. Skipping download.\""
+					initSnapshotSyncCommand = "echo 'Snapshot sync url not found. Skipping download.'"
 					logger.LogInfo("Snapshot sync url not found. Skipping download.")
 				}
 			}
+
+			print("aaaaa", fmt.Sprintf(`/bin/sh -c "
+			if [ -z \"$(ls -A /nodevin-volume-%s)\" ]; then
+			  mkdir -p /nodevin-volume-%s/ &&
+			  cp -r * /nodevin-volume-%s/ &&
+			  %s &&
+			  touch /nodevin-volume-%s/.copy-done
+			else
+			  echo 'Volume not empty, skipping file copy';
+			  touch /nodevin-volume-%s/.copy-done;
+			fi"`, serviceName, serviceName, serviceName, initSnapshotSyncCommand, serviceName, serviceName))
 
 			initService := Service{
 				Image:         finalConfig.Image + ":" + finalConfig.Version,
@@ -345,35 +357,25 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 		initContainerName := fmt.Sprintf("init-config-%s", nodeName)
 		initVolumeName := fmt.Sprintf("%s-init-volume", nodeName)
 
-		initSnapshotSyncCommand := "echo \"Snapshot sync not enabled. Skipping download.\""
+		initSnapshotSyncCommand := "echo 'Snapshot sync not enabled. Skipping download.'"
 
 		if viper.GetBool("snapshot-sync") {
 			if finalConfig.SnapshotSyncUrl != "" {
 				if finalConfig.SnapshotSyncCommand != "" {
 					initSnapshotSyncCommand = finalConfig.SnapshotSyncCommand
 				} else {
-					initSnapshotSyncCommand = fmt.Sprintf("curl -C - -o %s/%s %s && tar -xzf %s/%s -C %s",
+					initSnapshotSyncCommand = fmt.Sprintf("curl -C - -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s",
 						finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
 						finalConfig.SnapshotSyncUrl,
 						finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
-						finalConfig.LocalChainDataPath)
+						finalConfig.LocalChainDataPath,
+						finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename)
 				}
 			} else {
-				initSnapshotSyncCommand = "echo \"Snapshot sync url not found. Skipping download.\""
+				initSnapshotSyncCommand = "echo 'Snapshot sync url not found. Skipping download.'"
 				logger.LogInfo("Snapshot sync url not found. Skipping download.")
 			}
 		}
-
-		print(fmt.Sprintf(`/bin/sh -c "
-		if [ -z \"$(ls -A /nodevin-volume)\" ]; then
-		  mkdir -p /nodevin-volume/ &&
-		  cp -r * /nodevin-volume/ &&
-		  %s &&
-		  touch /nodevin-volume/.copy-done
-		else
-		  echo 'Volume not empty, skipping file copy';
-		  touch /nodevin-volume/.copy-done;
-		fi"`, initSnapshotSyncCommand))
 
 		initService := Service{
 			Image:         finalConfig.Image + ":" + finalConfig.Version,

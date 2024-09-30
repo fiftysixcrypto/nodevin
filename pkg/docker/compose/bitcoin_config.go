@@ -72,6 +72,7 @@ func GetBitcoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 		localChainDataPath := localPath + "/bitcoin-core"
 		baseConfig.ContainerName = "bitcoin-core-testnet"
 		baseConfig.Command = "bitcoind --testnet --server=1 --rpcbind=0.0.0.0 --rpcport=18332 --rpcallowip=0.0.0.0/0"
+		baseConfig.Networks = []string{"bitcoin-testnet-net"}
 		baseConfig.Ports = []string{"18332:18332", "18333:18333"}
 		baseConfig.Volumes = []string{fmt.Sprintf("%s:/node/bitcoin-core", localChainDataPath)}
 		baseConfig.VolumeDefs = map[string]VolumeDetails{
@@ -84,7 +85,7 @@ func GetBitcoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 		baseConfig.LocalPath = localPath
 		baseConfig.SnapshotSyncUrl = "https://www.dwsamplefiles.com/?dl_id=552"
 		baseConfig.SnapshotDataFilename = "bitcoin-testnet-chain-data.tar.gz"
-		baseConfig.LocalChainDataPath = "/nodevin-volume/bitcoin-core/data"
+		baseConfig.LocalChainDataPath = "/nodevin-volume/bitcoin-core/data/testnet3"
 
 	default:
 		return NetworkConfig{}, fmt.Errorf("unknown network: %s", network)

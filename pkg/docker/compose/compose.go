@@ -181,7 +181,7 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 
 			initSnapshotSyncCommand := "echo 'Snapshot sync not enabled. Skipping download.'"
 
-			if viper.GetBool(fmt.Sprintf("%s-snapshot-sync", serviceName)) {
+			if viper.GetBool("snapshot-sync") { // fmt.Sprintf("snapshot-sync", serviceName)
 				if finalConfig.SnapshotSyncUrl != "" {
 					if finalConfig.SnapshotSyncCommand != "" {
 						initSnapshotSyncCommand = finalConfig.SnapshotSyncCommand
@@ -198,17 +198,6 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 					logger.LogInfo("Snapshot sync url not found. Skipping download.")
 				}
 			}
-
-			print("aaaaa", fmt.Sprintf(`/bin/sh -c "
-			if [ -z \"$(ls -A /nodevin-volume-%s)\" ]; then
-			  mkdir -p /nodevin-volume-%s/ &&
-			  cp -r * /nodevin-volume-%s/ &&
-			  %s &&
-			  touch /nodevin-volume-%s/.copy-done
-			else
-			  echo 'Volume not empty, skipping file copy';
-			  touch /nodevin-volume-%s/.copy-done;
-			fi"`, serviceName, serviceName, serviceName, initSnapshotSyncCommand, serviceName, serviceName))
 
 			initService := Service{
 				Image:         finalConfig.Image + ":" + finalConfig.Version,

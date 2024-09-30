@@ -51,12 +51,13 @@ func GetOrdNetworkComposeConfig(network string) (NetworkConfig, error) {
 	// Set the container name and command based on the network
 	switch network {
 	case "ord":
-		localPath := filepath.Join(nodevinDataDir, "ord") // data dir, software type
+		localPath := filepath.Join(nodevinDataDir, "ord")      // nodevin data dir, software type
+		localChainDataPath := filepath.Join(localPath + "ord") // on-image data dir
 		baseConfig.ContainerName = "ord"
 		baseConfig.Command = "ord --bitcoin-rpc-url http://bitcoin-core:8332"
 		baseConfig.Volumes = []string{
 			fmt.Sprintf("%s:/node/bitcoin-core", filepath.Join(nodevinDataDir, "bitcoin-core", "bitcoin-core")),
-			fmt.Sprintf("%s:/node/ord", localPath+"/ord"),
+			fmt.Sprintf("%s:/node/ord", localChainDataPath),
 		}
 		baseConfig.VolumeDefs = map[string]VolumeDetails{
 			"ord-data": {
@@ -66,14 +67,18 @@ func GetOrdNetworkComposeConfig(network string) (NetworkConfig, error) {
 			},
 		}
 		baseConfig.LocalPath = localPath
+		baseConfig.SnapshotSyncUrl = "https://www.dwsamplefiles.com/?dl_id=552"
+		baseConfig.SnapshotDataFilename = "ord-bitcoin-mainnet-chain-data.tar.gz"
+		baseConfig.LocalChainDataPath = "/nodevin-volume/ord/data"
 
 	case "ord-testnet":
-		localPath := filepath.Join(nodevinDataDir, "ord-testnet") // data dir, software type
+		localPath := filepath.Join(nodevinDataDir, "ord-testnet") // nodevin data dir, software type
+		localChainDataPath := filepath.Join(localPath + "ord")    // on-image data dir
 		baseConfig.ContainerName = "ord-testnet"
 		baseConfig.Command = "ord --testnet --bitcoin-rpc-url http://bitcoin-core-testnet:18332"
 		baseConfig.Volumes = []string{
 			fmt.Sprintf("%s:/node/bitcoin-core", filepath.Join(nodevinDataDir, "bitcoin-core-testnet", "bitcoin-core")),
-			fmt.Sprintf("%s:/node/ord", localPath+"/ord"),
+			fmt.Sprintf("%s:/node/ord", localChainDataPath),
 		}
 		baseConfig.Networks = []string{"bitcoin-testnet-net"}
 		baseConfig.NetworkDefs = map[string]NetworkDetails{
@@ -89,6 +94,9 @@ func GetOrdNetworkComposeConfig(network string) (NetworkConfig, error) {
 			},
 		}
 		baseConfig.LocalPath = localPath
+		baseConfig.SnapshotSyncUrl = "https://www.dwsamplefiles.com/?dl_id=552"
+		baseConfig.SnapshotDataFilename = "ord-bitcoin-testnet-chain-data.tar.gz"
+		baseConfig.LocalChainDataPath = "/nodevin-volume/bitcoin-core/data/testnet3"
 
 	default:
 		return NetworkConfig{}, fmt.Errorf("unknown network: %s", network)

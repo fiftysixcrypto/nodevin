@@ -28,7 +28,6 @@ import (
 
 var (
 	RequestCmd      = requestCmd
-	BackupCmd       = backupCmd
 	RestartNodeCmd  = restartNodeCmd
 	ShellCmd        = shellCmd
 	StartNodeCmd    = startNodeCmd

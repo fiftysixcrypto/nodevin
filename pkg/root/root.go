@@ -116,7 +116,6 @@ func init() {
 
 	// Add blockchain commands
 	rootCmd.AddCommand(blockchain.RequestCmd)
-	rootCmd.AddCommand(blockchain.BackupCmd)
 	rootCmd.AddCommand(blockchain.RestartNodeCmd)
 	rootCmd.AddCommand(blockchain.ShellCmd)
 	rootCmd.AddCommand(blockchain.DeleteVolumeCmd)

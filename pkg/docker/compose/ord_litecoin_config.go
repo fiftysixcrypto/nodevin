@@ -51,8 +51,8 @@ func GetOrdLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 	// Set the container name and command based on the network
 	switch network {
 	case "ord-litecoin":
-		localPath := filepath.Join(nodevinDataDir, "ord-litecoin")      // nodevin data dir, software type
-		localChainDataPath := filepath.Join(localPath + "ord-litecoin") // on-image data dir
+		localPath := filepath.Join(nodevinDataDir, "ord-litecoin")     // nodevin data dir, software type
+		localChainDataPath := filepath.Join(localPath, "ord-litecoin") // on-image data dir
 		baseConfig.ContainerName = "ord-litecoin"
 		baseConfig.Command = "ord --litecoin-rpc-url http://litecoin-core:9332"
 		baseConfig.Volumes = []string{
@@ -69,11 +69,11 @@ func GetOrdLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 		baseConfig.LocalPath = localPath
 		baseConfig.SnapshotSyncUrl = "https://www.dwsamplefiles.com/?dl_id=552"
 		baseConfig.SnapshotDataFilename = "ord-litecoin-mainnet-chain-data.tar.gz"
-		baseConfig.LocalChainDataPath = "/nodevin-volume/ord-litecoin/data"
+		baseConfig.LocalChainDataPath = "/nodevin-volume-ord-litecoin/ord-litecoin/data"
 
 	case "ord-litecoin-testnet":
 		localPath := filepath.Join(nodevinDataDir, "ord-litecoin-testnet") // nodevin data dir, software type
-		localChainDataPath := filepath.Join(localPath + "ord-litecoin")    // on-image data dir
+		localChainDataPath := filepath.Join(localPath, "ord-litecoin")     // on-image data dir
 		baseConfig.ContainerName = "ord-litecoin-testnet"
 		baseConfig.Command = "ord --testnet --litecoin-rpc-url http://litecoin-core-testnet:19332"
 		baseConfig.Volumes = []string{
@@ -96,7 +96,7 @@ func GetOrdLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 		baseConfig.LocalPath = localPath
 		baseConfig.SnapshotSyncUrl = "https://www.dwsamplefiles.com/?dl_id=552"
 		baseConfig.SnapshotDataFilename = "ord-litecoin-testnet-chain-data.tar.gz"
-		baseConfig.LocalChainDataPath = "/nodevin-volume/ord-litecoin/data"
+		baseConfig.LocalChainDataPath = "/nodevin-volume-ord-litecoin/ord-litecoin/data/testnet3" // forked from ord, so doesn't move to testnet4
 
 	default:
 		return NetworkConfig{}, fmt.Errorf("unknown network: %s", network)

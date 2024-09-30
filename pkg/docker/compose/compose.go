@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 
 	"github.com/fiftysixcrypto/nodevin/internal/logger"
+	"github.com/fiftysixcrypto/nodevin/internal/utils"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
@@ -186,7 +187,14 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 					if finalConfig.SnapshotSyncCommand != "" {
 						initSnapshotSyncCommand = finalConfig.SnapshotSyncCommand
 					} else {
-						initSnapshotSyncCommand = fmt.Sprintf("curl -C - -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s",
+						testnetDataDirectoryCommand := ""
+						if utils.CheckIfTestnetOrTestnetNetworkFlag() {
+							// Ord, Bitcoin and Litecoin testnet require full paths to be created before snapshot sync
+							testnetDataDirectoryCommand = fmt.Sprintf("mkdir -p %s", finalConfig.LocalChainDataPath)
+						}
+
+						initSnapshotSyncCommand = fmt.Sprintf("%scurl -C - -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s",
+							testnetDataDirectoryCommand,
 							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
 							finalConfig.SnapshotSyncUrl,
 							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
@@ -353,7 +361,14 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 				if finalConfig.SnapshotSyncCommand != "" {
 					initSnapshotSyncCommand = finalConfig.SnapshotSyncCommand
 				} else {
-					initSnapshotSyncCommand = fmt.Sprintf("curl -C - -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s",
+					testnetDataDirectoryCommand := ""
+					if utils.CheckIfTestnetOrTestnetNetworkFlag() {
+						// Bitcoin and Litecoin testnet require full paths to be created before snapshot sync
+						testnetDataDirectoryCommand = fmt.Sprintf("mkdir -p %s", finalConfig.LocalChainDataPath)
+					}
+
+					initSnapshotSyncCommand = fmt.Sprintf("%scurl -C - -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s",
+						testnetDataDirectoryCommand,
 						finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
 						finalConfig.SnapshotSyncUrl,
 						finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,

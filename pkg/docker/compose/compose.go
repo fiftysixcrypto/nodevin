@@ -265,7 +265,7 @@ fi"`, serviceName, serviceName, serviceName, initSnapshotSyncCommand, serviceNam
 const GB = 1 << 30 // 1 GB in bytes
 
 func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames []string, extraServiceConfigs []NetworkConfig, cwd string) (string, error) {
-	nodevinDir, err := GetNodevinDataDir()
+	nodevinDir, err := utils.GetNodevinDataDir()
 	if err != nil {
 		return "", fmt.Errorf("failed to create image-specific directory: %w", err)
 	}

@@ -21,33 +21,12 @@ package compose
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/fiftysixcrypto/nodevin/internal/logger"
 )
-
-// Returns path to the user's nodevin data directory (~/.nodevin/data)
-func GetNodevinDataDir() (string, error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return "", fmt.Errorf("failed to get user home directory: %v", err)
-	}
-	nodevinDataDir := filepath.Join(homeDir, ".nodevin", "data")
-
-	// Create the directory if it doesn't exist
-	if _, err := os.Stat(nodevinDataDir); os.IsNotExist(err) {
-		err = os.MkdirAll(nodevinDataDir, os.ModePerm)
-		if err != nil {
-			return "", fmt.Errorf("failed to create nodevin data directory: %v", err)
-		}
-	}
-
-	return nodevinDataDir, nil
-}
 
 // RemoveInitContainersAndVolumes removes all containers that match "init-config-*" and their associated volumes,
 // deletes volumes with the label "nodevin.init.volume", and anonymous volumes created within the last minute.

@@ -19,21 +19,19 @@
 package blockchain
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 	"text/tabwriter"
 
-	"github.com/docker/docker/api/types/volume"
-	"github.com/docker/docker/client"
 	"github.com/fiftysixcrypto/nodevin/internal/logger"
+	"github.com/fiftysixcrypto/nodevin/internal/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -88,14 +86,14 @@ func displayInfo() {
 	containers := strings.Split(string(output), "\n")
 	if len(containers) < 2 {
 		fmt.Println("No running blockchain nodes found.\n")
-		displayVolumeInfo()
+		displayNodeDirectoryInfo()
 
 		displayPIDInfo()
 
 		fmt.Println("\n-- Helpful Commands:\n")
 		fmt.Println("nodevin start <network>")
 		fmt.Println("nodevin start <network> --testnet")
-		fmt.Println("nodevin delete <volume-name-or-image-name>\n")
+		fmt.Println("nodevin delete <network>\n")
 		return
 	}
 
@@ -151,7 +149,7 @@ func displayInfo() {
 
 	fmt.Println("")
 
-	displayVolumeInfo()
+	displayNodeDirectoryInfo()
 
 	displayPIDInfo()
 
@@ -313,73 +311,67 @@ func getPeers(containerName string) int {
 	return int(peerCount)
 }
 
-func displayVolumeInfo() {
-	fmt.Println("-- Volume Data:\n")
+func displayNodeDirectoryInfo() {
+	fmt.Println("-- Blockchain Node Data:\n")
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	// Get the nodevin data directory
+	nodevinDataDir, err := utils.GetNodevinDataDir()
 	if err != nil {
-		logger.LogError("Failed to create Docker client: " + err.Error())
+		logger.LogError("Failed to find Nodevin data directory: " + err.Error())
 		return
 	}
 
-	volumeList, err := cli.VolumeList(context.Background(), volume.ListOptions{})
-	if err != nil {
-		logger.LogError("Failed to list Docker volumes: " + err.Error())
-		return
-	}
-
-	if len(volumeList.Volumes) < 1 {
-		fmt.Println("No blockchain node data found.")
+	// Fetch the list of supported networks
+	networks := utils.GetAllSupportedNetworks()
+	if networks == "" {
+		fmt.Println("No data found.")
 		return
 	}
 
 	// Set up tabwriter for nicely formatted output
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.Debug)
-	fmt.Fprintln(w, "| VOLUME NAME\t SIZE\t MOUNTPOINT")
+	fmt.Fprintln(w, "| NETWORK\t SIZE\t DIRECTORY")
 
-	for _, vol := range volumeList.Volumes {
-		size, err := getVolumeSize(vol.Mountpoint)
-		sizeDescription := "unknown"
-		if err == nil {
-			sizeDescription = getSizeDescription(size)
-		} else {
-			if err.Error() == "exit status 1" {
-				fmt.Println("Failed to get size for volume " + vol.Name + ", do you have proper permissions?")
-			} else if err.Error() == "exit status 64" {
-				fmt.Println("Failed to get size for volume " + vol.Name + ", do you have proper permissions?")
-			} else {
-				logger.LogError("Failed to get size for volume " + vol.Name + ": " + err.Error())
-			}
+	printed := 0
+
+	// Iterate over each supported network and calculate its directory size
+	for _, network := range strings.Split(networks, ", ") {
+		containerName, exists := utils.GetFiftysixLocalMappedContainerName(network)
+		if !exists {
+			logger.LogError("Unsupported blockchain network: " + network)
+			continue
 		}
 
-		fmt.Fprintf(w, "| %s\t %s\t %s\n",
-			vol.Name,
-			sizeDescription,
-			vol.Mountpoint,
-		)
+		networkDir := filepath.Join(nodevinDataDir, containerName)
+		size, err := getDirectorySize(networkDir)
+		sizeDescription := "unknown"
+		if err == nil {
+			printed++
+			sizeDescription = getSizeDescription(size)
+			// Output the formatted row with network name, size, and directory path
+			fmt.Fprintf(w, "| %s\t %s\t %s\n", network, sizeDescription, networkDir)
+		}
 	}
+
+	if printed == 0 {
+		fmt.Fprintf(w, "| -\t -\t -\n")
+	}
+
 	w.Flush()
 }
 
-func getVolumeSize(mountpoint string) (int64, error) {
-	cmd := exec.Command("du", "-sb", mountpoint)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return 0, err
-	}
-
-	// Parse the output to get the size in bytes
-	fields := strings.Fields(string(output))
-	if len(fields) == 0 {
-		return 0, fmt.Errorf("unexpected du output: %s", string(output))
-	}
-
-	size, err := strconv.ParseInt(fields[0], 10, 64)
-	if err != nil {
-		return 0, err
-	}
-
-	return size, nil
+func getDirectorySize(path string) (int64, error) {
+	var size int64
+	err := filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			size += info.Size()
+		}
+		return nil
+	})
+	return size, err
 }
 
 func formatPorts(ports string) string {

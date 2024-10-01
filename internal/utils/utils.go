@@ -19,6 +19,9 @@
 package utils
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -42,6 +45,11 @@ var networkInfoMap = map[string]NetworkInfo{
 		RPCPort:       18332,
 		StartMessage:  "\"Testing is the lifeblood of innovation and security.\"",
 	},
+	"ord": {
+		ContainerName: "ord",
+		RPCPort:       80,
+		StartMessage:  "\"Ordinal theory imbues satoshis with numismatic value, allowing them to be collected and traded as curios.\"",
+	},
 	"ethereum": {
 		ContainerName: "geth",
 		RPCPort:       8545,
@@ -61,6 +69,11 @@ var networkInfoMap = map[string]NetworkInfo{
 		ContainerName: "litecoin-core-testnet",
 		RPCPort:       19332,
 		StartMessage:  "\"Testing is the lifeblood of innovation and security.\"",
+	},
+	"ord-litecoin": {
+		ContainerName: "ord-litecoin",
+		RPCPort:       80,
+		StartMessage:  "\"Ordinal theory imbues satoshis with numismatic value, allowing them to be collected and traded as curios.\"",
 	},
 	"dogecoin": {
 		ContainerName: "dogecoin-core",
@@ -115,4 +128,23 @@ func CheckIfTestnetOrTestnetNetworkFlag() bool {
 	testnetFlag := viper.GetBool("testnet")
 
 	return testnetFlag || networkFlag == "testnet"
+}
+
+// Returns path to the user's nodevin data directory (~/.nodevin/data)
+func GetNodevinDataDir() (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("failed to get user home directory: %v", err)
+	}
+	nodevinDataDir := filepath.Join(homeDir, ".nodevin", "data")
+
+	// Create the directory if it doesn't exist
+	if _, err := os.Stat(nodevinDataDir); os.IsNotExist(err) {
+		err = os.MkdirAll(nodevinDataDir, os.ModePerm)
+		if err != nil {
+			return "", fmt.Errorf("failed to create nodevin data directory: %v", err)
+		}
+	}
+
+	return nodevinDataDir, nil
 }

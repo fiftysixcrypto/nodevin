@@ -22,12 +22,13 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/fiftysixcrypto/nodevin/internal/utils"
 	"github.com/spf13/viper"
 )
 
 func GetBitcoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 	// Get base nodevin data directory
-	nodevinDataDir, err := GetNodevinDataDir()
+	nodevinDataDir, err := utils.GetNodevinDataDir()
 	if err != nil {
 		return NetworkConfig{}, err
 	}

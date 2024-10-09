@@ -64,7 +64,7 @@ func GetLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 			},
 		}
 		baseConfig.LocalPath = localPath
-		baseConfig.SnapshotSyncUrl = "https://www.dwsamplefiles.com/?dl_id=552"
+		baseConfig.SnapshotSyncUrl = "'https://s3.us-east-1.wasabisys.com/litecoin-mainnet-fiftysix/litecoin-core-blockchain-data.tar.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=YSE8E0S4QR7TNJJF0IKF%2F20241006%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20241006T175554Z&X-Amz-Expires=43200&X-Amz-Signature=32e70d4245a43ddc2ff36ce3b643acbe4f574ce6f76208ab92732f133f7a616d&X-Amz-SignedHeaders=host&x-id=GetObject'"
 		baseConfig.SnapshotDataFilename = "litecoin-mainnet-chain-data.tar.gz"
 		baseConfig.LocalChainDataPath = "/nodevin-volume/litecoin-core/data"
 

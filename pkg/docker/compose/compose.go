@@ -190,7 +190,7 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 						testnetDataDirectoryCommand := ""
 						if utils.CheckIfTestnetOrTestnetNetworkFlag() {
 							// Ord, Bitcoin and Litecoin testnet require full paths to be created before snapshot sync
-							testnetDataDirectoryCommand = fmt.Sprintf("mkdir -p %s", finalConfig.LocalChainDataPath)
+							testnetDataDirectoryCommand = fmt.Sprintf("mkdir -p %s && ", finalConfig.LocalChainDataPath)
 						}
 
 						initSnapshotSyncCommand = fmt.Sprintf("%scurl -C - -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s",
@@ -364,7 +364,7 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 					testnetDataDirectoryCommand := ""
 					if utils.CheckIfTestnetOrTestnetNetworkFlag() {
 						// Bitcoin and Litecoin testnet require full paths to be created before snapshot sync
-						testnetDataDirectoryCommand = fmt.Sprintf("mkdir -p %s", finalConfig.LocalChainDataPath)
+						testnetDataDirectoryCommand = fmt.Sprintf("mkdir -p %s && ", finalConfig.LocalChainDataPath)
 					}
 
 					initSnapshotSyncCommand = fmt.Sprintf("%scurl -C - -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s",

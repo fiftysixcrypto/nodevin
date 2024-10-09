@@ -20,7 +20,9 @@ package initialize
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"strconv"
@@ -153,8 +155,16 @@ func installDockerAndCompose() error {
 
 func installDocker() error {
 	var installCmd *exec.Cmd
+	var downloadsPath string
 
-	fmt.Println("Installing Docker...")
+	switch runtime.GOOS {
+	case "windows":
+		downloadsPath = filepath.Join(os.Getenv("USERPROFILE"), "Downloads")
+	case "darwin", "linux":
+		downloadsPath = filepath.Join(os.Getenv("HOME"), "Downloads")
+	}
+
+	fmt.Println("Starting Docker installation...")
 
 	switch runtime.GOOS {
 	case "linux":
@@ -168,24 +178,61 @@ func installDocker() error {
    			sudo usermod -aG docker $USER &&
 			newgrp docker`)
 	case "darwin":
-		installCmd = exec.Command("sh", "-c", `
-			brew install --cask docker &&
-			open /Applications/Docker.app &&
-			while ! docker system info > /dev/null 2>&1; do sleep 1; done`)
+		installCmd = exec.Command("sh", "-c", fmt.Sprintf(`
+			echo "Downloading Docker for macOS..."
+			curl -L https://desktop.docker.com/mac/stable/Docker.dmg -o %s/Docker.dmg &&
+			echo "Opening Docker installer..." &&
+			open %s/Docker.dmg &&
+			echo "Once Docker is installed, open Docker Desktop before running Nodevin commands."`, downloadsPath, downloadsPath))
 	case "windows":
-		installCmd = exec.Command("powershell", "-Command", `
-			$ErrorActionPreference = 'Stop'; 
-			Invoke-WebRequest -UseBasicParsing -OutFile docker-desktop-installer.exe https://desktop.docker.com/win/stable/Docker%20Desktop%20Installer.exe;
-			Start-Process -FilePath docker-desktop-installer.exe -Wait -ArgumentList @("--quiet");
-			Remove-Item -Force docker-desktop-installer.exe;
+		installCmd = exec.Command("powershell", "-Command", fmt.Sprintf(`
+			$ErrorActionPreference = 'Stop';
+			$downloadsFolder = "%s";
+			Write-Host 'Downloading Docker for Windows...';
+			Invoke-WebRequest -UseBasicParsing -OutFile "$downloadsFolder\\docker-desktop-installer.exe" https://desktop.docker.com/win/stable/Docker%%20Desktop%%20Installer.exe;
+			Write-Host 'Installing Docker...';
+			Start-Process -FilePath "$downloadsFolder\\docker-desktop-installer.exe" -Wait -ArgumentList @("--quiet");
+			Remove-Item -Force "$downloadsFolder\\docker-desktop-installer.exe";
+			Write-Host 'Starting Docker Desktop...';
 			Start-Process "Docker Desktop" -Wait;
-			while ((docker version) -eq $null) { Start-Sleep -Seconds 5 }`)
+			Write-Host 'Docker installed. Ensure Docker Desktop is running before using Nodevin.';`, downloadsPath))
 	default:
 		return fmt.Errorf("unsupported OS: %s", runtime.GOOS)
 	}
 
 	if err := installCmd.Run(); err != nil {
 		return err
+	}
+
+	switch runtime.GOOS {
+	case "linux":
+		fmt.Println(`
+Docker installation complete! 
+Make sure Docker is running with the following command:
+   sudo systemctl start docker
+Then, confirm the installation:
+   docker --version`)
+
+	case "darwin":
+		fmt.Println(fmt.Sprintf(`
+Download complete.
+Next steps to finish Docker setup:
+1. Drag "Docker Desktop" from %s/Docker.dmg into "Applications".
+2. Open Docker Desktop and go through the options. Make sure it is running in the top right corner of your screen. 
+3. Open your terminal and run the following command to verify Docker installation:
+   docker --version
+4. After confirming Docker is running, you can start using Nodevin. Remember, Nodevin will only work if Docker Desktop is running!`, downloadsPath))
+
+	case "windows":
+		fmt.Println(`
+Download complete.
+Next steps to finish Docker setup:
+1. Ensure Docker Desktop is open and running.
+2. Open your terminal and run the following command to verify Docker installation:
+   docker --version
+3. After confirming Docker is running, you can start using Nodevin:
+
+Remember, Nodevin will only work if Docker Desktop is running!`)
 	}
 
 	return nil
@@ -202,19 +249,17 @@ func installDockerCompose() error {
 			sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose &&
 			sudo chmod +x /usr/local/bin/docker-compose &&
 			docker-compose --version`)
-	case "darwin":
-		installCmd = exec.Command("sh", "-c", "brew install docker-compose")
-	case "windows":
-		installCmd = exec.Command("powershell", "-Command", `
-			$ErrorActionPreference = 'Stop'; 
-			Invoke-WebRequest "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-Windows-x86_64.exe" -OutFile "$env:ProgramFiles\Docker\Docker\resources\bin\docker-compose.exe";
-			& "$env:ProgramFiles\Docker\Docker\resources\bin\docker-compose.exe" --version`)
+	case "darwin", "windows":
+		fmt.Println("Docker Compose is already installed with Docker Desktop on macOS and Windows.")
 	default:
 		return fmt.Errorf("unsupported OS: %s", runtime.GOOS)
 	}
 
-	if err := installCmd.Run(); err != nil {
-		return err
+	if runtime.GOOS == "linux" {
+		if err := installCmd.Run(); err != nil {
+			return err
+		}
+		fmt.Println("Docker Compose installation complete for Linux.")
 	}
 
 	return nil

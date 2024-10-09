@@ -58,7 +58,7 @@ var deleteCmd = &cobra.Command{
 }
 
 func deleteNetworkDirectory(baseDir, networkName string) {
-	containerName, exists := utils.GetFiftysixLocalMappedContainerName(networkName)
+	containerName, exists := utils.GetDefaultLocalMappedContainerName(networkName)
 	if !exists {
 		logger.LogError("Unsupported blockchain network: " + networkName)
 		return

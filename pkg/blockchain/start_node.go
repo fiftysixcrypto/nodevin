@@ -31,6 +31,7 @@ import (
 	"github.com/fiftysixcrypto/nodevin/pkg/docker/compose"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var ord bool
@@ -85,6 +86,75 @@ func startNode(args []string) {
 	composeFilePath, err := createComposeFileForNetwork(network, cwd)
 	if err != nil {
 		logger.LogError("Failed to create node docker compose file: " + err.Error())
+	}
+
+	// Print out warning info for chain size and snapshot sync timing
+	if viper.GetBool("snapshot-sync") {
+		snapshotSize, exists := utils.GetNetworkRequiredSnapshotSize(network)
+
+		if !exists {
+			logger.LogInfo("Cannot determine assumed size for network.")
+			snapshotSize = 0
+		}
+
+		logger.LogInfo("--")
+		logger.LogInfo("WARNING: Initial snapshot sync can take hours depending on your download speed and computer specs. Nodevin will automatically start up your node after the download completes.")
+		logger.LogInfo(fmt.Sprintf("WARNING: Snapshot sync for this software requires %s amount of space. Ensure you have enough storage on disk.", utils.GetSizeDescription(int64(snapshotSize))))
+
+		if viper.GetBool("ord") {
+			dataSize, exists := utils.GetNetworkRequiredSnapshotSize("ord")
+
+			if !exists {
+				logger.LogInfo("Cannot determine assumed size for ord.")
+				dataSize = 0
+			}
+
+			logger.LogInfo(fmt.Sprintf("WARNING: Ord software requires an additional %s amount of snapshot space. Ensure you have enough storage on disk for both.", utils.GetSizeDescription(int64(dataSize))))
+		} else if viper.GetBool("ord-litecoin") {
+			dataSize, exists := utils.GetNetworkRequiredSnapshotSize("ord-litecoin")
+
+			if !exists {
+				logger.LogInfo("Cannot determine assumed size for ord-litecoin.")
+				dataSize = 0
+			}
+
+			logger.LogInfo(fmt.Sprintf("WARNING: Ord-litecoin software requires an additional %s amount of snapshot space. Ensure you have enough storage on disk for both.", utils.GetSizeDescription(int64(dataSize))))
+		}
+
+		logger.LogInfo("--")
+	} else {
+		dataSize, exists := utils.GetNetworkRequiredDataSize(network)
+
+		if !exists {
+			logger.LogInfo("Cannot determine assumed size for network.")
+			dataSize = 0
+		}
+
+		logger.LogInfo("--")
+		logger.LogInfo("WARNING: Initial chain sync can take hours or days depending on your computer specs.")
+		logger.LogInfo(fmt.Sprintf("WARNING: This software requires %s amount of space. Ensure you have enough storage on disk.", utils.GetSizeDescription(int64(dataSize))))
+
+		if viper.GetBool("ord") {
+			dataSize, exists := utils.GetNetworkRequiredDataSize("ord")
+
+			if !exists {
+				logger.LogInfo("Cannot determine assumed size for ord.")
+				dataSize = 0
+			}
+
+			logger.LogInfo(fmt.Sprintf("WARNING: Ord software requires an additional %s amount of space. Ensure you have enough storage on disk for both.", utils.GetSizeDescription(int64(dataSize))))
+		} else if viper.GetBool("ord-litecoin") {
+			dataSize, exists := utils.GetNetworkRequiredDataSize("ord-litecoin")
+
+			if !exists {
+				logger.LogInfo("Cannot determine assumed size for ord-litecoin.")
+				dataSize = 0
+			}
+
+			logger.LogInfo(fmt.Sprintf("WARNING: Ord-litecoin software requires an additional %s amount of space. Ensure you have enough storage on disk for both.", utils.GetSizeDescription(int64(dataSize))))
+		}
+
+		logger.LogInfo("--")
 	}
 
 	// Start the node

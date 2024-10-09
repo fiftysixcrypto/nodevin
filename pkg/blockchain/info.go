@@ -336,7 +336,7 @@ func displayNodeDirectoryInfo() {
 
 	// Iterate over each supported network and calculate its directory size
 	for _, network := range strings.Split(networks, ", ") {
-		containerName, exists := utils.GetFiftysixLocalMappedContainerName(network)
+		containerName, exists := utils.GetDefaultLocalMappedContainerName(network)
 		if !exists {
 			logger.LogError("Unsupported blockchain network: " + network)
 			continue
@@ -347,7 +347,7 @@ func displayNodeDirectoryInfo() {
 		sizeDescription := "unknown"
 		if err == nil {
 			printed++
-			sizeDescription = getSizeDescription(size)
+			sizeDescription = utils.GetSizeDescription(size)
 			// Output the formatted row with network name, size, and directory path
 			fmt.Fprintf(w, "| %s\t %s\t %s\n", network, sizeDescription, networkDir)
 		}
@@ -391,33 +391,4 @@ func formatPorts(ports string) string {
 		}
 	}
 	return strings.Join(formattedPorts, ", ")
-}
-
-func getSizeDescription(size int64) string {
-	if size <= 0 {
-		return "unknown (do you have proper permissions?)"
-	}
-
-	const (
-		KB = 1024
-		MB = KB * 1024
-		GB = MB * 1024
-		TB = GB * 1024
-		PB = TB * 1024
-	)
-
-	switch {
-	case size >= PB:
-		return fmt.Sprintf("%.2f PB", float64(size)/PB)
-	case size >= TB:
-		return fmt.Sprintf("%.2f TB", float64(size)/TB)
-	case size >= GB:
-		return fmt.Sprintf("%.2f GB", float64(size)/GB)
-	case size >= MB:
-		return fmt.Sprintf("%.2f MB", float64(size)/MB)
-	case size >= KB:
-		return fmt.Sprintf("%.2f KB", float64(size)/KB)
-	default:
-		return fmt.Sprintf("%d B", size)
-	}
 }

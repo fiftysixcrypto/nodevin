@@ -43,7 +43,7 @@ var shellCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		network := args[0]
-		containerName, exists := utils.GetFiftysixLocalMappedContainerName(network)
+		containerName, exists := utils.GetDefaultLocalMappedContainerName(network)
 		if !exists {
 			fmt.Printf("Unsupported blockchain network: %s\n", network)
 			return

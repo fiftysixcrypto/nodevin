@@ -31,6 +31,8 @@ import (
 type NetworkInfo struct {
 	ContainerName string
 	RPCPort       int
+	DataSize      int
+	SnapshotSize  int
 	StartMessage  string
 }
 
@@ -38,16 +40,22 @@ var networkInfoMap = map[string]NetworkInfo{
 	"bitcoin": {
 		ContainerName: "bitcoin-core",
 		RPCPort:       8332,
+		DataSize:      0,
+		SnapshotSize:  0,
 		StartMessage:  "\"A system for electronic transactions without relying on trust.\" -- Satoshi Nakamoto",
 	},
 	"bitcoin-testnet": {
 		ContainerName: "bitcoin-core-testnet",
 		RPCPort:       18332,
+		DataSize:      0,
+		SnapshotSize:  0,
 		StartMessage:  "\"Testing is the lifeblood of innovation and security.\"",
 	},
 	"ord": {
 		ContainerName: "ord",
 		RPCPort:       80,
+		DataSize:      0,
+		SnapshotSize:  0,
 		StartMessage:  "\"Ordinal theory imbues satoshis with numismatic value, allowing them to be collected and traded as curios.\"",
 	},
 	"ethereum": {
@@ -63,16 +71,22 @@ var networkInfoMap = map[string]NetworkInfo{
 	"litecoin": {
 		ContainerName: "litecoin-core",
 		RPCPort:       9332,
+		DataSize:      268435456000, // 250 GB
+		SnapshotSize:  429496729600, // 400 GB (~240GB + ~160GB)
 		StartMessage:  "\"Litecoin is the silver to Bitcoin's gold.\" -- Charlie Lee",
 	},
 	"litecoin-testnet": {
 		ContainerName: "litecoin-core-testnet",
 		RPCPort:       19332,
+		DataSize:      0,
+		SnapshotSize:  0,
 		StartMessage:  "\"Testing is the lifeblood of innovation and security.\"",
 	},
 	"ord-litecoin": {
 		ContainerName: "ord-litecoin",
 		RPCPort:       80,
+		DataSize:      0,
+		SnapshotSize:  0,
 		StartMessage:  "\"Ordinal theory imbues satoshis with numismatic value, allowing them to be collected and traded as curios.\"",
 	},
 	"dogecoin": {
@@ -103,9 +117,19 @@ func GetStartMessage(network string) (string, bool) {
 	return networkInfo.StartMessage, exists
 }
 
-func GetFiftysixLocalMappedContainerName(network string) (string, bool) {
+func GetDefaultLocalMappedContainerName(network string) (string, bool) {
 	networkInfo, exists := networkInfoMap[network]
 	return networkInfo.ContainerName, exists
+}
+
+func GetNetworkRequiredDataSize(network string) (int, bool) {
+	networkInfo, exists := networkInfoMap[network]
+	return networkInfo.DataSize, exists
+}
+
+func GetNetworkRequiredSnapshotSize(network string) (int, bool) {
+	networkInfo, exists := networkInfoMap[network]
+	return networkInfo.SnapshotSize, exists
 }
 
 func GetFiftysixDockerhubContainerName(network string) (string, bool) {
@@ -147,4 +171,33 @@ func GetNodevinDataDir() (string, error) {
 	}
 
 	return nodevinDataDir, nil
+}
+
+func GetSizeDescription(size int64) string {
+	if size <= 0 {
+		return "unknown (do you have proper permissions?)"
+	}
+
+	const (
+		KB = 1024
+		MB = KB * 1024
+		GB = MB * 1024
+		TB = GB * 1024
+		PB = TB * 1024
+	)
+
+	switch {
+	case size >= PB:
+		return fmt.Sprintf("%.2f PB", float64(size)/PB)
+	case size >= TB:
+		return fmt.Sprintf("%.2f TB", float64(size)/TB)
+	case size >= GB:
+		return fmt.Sprintf("%.2f GB", float64(size)/GB)
+	case size >= MB:
+		return fmt.Sprintf("%.2f MB", float64(size)/MB)
+	case size >= KB:
+		return fmt.Sprintf("%.2f KB", float64(size)/KB)
+	default:
+		return fmt.Sprintf("%d B", size)
+	}
 }

@@ -54,7 +54,7 @@ var restartNodeCmd = &cobra.Command{
 func restartNode(network string) {
 	logger.LogInfo("Restarting blockchain node...")
 
-	containerName, exists := utils.GetFiftysixLocalMappedContainerName(network)
+	containerName, exists := utils.GetDefaultLocalMappedContainerName(network)
 	if !exists {
 		logger.LogError("Unsupported blockchain network: " + network)
 		return

@@ -121,6 +121,11 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 			filesNeedCopy = true
 		}
 
+		// If the user specified volume info, do not start the init volume
+		if viper.IsSet(fmt.Sprintf("%s-volumes", serviceName)) {
+			filesNeedCopy = false
+		}
+
 		// Get configuration for the current service
 		config := extraServiceConfigs[i]
 
@@ -281,6 +286,11 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 	totalSize, err := getDirectorySize(config.LocalPath)
 	if err != nil || totalSize < GB {
 		filesNeedCopy = true
+	}
+
+	// If the user specified volume info, do not start the init volume
+	if viper.IsSet("volumes") || viper.IsSet("volume-definitions") || viper.IsSet("volume-labels") {
+		filesNeedCopy = false
 	}
 
 	// Create the volumes for the services

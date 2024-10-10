@@ -160,6 +160,11 @@ func GetNodevinDataDir() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to get user home directory: %v", err)
 	}
+
+	if viper.IsSet("data-dir") {
+		homeDir = viper.GetString("data-dir")
+	}
+
 	nodevinDataDir := filepath.Join(homeDir, ".nodevin", "data")
 
 	// Create the directory if it doesn't exist

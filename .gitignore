@@ -1,0 +1,52 @@
+# Compose files
+*docker-compose*
+
+# Binaries for programs and plugins
+nodevin.exe
+nodevin-macos
+nodevin-linux
+
+# Environment variables
+*.env
+
+# Output of 'go build', 'go install', etc.
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, build, and coverage outputs
+*.out
+
+# Dependency directories
+/vendor/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+# IDE specific files
+.vscode/
+.idea/
+*.iml
+
+# Go specific files
+/go/bin
+/go/pkg
+
+# Configuration files
+config.yaml
+
+# Other
+todo.txt

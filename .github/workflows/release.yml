@@ -1,0 +1,131 @@
+name: Build and Release Nodevin
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Set up Go environment
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.4'
+
+      # Get the version/tag name from the push
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+
+      # Gather commit logs between the previous tag and the current tag
+      - name: Gather commit logs
+        id: gather_commits
+        run: |
+          # Find the previous tag, fallback to the first commit if no previous tag exists
+          if git describe --tags --abbrev=0 HEAD^ > /dev/null 2>&1; then
+            PREV_TAG=$(git describe --tags --abbrev=0 HEAD^)
+          else
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD)  # First commit
+          fi
+          # Collect the commit logs between the previous tag and the current tag
+          COMMITS=$(git log $PREV_TAG..HEAD --pretty=format:"%h %s")
+          echo "commits=$COMMITS" >> $GITHUB_ENV
+
+      # Build and package the Linux binary
+      - name: Build and package Linux binary
+        run: make build-linux package-linux
+
+      # Build and package the macOS binary
+      - name: Build and package macOS binary
+        run: make build-macos package-macos
+
+      # Build and package the Windows binary
+      - name: Build and package Windows binary
+        run: make build-windows package-windows
+
+      # Create a GitHub release with commit logs
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: ${{ github.ref_name }}
+          body: |
+            Nodevin version ${{ github.ref_name }} release notes:
+
+            Commits included in this release:
+            ${{ env.commits }}
+          draft: false
+          prerelease: false
+
+      # Upload Linux binary and checksum
+      - name: Upload Linux binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/nodevin-linux-amd64-${{ github.ref_name }}.tar.gz
+          asset_name: nodevin-linux-amd64-${{ github.ref_name }}.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload Linux checksum
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/nodevin-linux-amd64-${{ github.ref_name }}.tar.gz.sha256
+          asset_name: nodevin-linux-amd64-${{ github.ref_name }}.tar.gz.sha256
+          asset_content_type: text/plain
+
+      # Upload macOS binary and checksum
+      - name: Upload macOS binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/nodevin-macos-${{ github.ref_name }}.tar.gz
+          asset_name: nodevin-macos-${{ github.ref_name }}.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload macOS checksum
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/nodevin-macos-${{ github.ref_name }}.tar.gz.sha256
+          asset_name: nodevin-macos-${{ github.ref_name }}.tar.gz.sha256
+          asset_content_type: text/plain
+
+      # Upload Windows binary and checksum
+      - name: Upload Windows binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/nodevin-windows-${{ github.ref_name }}.zip
+          asset_name: nodevin-windows-${{ github.ref_name }}.zip
+          asset_content_type: application/zip
+
+      - name: Upload Windows checksum
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/nodevin-windows-${{ github.ref_name }}.zip.sha256
+          asset_name: nodevin-windows-${{ github.ref_name }}.zip.sha256
+          asset_content_type: text/plain

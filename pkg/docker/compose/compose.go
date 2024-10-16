@@ -217,14 +217,13 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 				ContainerName: initContainerName,
 				Restart:       "no",
 				Command: fmt.Sprintf(`/bin/sh -c "
-if [ -z \"$(ls -A /nodevin-volume-%s)\" ]; then
+if [ ! -f /nodevin-volume-%s/.copy-done ]; then
   mkdir -p /nodevin-volume-%s/ &&
   cp -r * /nodevin-volume-%s/ &&
   %s &&
   touch /nodevin-volume-%s/.copy-done
 else
   echo 'Volume not empty, skipping file copy';
-  touch /nodevin-volume-%s/.copy-done;
 fi"`, serviceName, serviceName, serviceName, initSnapshotSyncCommand, serviceName, serviceName),
 				Volumes: []string{
 					fmt.Sprintf("%s:/init-volume-%s", initVolumeName, serviceName),
@@ -396,14 +395,13 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 			ContainerName: initContainerName,
 			Restart:       "no",
 			Command: fmt.Sprintf(`/bin/sh -c "
-if [ -z \"$(ls -A /nodevin-volume)\" ]; then
+if [ ! -f /nodevin-volume/.copy-done ]; then
   mkdir -p /nodevin-volume/ &&
   cp -r * /nodevin-volume/ &&
   %s &&
   touch /nodevin-volume/.copy-done
 else
   echo 'Volume not empty, skipping file copy';
-  touch /nodevin-volume/.copy-done;
 fi"`, initSnapshotSyncCommand),
 			Volumes: []string{
 				fmt.Sprintf("%s:/init-volume", initVolumeName),

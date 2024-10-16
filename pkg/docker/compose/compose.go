@@ -224,7 +224,7 @@ if [ ! -f /nodevin-volume-%s/.copy-done ]; then
   touch /nodevin-volume-%s/.copy-done
 else
   echo 'Volume not empty, skipping file copy';
-fi"`, serviceName, serviceName, serviceName, initSnapshotSyncCommand, serviceName, serviceName),
+fi"`, serviceName, serviceName, serviceName, initSnapshotSyncCommand, serviceName),
 				Volumes: []string{
 					fmt.Sprintf("%s:/init-volume-%s", initVolumeName, serviceName),
 					fmt.Sprintf("%s:/nodevin-volume-%s", config.LocalPath, serviceName),

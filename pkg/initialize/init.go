@@ -1,24 +1,7 @@
-/*
-// SPDX-License-Identifier: Apache-2.0
-//
-// Copyright 2024 The Nodevin Authors.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-*/
-
 package initialize
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
@@ -26,6 +9,7 @@ import (
 	"regexp"
 	"runtime"
 	"strconv"
+	"strings"
 
 	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/fiftysixcrypto/nodevin/internal/version"
@@ -53,8 +37,21 @@ func runInit() {
 	if err := performInspection(); err != nil {
 		fmt.Println("")
 		logger.LogError("System inspection failed: " + err.Error())
-		if err := installDockerAndCompose(); err != nil {
-			logger.LogError("Failed to install Docker and Docker Compose: " + err.Error())
+
+		// Ask the user if they want to install Docker and Docker Compose
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Docker and Docker Compose are required but not installed. Would you like to install them? ('y'/'n'): ")
+		input, _ := reader.ReadString('\n')
+		input = strings.TrimSpace(strings.ToLower(input))
+
+		// Check user response
+		if input == "y" {
+			if err := installDockerAndCompose(); err != nil {
+				logger.LogError("Failed to install Docker and Docker Compose: " + err.Error())
+				return
+			}
+		} else {
+			fmt.Println("Canceling docker installation.")
 			return
 		}
 	}
@@ -164,10 +161,9 @@ func installDocker() error {
 		downloadsPath = filepath.Join(os.Getenv("HOME"), "Downloads")
 	}
 
-	fmt.Println("Starting Docker installation...")
-
 	switch runtime.GOOS {
 	case "linux":
+		fmt.Println("Starting Docker installation...")
 		installCmd = exec.Command("sh", "-c", `
 			sudo apt update &&
 			sudo apt install -y apt-transport-https ca-certificates curl software-properties-common &&
@@ -178,6 +174,7 @@ func installDocker() error {
    			sudo usermod -aG docker $USER &&
 			newgrp docker`)
 	case "darwin":
+		fmt.Println("Starting Docker download...")
 		installCmd = exec.Command("sh", "-c", fmt.Sprintf(`
 			echo "Downloading Docker for macOS..."
 			curl -L https://desktop.docker.com/mac/stable/Docker.dmg -o %s/Docker.dmg &&
@@ -185,17 +182,13 @@ func installDocker() error {
 			open %s/Docker.dmg &&
 			echo "Once Docker is installed, open Docker Desktop before running Nodevin commands."`, downloadsPath, downloadsPath))
 	case "windows":
+		fmt.Println("Starting Docker download...")
 		installCmd = exec.Command("powershell", "-Command", fmt.Sprintf(`
 			$ErrorActionPreference = 'Stop';
 			$downloadsFolder = "%s";
 			Write-Host 'Downloading Docker for Windows...';
 			Invoke-WebRequest -UseBasicParsing -OutFile "$downloadsFolder\\docker-desktop-installer.exe" https://desktop.docker.com/win/stable/Docker%%20Desktop%%20Installer.exe;
-			Write-Host 'Installing Docker...';
-			Start-Process -FilePath "$downloadsFolder\\docker-desktop-installer.exe" -Wait -ArgumentList @("--quiet");
-			Remove-Item -Force "$downloadsFolder\\docker-desktop-installer.exe";
-			Write-Host 'Starting Docker Desktop...';
-			Start-Process "Docker Desktop" -Wait;
-			Write-Host 'Docker installed. Ensure Docker Desktop is running before using Nodevin.';`, downloadsPath))
+			Write-Host 'Once Docker is installed, open Docker Desktop before running Nodevin commands.';`, downloadsPath))
 	default:
 		return fmt.Errorf("unsupported OS: %s", runtime.GOOS)
 	}
@@ -227,12 +220,11 @@ Next steps to finish Docker setup:
 		fmt.Println(`
 Download complete.
 Next steps to finish Docker setup:
-1. Ensure Docker Desktop is open and running.
-2. Open your terminal and run the following command to verify Docker installation:
-   docker --version
-3. After confirming Docker is running, you can start using Nodevin:
-
-Remember, Nodevin will only work if Docker Desktop is running!`)
+1. Navigate to your downloads folder and find the file "docker-desktop-installer.exe".
+2. Open "docker-desktop-installer.exe".
+3. Follow the instructions to install Docker on your computer.
+4. Click "Close and restart" to restart your computer and finish the installation.
+5. After confirming Docker is running and working, you can start using Nodevin. Remember, Nodevin will only work if Docker Desktop is running!`)
 	}
 
 	return nil

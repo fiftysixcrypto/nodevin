@@ -11,35 +11,34 @@ Our goal is to facilitate blockchain node standup and maintenance for every chai
 - **Maximum Customization:** Set unique ports, data storage, networking, images, or even run multiple nodes at once.
 - **Cross-Platform Support:** Works on Linux, macOS, and Windows.
 
-## Installation
-
-To get started with Nodevin, you need to have Docker and Docker Compose installed on your system. If you don't have them installed, Nodevin can help you set them up.
-
-### Prerequisites
-
-- Docker 20+
-- Docker Compose
+## Getting Started
 
 ### Installation
 
+1. **Download Nodevin:**
+
 Download the latest version of Nodevin from the [releases page](https://github.com/fiftysixcrypto/nodevin/releases).
+
+2. **Initialize Nodevin and Docker:**
+
+This command will check if you have the proper versions of Docker and Docker Compose installed. If not, Nodevin will download or install them for you (depending on your operating system).
+
+```sh
+nodevin init
+```
+
+*For more information setting up Nodevin on Windows, read [these docs](./docs/windows-setup.md).*
+
+#### **(For Linux/MacOS) - Set Nodevin Permissions:**
+
+After downloading Nodevin, you may need to set executable permissions and move it to a directory in `$PATH`.
 
 ```sh
 chmod +x nodevin
 sudo mv nodevin /usr/local/bin/
 ```
 
-## Getting Started
-
-1. **Initialize Nodevin:**
-
-This command will check if you have the proper versions of Docker and Docker Compose installed. If not, it will install them for you.
-
-```sh
-nodevin init
-```
-
-2. **Start a Blockchain Node:**
+3. **Start a Blockchain Node:**
 
 Once Nodevin is initialized, you can start a blockchain node. For example, to start a Bitcoin node, run:
 
@@ -47,7 +46,9 @@ Once Nodevin is initialized, you can start a blockchain node. For example, to st
 nodevin start bitcoin
 ```
 
-3. **(Optional) - Advanced Features:**
+*Nodevin stores blockchain data by default in `$HOME/.nodevin`.*
+
+4. **(Optional) - Advanced Features:**
 
 Nodevin allows for full customization in node startup. View the full list of flags for configuration details [here](./docs). For example, this command runs a Bitcoin Testnet node with a specified command, docker image and tag (version), unique nodevin data directory, and more:
 
@@ -79,7 +80,7 @@ Snapshot synchronization can save up to **days** of node initialization.
 
 ### Adding Your Data Snapshot
 
-Nodevin offers [a monthly subscription](https://nodevin.xyz/#/business) for networks interested in having their data snapshots integrated and universally accessible to all users.
+Nodevin offers [a monthly subscription](#nodevin-subscription) for networks interested in having their data snapshots integrated and universally accessible to all users.
 
 ## Nodevin Daemon
 
@@ -132,17 +133,18 @@ More documentation [here](./docs/).
 
 ## Integrating Your Blockchain
 
-Adding your blockchain to Nodevin requires a small one-time grant. For more information, visit [https://nodevin.xyz/#/business](https://nodevin.xyz/#/business).
+Adding your blockchain to Nodevin requires a small one-time grant. For more information, visit [our business page](https://nodevin.xyz/#/business).
 
 ### Nodevin Subscription
 
-For more features, such as:
+In addition to integration, companies can enhance their network's performance and accessibility by upgrading to the Nodevin subscription plan. By upgrading, all Nodevin users are offered a faster and more streamlined experience connecting to your blockchain. Key benefits include:
+
 - Up to 90% faster sync times (`--snapshot-sync`)
 - Universally available data snapshots
 - Open source Docker images
 - Docker image support and documentation
 
-Visit [https://nodevin.xyz/#/business](https://nodevin.xyz/#/business).
+For more details, visit [our business page](https://nodevin.xyz/#/business).
 
 ## Uninstalling Nodevin
 

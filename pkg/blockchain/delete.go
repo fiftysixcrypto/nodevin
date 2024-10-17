@@ -54,8 +54,8 @@ var deleteCmd = &cobra.Command{
 
 		if len(args) == 0 {
 			logger.LogError("No network name provided. To delete network data, specify the name explicitly (for example: bitcoin, litecoin)")
-			logger.LogInfo("Example usage: `nodevin delete <network>`")
-			logger.LogInfo("Example usage: `nodevin delete all`")
+			logger.LogInfo(fmt.Sprintf("Example usage: `%s delete <network>`", utils.GetNodevinExecutable()))
+			logger.LogInfo(fmt.Sprintf("Example usage: `%s delete all`", utils.GetNodevinExecutable()))
 			return
 		}
 

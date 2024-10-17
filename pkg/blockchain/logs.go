@@ -19,6 +19,7 @@
 package blockchain
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 
@@ -39,7 +40,7 @@ var logsCmd = &cobra.Command{
 			logger.LogError("No network specified. To fetch logs, specify the network explicitly.")
 			availableNetworks := utils.GetAllSupportedNetworks()
 			logger.LogInfo("List of available networks: " + availableNetworks)
-			logger.LogInfo("Example usage: `nodevin logs <network>`")
+			logger.LogInfo(fmt.Sprintf("Example usage: `%s logs <network>`", utils.GetNodevinExecutable()))
 			return
 		}
 

@@ -24,10 +24,9 @@ var stopNodeCmd = &cobra.Command{
 			availableNetworks := utils.GetAllSupportedNetworks()
 
 			logger.LogInfo("List of available networks: " + availableNetworks)
-			logger.LogInfo("Example usage: `nodevin stop <network>`")
-			logger.LogInfo("Example usage: `nodevin stop <network> --testnet`")
-			logger.LogInfo("Example usage: `nodevin stop <network> --network=\"goerli\"`")
-			logger.LogInfo("Example usage: `nodevin stop all`")
+			logger.LogInfo(fmt.Sprintf("Example usage: `%s stop <network>`", utils.GetNodevinExecutable()))
+			logger.LogInfo(fmt.Sprintf("Example usage: `%s stop <network> --testnet`", utils.GetNodevinExecutable()))
+			logger.LogInfo(fmt.Sprintf("Example usage: `%s stop all`", utils.GetNodevinExecutable()))
 			return
 		}
 

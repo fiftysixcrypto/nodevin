@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -205,4 +206,11 @@ func GetSizeDescription(size int64) string {
 	default:
 		return fmt.Sprintf("%d B", size)
 	}
+}
+
+func GetNodevinExecutable() string {
+	if runtime.GOOS == "windows" {
+		return "nodevin.exe"
+	}
+	return "nodevin"
 }

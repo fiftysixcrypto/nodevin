@@ -70,9 +70,9 @@ var requestCmd = &cobra.Command{
 }
 
 func printUsageAndExample() {
-	fmt.Println("Usage: nodevin request [network] --method <http-method> --params <json-data> --rpc-user <rpc-username> --rpc-pass <rpc-password> --header <optional-extra-headers> --endpoint <optional-api-endpoint>")
-	fmt.Println("Example: nodevin request bitcoin --method getblockcount")
-	fmt.Println("Example: nodevin request bitcoin --method getblockheader --params '[\"00000000c937983704a73af28acdec37b049d214adbda81d7e2a3dd146f6ed09\"]'")
+	fmt.Printf("Usage: %s request [network] --method <http-method> --params <json-data> --rpc-user <rpc-username> --rpc-pass <rpc-password> --header <optional-extra-headers> --endpoint <optional-api-endpoint>\n", utils.GetNodevinExecutable())
+	fmt.Printf("Example: `%s request bitcoin --method getblockcount`\n", utils.GetNodevinExecutable())
+	fmt.Printf("Example: `%s request bitcoin --method getblockheader --params '[\"00000000c937983704a73af28acdec37b049d214adbda81d7e2a3dd146f6ed09\"]'`\n", utils.GetNodevinExecutable())
 }
 
 func makeRequest(network, url, method, params, headers, user, pass string) ([]byte, error) {

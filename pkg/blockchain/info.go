@@ -91,9 +91,9 @@ func displayInfo() {
 		displayPIDInfo()
 
 		fmt.Println("\n-- Helpful Commands:\n")
-		fmt.Println("nodevin start <network>")
-		fmt.Println("nodevin start <network> --testnet")
-		fmt.Println("nodevin delete <network>\n")
+		fmt.Printf("%s start <network>\n", utils.GetNodevinExecutable())
+		fmt.Printf("%s start <network> --testnet\n", utils.GetNodevinExecutable())
+		fmt.Printf("%s stop <network>\n", utils.GetNodevinExecutable())
 		return
 	}
 
@@ -155,10 +155,10 @@ func displayInfo() {
 
 	fmt.Println("\n-- Helpful Commands:\n")
 
-	fmt.Println("nodevin stop <network>")
-	fmt.Println("nodevin shell <network>")
-	fmt.Println("nodevin daemon start")
-	fmt.Println("nodevin logs <network> --tail 50\n")
+	fmt.Printf("%s stop <network>\n", utils.GetNodevinExecutable())
+	fmt.Printf("%s shell <network>\n", utils.GetNodevinExecutable())
+	fmt.Printf("%s daemon start\n", utils.GetNodevinExecutable())
+	fmt.Printf("%s logs <network> --tail 20\n", utils.GetNodevinExecutable())
 }
 
 func displayPIDInfo() {
@@ -170,8 +170,9 @@ func displayPIDInfo() {
 			return
 		}
 		fmt.Printf("\nDaemon is running to update nodes with PID: %s\n", string(pidData))
-		fmt.Println("Logs: nodevin daemon logs")
-		fmt.Println("Stop: nodevin daemon stop")
+
+		fmt.Printf("Logs: %s daemon logs\n", utils.GetNodevinExecutable())
+		fmt.Printf("Stop: %s daemon stop\n", utils.GetNodevinExecutable())
 	}
 }
 

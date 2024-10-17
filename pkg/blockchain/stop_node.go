@@ -1,32 +1,15 @@
-/*
-// SPDX-License-Identifier: Apache-2.0
-//
-// Copyright 2024 The Nodevin Authors.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-*/
-
 package blockchain
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/fiftysixcrypto/nodevin/internal/utils"
-
 	"github.com/spf13/cobra"
 )
 
@@ -66,17 +49,21 @@ func stopNode(network string) {
 		return
 	}
 
-	// Check if ~/.nodevin exists
-	homeDir := os.Getenv("HOME")
+	// Get the user's home directory in a cross-platform manner
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		logger.LogError(fmt.Sprintf("Failed to determine home directory: %s", err))
+		return
+	}
+
 	var composeCreateDir string
 
-	if homeDir != "" {
-		nodevinDir := filepath.Join(homeDir, ".nodevin", "data")
-		if _, err := os.Stat(nodevinDir); err == nil {
-			composeCreateDir = nodevinDir
-		} else if !os.IsNotExist(err) {
-			logger.LogError(fmt.Sprintf("Error accessing ~/.nodevin: %s", err))
-		}
+	// Check if ~/.nodevin exists
+	nodevinDir := filepath.Join(homeDir, ".nodevin", "data")
+	if _, err := os.Stat(nodevinDir); err == nil {
+		composeCreateDir = nodevinDir
+	} else if !os.IsNotExist(err) {
+		logger.LogError(fmt.Sprintf("Error accessing ~/.nodevin: %s", err))
 	}
 
 	// Fallback to nodevin executable directory if ~/.nodevin does not exist
@@ -130,33 +117,42 @@ func stopNode(network string) {
 func stopAllNodes() {
 	logger.LogInfo("Stopping all Docker containers...")
 
-	psCmd := exec.Command("sh", "-c", "docker ps -q")
-	psOut, err := psCmd.Output()
-	if err != nil {
+	// Get a list of running Docker container IDs
+	psCmd := exec.Command("docker", "ps", "-q")
+	var psOut bytes.Buffer
+	psCmd.Stdout = &psOut
+	psCmd.Stderr = os.Stderr
+
+	if err := psCmd.Run(); err != nil {
 		logger.LogError("Failed to list running Docker containers: " + err.Error())
 		return
 	}
 
-	if len(psOut) == 0 {
+	containerIDs := strings.Fields(psOut.String())
+	if len(containerIDs) == 0 {
 		logger.LogInfo("No running Docker containers found.")
 		return
 	}
 
-	stopCmd := exec.Command("sh", "-c", "docker stop $(docker ps -aq)")
+	// Stop the containers
+	logger.LogInfo("Stopping containers: " + strings.Join(containerIDs, ", "))
+	stopCmd := exec.Command("docker", append([]string{"stop"}, containerIDs...)...)
 	stopCmd.Stdout = os.Stdout
 	stopCmd.Stderr = os.Stderr
 
 	if err := stopCmd.Run(); err != nil {
-		logger.LogError("Failed to stop all Docker containers: " + err.Error())
+		logger.LogError("Failed to stop Docker containers: " + err.Error())
 		return
 	}
 
-	rmCmd := exec.Command("sh", "-c", "docker rm $(docker ps -aq)")
+	// Remove the containers
+	logger.LogInfo("Removing containers: " + strings.Join(containerIDs, ", "))
+	rmCmd := exec.Command("docker", append([]string{"rm"}, containerIDs...)...)
 	rmCmd.Stdout = os.Stdout
 	rmCmd.Stderr = os.Stderr
 
 	if err := rmCmd.Run(); err != nil {
-		logger.LogError("Failed to remove all Docker containers: " + err.Error())
+		logger.LogError("Failed to remove Docker containers: " + err.Error())
 		return
 	}
 

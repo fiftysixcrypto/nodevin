@@ -97,25 +97,15 @@ Read more about Nodevin:
 
 Adding your blockchain to Nodevin requires a small one-time grant. For more information, visit [our business page](https://nodevin.xyz/#/business).
 
-### Nodevin Subscription
-
-In addition to integration, companies can enhance their network's performance and accessibility by upgrading to the Nodevin subscription plan. By upgrading, all Nodevin users are offered a faster and more streamlined experience connecting to your blockchain. Key benefits include:
-
-- Up to 90% faster sync times (`--snapshot-sync`)
-- Universally available data snapshots
-- Open source Docker images
-- Docker image support and documentation
-
-For more details, visit [our business page](https://nodevin.xyz/#/business).
-
 ## Uninstalling Nodevin
 
 To uninstall Nodevin and delete all associated data and docker images, run the following commands:
 
 ```sh
+nodevin stop all
 nodevin cleanup
 nodevin delete all
-rm nodevin # wherever nodevin is located
+rm nodevin # delete nodevin
 ```
 
 ## Contributing

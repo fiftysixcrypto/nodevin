@@ -1,10 +1,3 @@
-name: Build and Release Nodevin
-
-on:
-  push:
-    tags:
-      - 'v*.*.*'
-
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -24,17 +17,27 @@ jobs:
         id: get_version
         run: echo "VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
 
+      # Copy cli-commands.md to readme.txt
+      - name: Rename cli-commands.md to readme.txt
+        run: cp docs/cli-commands.md readme.txt
+
+      # Make readme.txt available for packaging (Move to build directory)
+      - name: Move readme.txt to build directories
+        run: |
+          mkdir -p ./release/linux ./release/macos ./release/windows
+          cp readme.txt ./release/linux/
+          cp readme.txt ./release/macos/
+          cp readme.txt ./release/windows/
+
       # Gather commit logs between the previous tag and the current tag
       - name: Gather commit logs
         id: gather_commits
         run: |
-          # Find the previous tag, fallback to the first commit if no previous tag exists
           if git describe --tags --abbrev=0 HEAD^ > /dev/null 2>&1; then
             PREV_TAG=$(git describe --tags --abbrev=0 HEAD^)
           else
             PREV_TAG=$(git rev-list --max-parents=0 HEAD)  # First commit
           fi
-          # Collect the commit logs between the previous tag and the current tag
           COMMITS=$(git log $PREV_TAG..HEAD --pretty=format:"%h %s")
           echo "commits=$COMMITS" >> $GITHUB_ENV
 

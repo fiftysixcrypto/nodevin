@@ -84,4 +84,4 @@ By using Docker, Nodevin makes deploying and managing blockchain nodes easy and 
 - [Blockchain Basics](https://www.investopedia.com/terms/b/blockchain.asp)
 - [Getting Started with Docker](https://docs.docker.com/get-started/)
 - [Nodevin Windows Installation](./windows-setup.md)
-- [Nodevin Commands](./cli-flags.md)
+- [Nodevin Commands](./cli-commands.md)

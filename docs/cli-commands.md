@@ -6,6 +6,8 @@ Nodevin is a command-line interface (CLI) daemon that simplifies the setup, mana
 
 ## Table of Contents
 
+**Note**: On Windows, commands should be written as `nodevin.exe <command>`, not `nodevin <command>`. For example, `nodevin.exe init`.
+
 ### Getting Started
 - [nodevin init](#nodevin-init)
 - [nodevin list](#nodevin-list)
@@ -22,6 +24,7 @@ Nodevin is a command-line interface (CLI) daemon that simplifies the setup, mana
 ### Data Cleanup
 - [nodevin delete](#nodevin-delete)
 - [nodevin cleanup](#nodevin-cleanup)
+
 ---
 
 ## Commands and Detailed Options

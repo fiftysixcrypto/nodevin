@@ -146,6 +146,36 @@ func installDockerAndCompose() error {
 		return fmt.Errorf("failed to install Docker Compose: %w", err)
 	}
 
+	switch runtime.GOOS {
+	case "linux":
+		fmt.Println(`
+Docker installation complete! 
+Make sure Docker is running with the following command:
+   sudo systemctl start docker
+Then, confirm the installation:
+   docker --version`)
+
+	case "darwin":
+		fmt.Println(`
+Download complete.
+Next steps to finish Docker setup:
+1. Drag "Docker Desktop" from Downloads/Docker.dmg into "Applications".
+2. Open Docker Desktop and go through the options. Make sure it is running in the top right corner of your screen. 
+3. Open your terminal and run the following command to verify Docker installation:
+   docker --version
+4. After confirming Docker is running, you can start using Nodevin. Remember, Nodevin will only work if Docker Desktop is running!`)
+
+	case "windows":
+		fmt.Println(`
+Download complete.
+Next steps to finish Docker setup:
+1. Navigate to your downloads folder and find the file "docker-desktop-installer.exe".
+2. Open "docker-desktop-installer.exe".
+3. Follow the instructions to install Docker on your computer.
+4. Click "Close and restart" to restart your computer and finish the installation.
+5. After confirming Docker is running and working, you can start using Nodevin. Remember, Nodevin will only work if Docker Desktop is running!`)
+	}
+
 	fmt.Println("Docker and Docker Compose installed successfully.")
 	return nil
 }
@@ -195,36 +225,6 @@ func installDocker() error {
 
 	if err := installCmd.Run(); err != nil {
 		return err
-	}
-
-	switch runtime.GOOS {
-	case "linux":
-		fmt.Println(`
-Docker installation complete! 
-Make sure Docker is running with the following command:
-   sudo systemctl start docker
-Then, confirm the installation:
-   docker --version`)
-
-	case "darwin":
-		fmt.Println(fmt.Sprintf(`
-Download complete.
-Next steps to finish Docker setup:
-1. Drag "Docker Desktop" from %s/Docker.dmg into "Applications".
-2. Open Docker Desktop and go through the options. Make sure it is running in the top right corner of your screen. 
-3. Open your terminal and run the following command to verify Docker installation:
-   docker --version
-4. After confirming Docker is running, you can start using Nodevin. Remember, Nodevin will only work if Docker Desktop is running!`, downloadsPath))
-
-	case "windows":
-		fmt.Println(`
-Download complete.
-Next steps to finish Docker setup:
-1. Navigate to your downloads folder and find the file "docker-desktop-installer.exe".
-2. Open "docker-desktop-installer.exe".
-3. Follow the instructions to install Docker on your computer.
-4. Click "Close and restart" to restart your computer and finish the installation.
-5. After confirming Docker is running and working, you can start using Nodevin. Remember, Nodevin will only work if Docker Desktop is running!`)
 	}
 
 	return nil

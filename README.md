@@ -116,20 +116,12 @@ To view the logs of the running daemon, run:
 nodevin daemon logs
 ```
 
-## Commands
+## More Info
 
-Here are some key commands you can use with Nodevin:
-
-- `nodevin init`: Initialize Nodevin and check system capabilities.
-- `nodevin start <network>`: Start a blockchain node (e.g., `nodevin start bitcoin`).
-- `nodevin stop <network>`: Stop a running blockchain node.
-
-- `nodevin shell <network>`: Open a shell to the running node container.
-- `nodevin logs <network>`: View logs for a specific node.
-- `nodevin delete <volume-name-or-image-name>`: Delete local blockchain data.
-- `nodevin request <network> --method <http-method> --params <json-data>`: Make an RPC request to a blockchain network.
-
-More documentation [here](./docs/).
+Read more about Nodevin:
+- [Introduction to Nodevin](./docs/nodevin-intro.md) - Learn more about what Nodevin is and how it works.
+- [Using Nodevin](./docs/cli-commands.md) - Documentation on how to use Nodevin. 
+- [The Nodevin Daemon](./docs/daemon-commands.md) - Documentation on how to use the monitoring Nodevin daemon.
 
 ## Integrating Your Blockchain
 

@@ -217,7 +217,7 @@ func installDocker() error {
 			$ErrorActionPreference = 'Stop';
 			$downloadsFolder = "%s";
 			Write-Host 'Downloading Docker for Windows...';
-			Invoke-WebRequest -UseBasicParsing -OutFile "$downloadsFolder\\docker-desktop-installer.exe" https://desktop.docker.com/win/stable/Docker%%20Desktop%%20Installer.exe;
+			Invoke-WebRequest -UseBasicParsing -OutFile "$downloadsFolder\\docker-desktop-installer.exe" https://desktop.docker.com/win/stable/Docker%%20Desktop%%20Installer.exe -Verbose;
 			Write-Host 'Once Docker is installed, open Docker Desktop before running Nodevin commands.';`, downloadsPath))
 	default:
 		return fmt.Errorf("unsupported OS: %s", runtime.GOOS)

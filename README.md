@@ -84,37 +84,7 @@ Nodevin offers [a monthly subscription](#nodevin-subscription) for networks inte
 
 ## Nodevin Daemon
 
-The Nodevin daemon runs in the background and ensures your blockchain nodes are always up-to-date. It checks for updates every hour and automatically updates the nodes if a new version is available.
-
-### Starting the Daemon
-
-To start the daemon, run:
-
-```sh
-nodevin daemon start
-```
-
-To start the daemon in detached mode (background):
-
-```sh
-nodevin daemon start -d
-```
-
-### Stopping the Daemon
-
-To stop the daemon, run:
-
-```sh
-nodevin daemon stop
-```
-
-### Viewing Daemon Logs
-
-To view the logs of the running daemon, run:
-
-```sh
-nodevin daemon logs
-```
+The Nodevin daemon runs in the background and ensures your blockchain nodes are always up-to-date. It checks for updates every hour and automatically updates the nodes if a new version is available. [Read more](./docs/daemon-commands.md) about the daemon.
 
 ## More Info
 

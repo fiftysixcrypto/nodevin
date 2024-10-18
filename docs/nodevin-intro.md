@@ -9,7 +9,7 @@
 1. **Check System Requirements**
    - **OS**: Linux, macOS, Windows (64-bit)
    - **Docker**: Version 20+ ([Get Docker](https://docs.docker.com/get-docker/))
-   - **Docker Compose**: ([Install Docker Compose](https://docs.docker.com/compose/install/))
+   - **Docker Compose**: Included with latest versions of Docker
    - **CPU**: (Depends on blockchain)
    - **RAM**: (Depends on blockchain)
    - **Storage**: (Depends on blockchain)
@@ -71,7 +71,7 @@ Nodevin currently only supports running nodes to help users contribute to the ne
 
 ## What is Docker and Why Does Nodevin Use Docker?
 
-**Docker** is a platform that bundles software into containers, which include everything needed to run the software. Nodevin uses Docker because:
+[Docker](https://docs.docker.com/get-started/) is a platform that bundles software into containers, which include everything needed to run the software. Nodevin uses Docker because:
 - **Isolation**: Docker keeps your node separate from the rest of your system.
 - **Standardization**: It ensures consistent performance across different systems.
 - **Accessibility**: The [Docker Hub](https://hub.docker.com/u/fiftysix) allows anyone to access Nodevin built software versions and updates.
@@ -80,8 +80,21 @@ By using Docker, Nodevin makes deploying and managing blockchain nodes easy and 
 
 ---
 
+## Uninstalling Nodevin
+
+To uninstall Nodevin and delete all associated data and docker images, run the following commands:
+
+```sh
+nodevin stop all
+nodevin cleanup
+nodevin delete all
+rm nodevin # delete nodevin
+```
+
+---
+
 ## More Resources
-- [Blockchain Basics](https://www.investopedia.com/terms/b/blockchain.asp)
-- [Getting Started with Docker](https://docs.docker.com/get-started/)
-- [Nodevin Windows Installation](./windows-setup.md)
+- [Main README](../README.md)
 - [Nodevin Commands](./cli-commands.md)
+- [Nodevin Windows Installation](./windows-setup.md)
+

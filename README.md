@@ -80,15 +80,15 @@ Snapshot synchronization can save up to **days** of node initialization.
 
 ### Adding Your Data Snapshot
 
-Nodevin offers [a monthly subscription](#nodevin-subscription) for networks interested in having their data snapshots integrated and universally accessible to all users.
+Nodevin requires a [small one-time grant](#nodevin-subscription) for networks interested in having their data snapshots integrated and universally accessible to all users.
 
 ## Nodevin Daemon
 
 The Nodevin daemon runs in the background and ensures your blockchain nodes are always up-to-date. It checks for updates every hour and automatically updates the nodes if a new version is available. [Read more](./docs/daemon-commands.md) about the daemon.
 
-## More Info
+## Documentation
 
-Read more about Nodevin:
+Read more on how to use Nodevin:
 - [Introduction to Nodevin](./docs/nodevin-intro.md) - Learn more about what Nodevin is and how it works.
 - [Using Nodevin](./docs/cli-commands.md) - Documentation on how to use Nodevin. 
 - [The Nodevin Daemon](./docs/daemon-commands.md) - Documentation on how to use the monitoring Nodevin daemon.
@@ -96,17 +96,6 @@ Read more about Nodevin:
 ## Integrating Your Blockchain
 
 Adding your blockchain to Nodevin requires a small one-time grant. For more information, visit [our business page](https://nodevin.xyz/#/business).
-
-## Uninstalling Nodevin
-
-To uninstall Nodevin and delete all associated data and docker images, run the following commands:
-
-```sh
-nodevin stop all
-nodevin cleanup
-nodevin delete all
-rm nodevin # delete nodevin
-```
 
 ## Contributing
 

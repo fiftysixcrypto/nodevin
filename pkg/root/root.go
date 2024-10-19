@@ -132,6 +132,7 @@ func init() {
 	rootCmd.AddCommand(blockchain.StopNodeCmd)
 	rootCmd.AddCommand(blockchain.LogsCmd)
 	rootCmd.AddCommand(blockchain.InfoCmd)
+	rootCmd.AddCommand(blockchain.ListCmd)
 
 	// Add init command
 	rootCmd.AddCommand(initialize.InitCmd)

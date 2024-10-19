@@ -35,6 +35,7 @@ var (
 	CleanupCmd   = cleanupCmd
 	LogsCmd      = logsCmd
 	InfoCmd      = infoCmd
+	ListCmd      = listCmd
 )
 
 var blockchainCmd = &cobra.Command{

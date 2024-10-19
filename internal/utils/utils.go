@@ -59,16 +59,6 @@ var networkInfoMap = map[string]NetworkInfo{
 		SnapshotSize:  0,
 		StartMessage:  "\"Ordinal theory imbues satoshis with numismatic value, allowing them to be collected and traded as curios.\"",
 	},
-	"ethereum": {
-		ContainerName: "geth",
-		RPCPort:       8545,
-		StartMessage:  "\"Ethereum is the foundation for our digital future.\" -- Vitalik Buterin",
-	},
-	"ethereum-classic": {
-		ContainerName: "core-geth",
-		RPCPort:       8545,
-		StartMessage:  "\"Code is law.\" -- Ethereum Classic",
-	},
 	"litecoin": {
 		ContainerName: "litecoin-core",
 		RPCPort:       9332,
@@ -89,11 +79,6 @@ var networkInfoMap = map[string]NetworkInfo{
 		DataSize:      0,
 		SnapshotSize:  0,
 		StartMessage:  "\"Ordinal theory imbues satoshis with numismatic value, allowing them to be collected and traded as curios.\"",
-	},
-	"dogecoin": {
-		ContainerName: "dogecoin-core",
-		RPCPort:       22555,
-		StartMessage:  "\"To the moon!\" -- Dogecoin Community",
 	},
 }
 

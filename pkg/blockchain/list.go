@@ -3,7 +3,6 @@ package blockchain
 import (
 	"fmt"
 	"sort"
-	"strings"
 
 	"github.com/fiftysixcrypto/nodevin/internal/utils"
 	"github.com/spf13/cobra"
@@ -25,5 +24,10 @@ func listAllNetworks() {
 
 	sort.Strings(networkNames)
 
-	fmt.Printf("Supported networks: %s\n", strings.Join(networkNames, ", "))
+	fmt.Printf("Supported networks: %s\n", utils.GetCommandSupportedNetworks())
+	fmt.Print("\nHelpful Commands:\n")
+	fmt.Printf("%s start <network>\n", utils.GetNodevinExecutable())
+	fmt.Printf("%s start <network> --testnet\n", utils.GetNodevinExecutable())
+	fmt.Printf("%s start bitcoin --ord\n", utils.GetNodevinExecutable())
+	fmt.Printf("%s start litecoin --ord-litecoin\n", utils.GetNodevinExecutable())
 }

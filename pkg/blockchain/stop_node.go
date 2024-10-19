@@ -21,7 +21,7 @@ var stopNodeCmd = &cobra.Command{
 		if len(args) == 0 {
 			logger.LogError("No network specified. To stop a node, specify the network explicitly.")
 			logger.LogInfo("")
-			availableNetworks := utils.GetAllSupportedNetworks()
+			availableNetworks := utils.GetCommandSupportedNetworks()
 
 			logger.LogInfo("List of available networks: " + availableNetworks)
 			logger.LogInfo(fmt.Sprintf("Example usage: `%s stop <network>`", utils.GetNodevinExecutable()))

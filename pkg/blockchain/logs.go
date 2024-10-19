@@ -38,7 +38,7 @@ var logsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			logger.LogError("No network specified. To fetch logs, specify the network explicitly.")
-			availableNetworks := utils.GetAllSupportedNetworks()
+			availableNetworks := utils.GetCommandSupportedNetworks()
 			logger.LogInfo("List of available networks: " + availableNetworks)
 			logger.LogInfo(fmt.Sprintf("Example usage: `%s logs <network>`", utils.GetNodevinExecutable()))
 			return

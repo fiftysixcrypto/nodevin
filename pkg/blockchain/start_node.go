@@ -47,7 +47,7 @@ var startNodeCmd = &cobra.Command{
 
 func startNode(args []string) {
 	if len(args) == 0 {
-		logger.LogError("No network provided. Nodevin supports any of the following: " + utils.GetAllSupportedNetworks())
+		logger.LogError("No network provided. Nodevin supports any of the following: " + utils.GetCommandSupportedNetworks())
 		logger.LogInfo(fmt.Sprintf("Example usage: `%s start <network>`", utils.GetNodevinExecutable()))
 
 		return

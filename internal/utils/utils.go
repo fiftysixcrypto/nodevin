@@ -61,6 +61,14 @@ var networkInfoMap = map[string]NetworkInfo{
 		DataSize:         0,
 		SnapshotSize:     0,
 		StartMessage:     "\"Ordinal theory imbues satoshis with numismatic value, allowing them to be collected and traded as curios.\"",
+		CommandSupported: true,
+	},
+	"ord-testnet": {
+		ContainerName:    "ord-testnet",
+		RPCPort:          80,
+		DataSize:         0,
+		SnapshotSize:     0,
+		StartMessage:     "\"Ordinal theory imbues satoshis with numismatic value, allowing them to be collected and traded as curios.\"",
 		CommandSupported: false,
 	},
 	"litecoin": {
@@ -81,6 +89,14 @@ var networkInfoMap = map[string]NetworkInfo{
 	},
 	"ord-litecoin": {
 		ContainerName:    "ord-litecoin",
+		RPCPort:          80,
+		DataSize:         0,
+		SnapshotSize:     0,
+		StartMessage:     "\"Ordinal theory imbues satoshis with numismatic value, allowing them to be collected and traded as curios.\"",
+		CommandSupported: true,
+	},
+	"ord-litecoin-testnet": {
+		ContainerName:    "ord-litecoin-testnet",
 		RPCPort:          80,
 		DataSize:         0,
 		SnapshotSize:     0,

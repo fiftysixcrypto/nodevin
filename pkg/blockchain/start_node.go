@@ -27,14 +27,14 @@ import (
 	"github.com/fiftysixcrypto/nodevin/internal/utils"
 	"github.com/fiftysixcrypto/nodevin/pkg/blockchain/bitcoin"
 	"github.com/fiftysixcrypto/nodevin/pkg/blockchain/litecoin"
+	"github.com/fiftysixcrypto/nodevin/pkg/blockchain/ord"
+	ord_litecoin "github.com/fiftysixcrypto/nodevin/pkg/blockchain/ord-litecoin"
 	"github.com/fiftysixcrypto/nodevin/pkg/docker"
 	"github.com/fiftysixcrypto/nodevin/pkg/docker/compose"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
-
-var ord bool
 
 var startNodeCmd = &cobra.Command{
 	Use:   "start [network]",
@@ -184,18 +184,14 @@ func startNode(args []string) {
 
 func createComposeFileForNetwork(network string, cwd string) (string, error) {
 	switch network {
-	case "daemon":
-		return "", nil // start the daemon
 	case "bitcoin":
 		return bitcoin.CreateBitcoinComposeFile(cwd)
-	case "ethereum":
-		return "", nil // createEthereumComposeFile(cwd)
-	case "dogecoin":
-		return "", nil // createDogecoinComposeFile(cwd)
-	case "ethereumclassic":
-		return "", nil // createEthereumClassicComposeFile(cwd)
+	case "ord":
+		return ord.CreateOrdComposeFile(cwd)
 	case "litecoin":
 		return litecoin.CreateLitecoinComposeFile(cwd)
+	case "ord-litecoin":
+		return ord_litecoin.CreateOrdLitecoinComposeFile(cwd)
 	default:
 		return "", fmt.Errorf("unsupported network: %s", network)
 	}

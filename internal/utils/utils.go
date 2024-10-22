@@ -42,8 +42,8 @@ var networkInfoMap = map[string]NetworkInfo{
 	"bitcoin": {
 		ContainerName:    "bitcoin-core",
 		RPCPort:          8332,
-		DataSize:         0,
-		SnapshotSize:     0,
+		DataSize:         708669603840,  // 660 GB
+		SnapshotSize:     1319413953331, // 1.2TB (~660 GB + ~540 GB)
 		StartMessage:     "\"A system for electronic transactions without relying on trust.\" -- Satoshi Nakamoto",
 		CommandSupported: true,
 	},

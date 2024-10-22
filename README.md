@@ -68,6 +68,13 @@ nodevin start bitcoin \
   --mem-reservation=512m
 ```
 
+### More Documentation
+
+Continue to learn about Nodevin:
+- [Introduction to Nodevin](./docs/nodevin-intro.md) - Learn more about what Nodevin is and how it works.
+- [Using Nodevin](./docs/cli-commands.md) - Documentation on how to use Nodevin. 
+- [The Nodevin Daemon](./docs/daemon-commands.md) - Documentation on how to use the monitoring Nodevin daemon.
+
 ## Snapshot Synchronization
 
 Data snapshots are compressed archives of the state of a blockchain node. Using snapshot synchronization greatly speeds up the process of catching up with the network, as the node starts from downloaded data rather than trying to synchronize from the beginning of the blockchain. Running this command will use snapshot synchronization when starting up your node.
@@ -86,20 +93,13 @@ Nodevin requires a [small one-time grant](#nodevin-subscription) for networks in
 
 The Nodevin daemon runs in the background and ensures your blockchain nodes are always up-to-date. It checks for updates every hour and automatically updates the nodes if a new version is available. [Read more](./docs/daemon-commands.md) about the daemon.
 
-## Documentation
-
-Read more on how to use Nodevin:
-- [Introduction to Nodevin](./docs/nodevin-intro.md) - Learn more about what Nodevin is and how it works.
-- [Using Nodevin](./docs/cli-commands.md) - Documentation on how to use Nodevin. 
-- [The Nodevin Daemon](./docs/daemon-commands.md) - Documentation on how to use the monitoring Nodevin daemon.
-
 ## Integrating Your Blockchain
 
 Adding your blockchain to Nodevin requires a small one-time grant. For more information, visit [our business page](https://nodevin.xyz/#/business).
 
 ### Nodevin Docker Images
 
-Nodevin pulls images by default from [https://hub.docker.com/u/fiftysix], with code located [here](https://github.com/fiftysixcrypto/node-images). The [node image respository](https://github.com/fiftysixcrypto/node-images) contains helpful resources including [blockchain requirements and synchronization times](https://github.com/fiftysixcrypto/node-images?tab=readme-ov-file#overview), [Docker installation steps](https://github.com/fiftysixcrypto/node-images?tab=readme-ov-file#installing-docker), [Docker images and compose files](https://github.com/fiftysixcrypto/node-images?tab=readme-ov-file#dockerfiles-and-compose-files) with documentation, and more.
+Nodevin pulls images by default from [Docker Hub](https://hub.docker.com/u/fiftysix), with code located [here](https://github.com/fiftysixcrypto/node-images). The node image respository contains helpful resources including blockchain requirements and synchronization times, Docker installation steps, Docker compose files with documentation, and more.
 
 ## Contributing
 

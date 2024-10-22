@@ -22,18 +22,6 @@ jobs:
         id: get_version
         run: echo "VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
 
-      # Copy cli-commands.md to readme.txt
-      - name: Rename cli-commands.md to readme.txt
-        run: cp docs/cli-commands.md readme.txt
-
-      # Make readme.txt available for packaging (Move to build directory)
-      - name: Move readme.txt to build directories
-        run: |
-          mkdir -p ./release/linux ./release/macos ./release/windows
-          cp readme.txt ./release/linux/
-          cp readme.txt ./release/macos/
-          cp readme.txt ./release/windows/
-
       # Gather commit logs between the previous tag and the current tag
       - name: Gather commit logs
         id: gather_commits
@@ -46,17 +34,23 @@ jobs:
           COMMITS=$(git log $PREV_TAG..HEAD --pretty=format:"%h %s")
           echo "commits=$COMMITS" >> $GITHUB_ENV
 
-      # Build and package the Linux binary
-      - name: Build and package Linux binary
-        run: make build-linux package-linux
+      # Build and package the Linux binaries
+      - name: Build and package Linux binaries
+        run: |
+          make build-linux-amd64 package-linux-amd64
+          make build-linux-arm64 package-linux-arm64
 
-      # Build and package the macOS binary
-      - name: Build and package macOS binary
-        run: make build-macos package-macos
+      # Build and package the macOS binaries
+      - name: Build and package macOS binaries
+        run: |
+          make build-macos-amd64 package-macos-amd64
+          make build-macos-arm64 package-macos-arm64
 
-      # Build and package the Windows binary
-      - name: Build and package Windows binary
-        run: make build-windows package-windows
+      # Build and package the Windows binaries
+      - name: Build and package Windows binaries
+        run: |
+          make build-windows-amd64 package-windows-amd64
+          make build-windows-arm64 package-windows-arm64
 
       # Create a GitHub release with commit logs
       - name: Create release
@@ -75,8 +69,8 @@ jobs:
           draft: false
           prerelease: false
 
-      # Upload Linux binary and checksum
-      - name: Upload Linux binary
+      # Upload Linux binaries and checksums
+      - name: Upload Linux amd64 binary
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -86,7 +80,7 @@ jobs:
           asset_name: nodevin-linux-amd64-${{ github.ref_name }}.tar.gz
           asset_content_type: application/gzip
 
-      - name: Upload Linux checksum
+      - name: Upload Linux amd64 checksum
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -96,44 +90,104 @@ jobs:
           asset_name: nodevin-linux-amd64-${{ github.ref_name }}.tar.gz.sha256
           asset_content_type: text/plain
 
-      # Upload macOS binary and checksum
-      - name: Upload macOS binary
+      - name: Upload Linux arm64 binary
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/nodevin-macos-${{ github.ref_name }}.tar.gz
-          asset_name: nodevin-macos-${{ github.ref_name }}.tar.gz
+          asset_path: ./release/nodevin-linux-arm64-${{ github.ref_name }}.tar.gz
+          asset_name: nodevin-linux-arm64-${{ github.ref_name }}.tar.gz
           asset_content_type: application/gzip
 
-      - name: Upload macOS checksum
+      - name: Upload Linux arm64 checksum
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/nodevin-macos-${{ github.ref_name }}.tar.gz.sha256
-          asset_name: nodevin-macos-${{ github.ref_name }}.tar.gz.sha256
+          asset_path: ./release/nodevin-linux-arm64-${{ github.ref_name }}.tar.gz.sha256
+          asset_name: nodevin-linux-arm64-${{ github.ref_name }}.tar.gz.sha256
           asset_content_type: text/plain
 
-      # Upload Windows binary and checksum
-      - name: Upload Windows binary
+      # Upload macOS binaries and checksums
+      - name: Upload macOS amd64 binary
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/nodevin-windows-${{ github.ref_name }}.zip
-          asset_name: nodevin-windows-${{ github.ref_name }}.zip
+          asset_path: ./release/nodevin-macos-amd64-${{ github.ref_name }}.tar.gz
+          asset_name: nodevin-macos-amd64-${{ github.ref_name }}.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload macOS amd64 checksum
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/nodevin-macos-amd64-${{ github.ref_name }}.tar.gz.sha256
+          asset_name: nodevin-macos-amd64-${{ github.ref_name }}.tar.gz.sha256
+          asset_content_type: text/plain
+
+      - name: Upload macOS arm64 binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/nodevin-macos-arm64-${{ github.ref_name }}.tar.gz
+          asset_name: nodevin-macos-arm64-${{ github.ref_name }}.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload macOS arm64 checksum
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/nodevin-macos-arm64-${{ github.ref_name }}.tar.gz.sha256
+          asset_name: nodevin-macos-arm64-${{ github.ref_name }}.tar.gz.sha256
+          asset_content_type: text/plain
+
+      # Upload Windows binaries and checksums
+      - name: Upload Windows amd64 binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/nodevin-windows-amd64-${{ github.ref_name }}.zip
+          asset_name: nodevin-windows-amd64-${{ github.ref_name }}.zip
           asset_content_type: application/zip
 
-      - name: Upload Windows checksum
+      - name: Upload Windows amd64 checksum
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/nodevin-windows-${{ github.ref_name }}.zip.sha256
-          asset_name: nodevin-windows-${{ github.ref_name }}.zip.sha256
+          asset_path: ./release/nodevin-windows-amd64-${{ github.ref_name }}.zip.sha256
+          asset_name: nodevin-windows-amd64-${{ github.ref_name }}.zip.sha256
+          asset_content_type: text/plain
+
+      - name: Upload Windows arm64 binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/nodevin-windows-arm64-${{ github.ref_name }}.zip
+          asset_name: nodevin-windows-arm64-${{ github.ref_name }}.zip
+          asset_content_type: application/zip
+
+      - name: Upload Windows arm64 checksum
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/nodevin-windows-arm64-${{ github.ref_name }}.zip.sha256
+          asset_name: nodevin-windows-arm64-${{ github.ref_name }}.zip.sha256
           asset_content_type: text/plain

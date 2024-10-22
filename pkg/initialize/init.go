@@ -170,7 +170,7 @@ Next steps to finish Docker setup:
 Download complete.
 Next steps to finish Docker setup:
 1. Navigate to your downloads folder and find the file "docker-desktop-installer.exe".
-2. Open "docker-desktop-installer.exe".
+2. Open the installer.
 3. Follow the instructions to install Docker on your computer.
 4. Click "Close and restart" to restart your computer and finish the installation.
 5. After confirming Docker is running and working, you can start using Nodevin. Remember, Nodevin will only work if Docker Desktop is running!`)
@@ -183,6 +183,7 @@ Next steps to finish Docker setup:
 func installDocker() error {
 	var installCmd *exec.Cmd
 	var downloadsPath string
+	arch := runtime.GOARCH
 
 	switch runtime.GOOS {
 	case "windows":
@@ -193,32 +194,53 @@ func installDocker() error {
 
 	switch runtime.GOOS {
 	case "linux":
-		fmt.Println("Starting Docker installation...")
-		installCmd = exec.Command("sh", "-c", `
+		fmt.Printf("Starting Docker installation for Linux (%s)...\n", arch)
+		installCmd = exec.Command("sh", "-c", fmt.Sprintf(`
 			sudo apt update &&
 			sudo apt install -y apt-transport-https ca-certificates curl software-properties-common &&
 			curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - &&
-			sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" &&
+			sudo add-apt-repository "deb [arch=%s] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" &&
 			sudo apt update &&
 			sudo apt install -y docker-ce &&
    			sudo usermod -aG docker $USER &&
-			newgrp docker`)
+			newgrp docker`, arch))
+
 	case "darwin":
-		fmt.Println("Starting Docker download...")
+		fmt.Printf("Starting Docker download for macOS (%s)...\n", arch)
+		var dockerURL string
+		if arch == "amd64" {
+			dockerURL = "https://desktop.docker.com/mac/stable/amd64/Docker.dmg"
+		} else if arch == "arm64" {
+			dockerURL = "https://desktop.docker.com/mac/stable/arm64/Docker.dmg"
+		} else {
+			return fmt.Errorf("unsupported architecture: %s", arch)
+		}
+
 		installCmd = exec.Command("sh", "-c", fmt.Sprintf(`
-			echo "Downloading Docker for macOS..."
-			curl -L https://desktop.docker.com/mac/stable/Docker.dmg -o %s/Docker.dmg &&
+			echo "Downloading Docker for macOS..." &&
+			curl -L %s -o %s/Docker.dmg &&
 			echo "Opening Docker installer..." &&
 			open %s/Docker.dmg &&
-			echo "Once Docker is installed, open Docker Desktop before running Nodevin commands."`, downloadsPath, downloadsPath))
+			echo "Once Docker is installed, open Docker Desktop before running Nodevin commands."`, dockerURL, downloadsPath, downloadsPath))
+
 	case "windows":
-		fmt.Println("Starting Docker download...")
+		fmt.Printf("Starting Docker download for Windows (%s)...\n", arch)
+		var dockerURL string
+		if arch == "amd64" {
+			dockerURL = "https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe"
+		} else if arch == "arm64" {
+			dockerURL = "https://desktop.docker.com/win/main/arm64/Docker%20Desktop%20Installer.exe"
+		} else {
+			return fmt.Errorf("unsupported architecture: %s", arch)
+		}
+
 		installCmd = exec.Command("powershell", "-Command", fmt.Sprintf(`
 			$ErrorActionPreference = 'Stop';
 			$downloadsFolder = "%s";
 			Write-Host 'Downloading Docker for Windows...';
-			Invoke-WebRequest -UseBasicParsing -OutFile "$downloadsFolder\\docker-desktop-installer.exe" https://desktop.docker.com/win/stable/Docker%%20Desktop%%20Installer.exe -Verbose;
-			Write-Host 'Once Docker is installed, open Docker Desktop before running Nodevin commands.';`, downloadsPath))
+			Invoke-WebRequest -UseBasicParsing -OutFile "$downloadsFolder\\docker-desktop-installer.exe" %s -Verbose;
+			Write-Host 'Once Docker is installed, open Docker Desktop before running Nodevin commands.';`, downloadsPath, dockerURL))
+
 	default:
 		return fmt.Errorf("unsupported OS: %s", runtime.GOOS)
 	}

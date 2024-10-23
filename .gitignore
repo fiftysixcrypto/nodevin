@@ -2,9 +2,9 @@
 *docker-compose*
 
 # Binaries for programs and plugins
-nodevin.exe
-nodevin-macos
-nodevin-linux
+nodevin-*.exe
+nodevin-macos-*
+nodevin-linux-*
 
 # Environment variables
 *.env

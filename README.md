@@ -13,7 +13,9 @@ Our goal is to facilitate blockchain node standup and maintenance for every chai
 
 ## Getting Started
 
-### Installation
+### Setup
+
+Stand up a blockchain node in three steps.
 
 1. **Download Nodevin:**
 
@@ -21,22 +23,11 @@ Download the latest version of Nodevin from the [releases page](https://github.c
 
 2. **Initialize Nodevin and Docker:**
 
-This command will check if you have the proper versions of Docker and Docker Compose installed. If not, Nodevin will download or install them for you (depending on your operating system).
-
 ```sh
 nodevin init
 ```
 
 *For more information setting up Nodevin on Windows, read [these docs](./docs/windows-setup.md).*
-
-#### **(For Linux/MacOS) - Set Nodevin Permissions:**
-
-After downloading Nodevin, you may need to set executable permissions and move it to a directory in `$PATH`.
-
-```sh
-chmod +x nodevin
-sudo mv nodevin /usr/local/bin/
-```
 
 3. **Start a Blockchain Node:**
 
@@ -48,7 +39,9 @@ nodevin start bitcoin
 
 *Nodevin stores blockchain data by default in `$HOME/.nodevin`.*
 
-4. **(Optional) - Advanced Features:**
+---
+
+#### **(Optional) - Advanced Features:**
 
 Nodevin allows for full customization in node startup. View the full list of flags for configuration details [here](./docs). For example, this command runs a Bitcoin Testnet node with a specified command, docker image and tag (version), unique nodevin data directory, and more:
 
@@ -66,6 +59,15 @@ nodevin start bitcoin \
   --mem-limit=1g \
   --cpu-reservation=1.0 \
   --mem-reservation=512m
+```
+
+#### **(For Linux/MacOS) - Set Nodevin Permissions:**
+
+After downloading Nodevin, you may need to set executable permissions and move it to a directory in `$PATH`.
+
+```sh
+chmod +x nodevin
+sudo mv nodevin /usr/local/bin/
 ```
 
 ### More Documentation

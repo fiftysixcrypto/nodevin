@@ -19,6 +19,8 @@
 package litecoin
 
 import (
+	"runtime"
+
 	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/fiftysixcrypto/nodevin/internal/utils"
 	"github.com/fiftysixcrypto/nodevin/pkg/docker"
@@ -40,7 +42,23 @@ func CreateLitecoinComposeFile(cwd string) (string, error) {
 		return "", err
 	}
 
+	composeFilePath, err := compose.CreateComposeFile(
+		litecoinBaseComposeConfig.ContainerName,
+		litecoinBaseComposeConfig,
+		[]string{},
+		[]compose.NetworkConfig{},
+		cwd)
+
+	if err != nil {
+		return "", err
+	}
+
 	if viper.GetBool("ord") || viper.GetBool("ord-litecoin") {
+		if runtime.GOARCH == "arm64" {
+			logger.LogError("Running on ARM architecture: ord functionality is not supported on ARM builds. Skipping ord-litecoin.")
+			return composeFilePath, nil
+		}
+
 		var ordLitecoinNetwork string
 
 		if utils.CheckIfTestnetOrTestnetNetworkFlag() {

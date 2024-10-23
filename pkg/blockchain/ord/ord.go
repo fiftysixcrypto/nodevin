@@ -19,7 +19,9 @@
 package ord
 
 import (
+	"errors"
 	"fmt"
+	"runtime"
 
 	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/fiftysixcrypto/nodevin/internal/utils"
@@ -30,6 +32,12 @@ import (
 
 func CreateOrdComposeFile(cwd string) (string, error) {
 	var network string
+
+	if runtime.GOARCH == "arm64" {
+		err := errors.New("ord functionality is not supported on ARM builds")
+		logger.LogError("Running on ARM architecture: " + err.Error())
+		return "", err
+	}
 
 	fmt.Printf("WARNING: It isn't reccomended to start ord individually. Most cases would require starting ord alongside Bitcoin with command `%s start bitcoin --ord`. You may run into unintentional errors or require additional configuration.", utils.GetNodevinExecutable())
 

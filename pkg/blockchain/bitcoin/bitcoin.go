@@ -19,6 +19,8 @@
 package bitcoin
 
 import (
+	"runtime"
+
 	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/fiftysixcrypto/nodevin/internal/utils"
 	"github.com/fiftysixcrypto/nodevin/pkg/docker"
@@ -40,7 +42,23 @@ func CreateBitcoinComposeFile(cwd string) (string, error) {
 		return "", err
 	}
 
+	composeFilePath, err := compose.CreateComposeFile(
+		bitcoinBaseComposeConfig.ContainerName,
+		bitcoinBaseComposeConfig,
+		[]string{},
+		[]compose.NetworkConfig{},
+		cwd)
+
+	if err != nil {
+		return "", err
+	}
+
 	if viper.GetBool("ord") {
+		if runtime.GOARCH == "arm64" {
+			logger.LogError("Running on ARM architecture: ord functionality is not supported on ARM builds. Skipping ord.")
+			return composeFilePath, nil
+		}
+
 		var ordNetwork string
 
 		if utils.CheckIfTestnetOrTestnetNetworkFlag() {
@@ -74,17 +92,6 @@ func CreateBitcoinComposeFile(cwd string) (string, error) {
 
 		return composeFilePath, nil
 	} else {
-		composeFilePath, err := compose.CreateComposeFile(
-			bitcoinBaseComposeConfig.ContainerName,
-			bitcoinBaseComposeConfig,
-			[]string{},
-			[]compose.NetworkConfig{},
-			cwd)
-
-		if err != nil {
-			return "", err
-		}
-
 		return composeFilePath, nil
 	}
 }

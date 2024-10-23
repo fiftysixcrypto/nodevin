@@ -19,7 +19,9 @@
 package ord_litecoin
 
 import (
+	"errors"
 	"fmt"
+	"runtime"
 
 	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/fiftysixcrypto/nodevin/internal/utils"
@@ -30,6 +32,12 @@ import (
 
 func CreateOrdLitecoinComposeFile(cwd string) (string, error) {
 	var network string
+
+	if runtime.GOARCH == "arm64" {
+		err := errors.New("ord-litecoin functionality is not supported on ARM builds")
+		logger.LogError("Running on ARM architecture: " + err.Error())
+		return "", err
+	}
 
 	fmt.Printf("WARNING: It isn't reccomended to start ord-litecoin individually. Most cases would require starting ord-litecoin alongside Litecoin with command `%s start litecoin --ord-litecoin`. You may run into unintentional errors or require additional configuration.", utils.GetNodevinExecutable())
 

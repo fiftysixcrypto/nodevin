@@ -82,6 +82,9 @@ func deleteNetworkDirectory(baseDir, networkName string) {
 		return
 	}
 
+	// Stop network docker container
+	stopNode(networkName)
+
 	// Remove the network directory
 	err := os.RemoveAll(networkDir)
 	if err != nil {
@@ -93,6 +96,9 @@ func deleteNetworkDirectory(baseDir, networkName string) {
 }
 
 func deleteAllDirectories(baseDir string) {
+	// Stop all docker containers
+	stopAllNodes()
+
 	// Remove the entire nodevinDataDir directory
 	err := os.RemoveAll(baseDir)
 	if err != nil {

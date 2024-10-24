@@ -114,10 +114,17 @@ func stopNode(network string) {
 }
 
 func stopAllNodes() {
-	logger.LogInfo("Stopping all Docker containers...")
+	logger.LogInfo("Stopping Docker Compose containers...")
 
-	// Get a list of running Docker container IDs
-	psCmd := exec.Command("docker", "ps", "-q")
+	// Get the map of allowed network container names
+	networkContainerMap := utils.NetworkContainerMap()
+	allowedContainers := make(map[string]bool)
+	for _, containerName := range networkContainerMap {
+		allowedContainers[containerName] = true
+	}
+
+	// Get a list of running Docker container IDs with their names
+	psCmd := exec.Command("docker", "ps", "--format", "{{.ID}} {{.Names}}")
 	var psOut bytes.Buffer
 	psCmd.Stdout = &psOut
 	psCmd.Stderr = os.Stderr
@@ -127,9 +134,22 @@ func stopAllNodes() {
 		return
 	}
 
-	containerIDs := strings.Fields(psOut.String())
+	// Filter containers that match allowed container names
+	var containerIDs []string
+	lines := strings.Split(strings.TrimSpace(psOut.String()), "\n")
+	for _, line := range lines {
+		parts := strings.Fields(line)
+		if len(parts) != 2 {
+			continue
+		}
+		containerID, containerName := parts[0], parts[1]
+		if allowedContainers[containerName] {
+			containerIDs = append(containerIDs, containerID)
+		}
+	}
+
 	if len(containerIDs) == 0 {
-		logger.LogInfo("No running Docker containers found.")
+		logger.LogInfo("No matching Docker Compose containers found.")
 		return
 	}
 
@@ -155,5 +175,5 @@ func stopAllNodes() {
 		return
 	}
 
-	logger.LogInfo("All Docker containers stopped and removed successfully.")
+	logger.LogInfo("Selected Docker Compose containers stopped and removed successfully.")
 }

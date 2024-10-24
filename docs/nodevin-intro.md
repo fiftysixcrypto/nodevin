@@ -2,6 +2,8 @@
 
 **Nodevin** is an open-source tool that simplifies the process of running blockchain nodes. Whether you're a developer, enthusiast, or institution, Nodevin automates node setup, updates, and management—making it easy for anyone to participate in decentralized blockchain networks.
 
+Nodevin is a **Command-Line Interface (CLI) tool**. This means it doesn't have a graphical user interface with buttons to click or windows to navigate. Instead, you interact with Nodevin by typing commands directly into your **command prompt** (Windows) or **terminal** (Linux/MacOS).
+
 ---
 
 ## Nodevin Quick Start Guide
@@ -24,6 +26,27 @@ The `nodevin init` command can help you get set up and test system requirements.
 3. **Start a Blockchain Node**
    - Run: `nodevin list` to list all supported networks.
    - Run: `nodevin start <network>` (e.g., `nodevin start bitcoin`).
+
+---
+
+### Intro - Using a CLI Tool
+
+1. **Open Your Command Prompt/Terminal**:
+   - On **Windows**: Search for `cmd` or `Powershell` from the Start menu.
+   - On **Linux/MacOS**: Open the Terminal application (usually found in your Applications menu).
+
+2. **Running Commands**: 
+   - Commands are simply instructions you type and execute by pressing "Enter." For example, to start a Bitcoin node, you'd type:
+     ```
+     nodevin start bitcoin
+     ```
+   - This command tells Nodevin to start a Bitcoin node, on mainnet, using Docker.
+
+3. **No Mouse Required**: Unlike traditional software, you won't be using your mouse to interact. Every action, from starting a blockchain node to stopping it, is handled through typed commands.
+
+### Why a CLI?
+
+CLI tools like Nodevin are preferred by many for their **precision, efficiency, and flexibility**. They allow you to execute complex tasks quickly without navigating multiple screens. Nodevin leverages this power to make node management as straightforward as possible, with simple commands that abstract complex operations, all in the background.
 
 ---
 
@@ -97,4 +120,3 @@ rm nodevin # delete nodevin
 - [Main README](../README.md)
 - [Nodevin Commands](./cli-commands.md)
 - [Nodevin Windows Installation](./windows-setup.md)
-

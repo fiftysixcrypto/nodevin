@@ -22,9 +22,9 @@ import (
 	"fmt"
 
 	"github.com/fiftysixcrypto/nodevin/internal/version"
-	"github.com/fiftysixcrypto/nodevin/pkg/blockchain"
 	"github.com/fiftysixcrypto/nodevin/pkg/daemon"
 	"github.com/fiftysixcrypto/nodevin/pkg/initialize"
+	"github.com/fiftysixcrypto/nodevin/pkg/nodes"
 	"github.com/fiftysixcrypto/nodevin/pkg/update"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -123,16 +123,16 @@ func init() {
 	viper.BindPFlag("ord-litecoin-image", rootCmd.PersistentFlags().Lookup("ord-litecoin-image"))
 	viper.BindPFlag("ord-litecoin-version", rootCmd.PersistentFlags().Lookup("ord-litecoin-version"))
 
-	// Add blockchain commands
-	rootCmd.AddCommand(blockchain.RequestCmd)
-	rootCmd.AddCommand(blockchain.ShellCmd)
-	rootCmd.AddCommand(blockchain.CleanupCmd)
-	rootCmd.AddCommand(blockchain.DeleteCmd)
-	rootCmd.AddCommand(blockchain.StartNodeCmd)
-	rootCmd.AddCommand(blockchain.StopNodeCmd)
-	rootCmd.AddCommand(blockchain.LogsCmd)
-	rootCmd.AddCommand(blockchain.InfoCmd)
-	rootCmd.AddCommand(blockchain.ListCmd)
+	// Add node commands
+	rootCmd.AddCommand(nodes.RequestCmd)
+	rootCmd.AddCommand(nodes.ShellCmd)
+	rootCmd.AddCommand(nodes.CleanupCmd)
+	rootCmd.AddCommand(nodes.DeleteCmd)
+	rootCmd.AddCommand(nodes.StartNodeCmd)
+	rootCmd.AddCommand(nodes.StopNodeCmd)
+	rootCmd.AddCommand(nodes.LogsCmd)
+	rootCmd.AddCommand(nodes.InfoCmd)
+	rootCmd.AddCommand(nodes.ListCmd)
 
 	// Add init command
 	rootCmd.AddCommand(initialize.InitCmd)

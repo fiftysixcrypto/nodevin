@@ -1,4 +1,4 @@
-package blockchain
+package nodes
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all supported blockchain networks",
+	Short: "List all supported networks",
 	Run: func(cmd *cobra.Command, args []string) {
 		listAllNetworks()
 	},

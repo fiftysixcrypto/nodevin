@@ -16,7 +16,7 @@
 // limitations under the License.
 */
 
-package blockchain
+package nodes
 
 import (
 	"fmt"
@@ -33,7 +33,7 @@ var tail string
 
 var logsCmd = &cobra.Command{
 	Use:   "logs [network]",
-	Short: "Fetch logs from a running blockchain node",
+	Short: "Fetch logs from a running node",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
@@ -50,7 +50,7 @@ var logsCmd = &cobra.Command{
 }
 
 func fetchLogs(network string) {
-	logger.LogInfo("Fetching logs for blockchain node...")
+	logger.LogInfo("Fetching logs for node...")
 
 	properNetwork := network
 

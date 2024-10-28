@@ -16,7 +16,7 @@
 // limitations under the License.
 */
 
-package blockchain
+package nodes
 
 import (
 	"fmt"
@@ -39,7 +39,7 @@ var (
 
 var shellCmd = &cobra.Command{
 	Use:   "shell [network]",
-	Short: "Run a shell in the specified blockchain node container",
+	Short: "Run a shell in the specified node container",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		network := args[0]

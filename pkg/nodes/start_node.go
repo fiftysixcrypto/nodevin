@@ -16,7 +16,7 @@
 // limitations under the License.
 */
 
-package blockchain
+package nodes
 
 import (
 	"fmt"
@@ -25,12 +25,12 @@ import (
 
 	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/fiftysixcrypto/nodevin/internal/utils"
-	"github.com/fiftysixcrypto/nodevin/pkg/blockchain/bitcoin"
-	"github.com/fiftysixcrypto/nodevin/pkg/blockchain/litecoin"
-	"github.com/fiftysixcrypto/nodevin/pkg/blockchain/ord"
-	ord_litecoin "github.com/fiftysixcrypto/nodevin/pkg/blockchain/ord-litecoin"
 	"github.com/fiftysixcrypto/nodevin/pkg/docker"
 	"github.com/fiftysixcrypto/nodevin/pkg/docker/compose"
+	"github.com/fiftysixcrypto/nodevin/pkg/nodes/bitcoin"
+	"github.com/fiftysixcrypto/nodevin/pkg/nodes/litecoin"
+	"github.com/fiftysixcrypto/nodevin/pkg/nodes/ord"
+	ord_litecoin "github.com/fiftysixcrypto/nodevin/pkg/nodes/ord-litecoin"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

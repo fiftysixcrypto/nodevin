@@ -16,7 +16,7 @@
 // limitations under the License.
 */
 
-package blockchain
+package nodes
 
 import (
 	"bytes"
@@ -34,7 +34,7 @@ import (
 
 var requestCmd = &cobra.Command{
 	Use:   "request [network]",
-	Short: "Make an RPC request to a blockchain network",
+	Short: "Make an RPC request to a node",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		network := args[0]

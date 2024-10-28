@@ -27,7 +27,7 @@ var InitCmd = &cobra.Command{
 func runInit() {
 	fmt.Println("")
 	fmt.Printf("Welcome to nodevin v%s!\n", version.Version)
-	fmt.Println("Nodevin allows you to run any blockchain node in the world.")
+	fmt.Println("Nodevin makes running blockchain nodes more accessible.")
 	fmt.Println("")
 	fmt.Println("--")
 	fmt.Println("")

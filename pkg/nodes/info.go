@@ -16,7 +16,7 @@
 // limitations under the License.
 */
 
-package blockchain
+package nodes
 
 import (
 	"encoding/json"

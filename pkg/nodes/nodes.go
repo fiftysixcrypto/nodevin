@@ -27,15 +27,16 @@ import (
 )
 
 var (
-	RequestCmd   = requestCmd
-	ShellCmd     = shellCmd
-	StartNodeCmd = startNodeCmd
-	StopNodeCmd  = stopNodeCmd
-	DeleteCmd    = deleteCmd
-	CleanupCmd   = cleanupCmd
-	LogsCmd      = logsCmd
-	InfoCmd      = infoCmd
-	ListCmd      = listCmd
+	RequestCmd     = requestCmd
+	ShellCmd       = shellCmd
+	StartNodeCmd   = startNodeCmd
+	StopNodeCmd    = stopNodeCmd
+	DeleteCmd      = deleteCmd
+	CleanupCmd     = cleanupCmd
+	LogsCmd        = logsCmd
+	InfoCmd        = infoCmd
+	ListCmd        = listCmd
+	IpfsSupportCmd = ipfsSupportCmd
 )
 
 var blockchainCmd = &cobra.Command{

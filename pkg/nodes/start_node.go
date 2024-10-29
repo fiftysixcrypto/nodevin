@@ -28,6 +28,7 @@ import (
 	"github.com/fiftysixcrypto/nodevin/pkg/docker"
 	"github.com/fiftysixcrypto/nodevin/pkg/docker/compose"
 	"github.com/fiftysixcrypto/nodevin/pkg/nodes/bitcoin"
+	"github.com/fiftysixcrypto/nodevin/pkg/nodes/ipfs"
 	"github.com/fiftysixcrypto/nodevin/pkg/nodes/litecoin"
 	"github.com/fiftysixcrypto/nodevin/pkg/nodes/ord"
 	ord_litecoin "github.com/fiftysixcrypto/nodevin/pkg/nodes/ord-litecoin"
@@ -123,6 +124,8 @@ func startNode(args []string) {
 		}
 
 		logger.LogInfo("--")
+	} else if network == "ipfs" {
+		logger.LogInfo("No assumed size for network, depends on user input.")
 	} else {
 		dataSize, exists := utils.GetNetworkRequiredDataSize(network)
 
@@ -192,6 +195,8 @@ func createComposeFileForNetwork(network string, cwd string) (string, error) {
 		return litecoin.CreateLitecoinComposeFile(cwd)
 	case "ord-litecoin":
 		return ord_litecoin.CreateOrdLitecoinComposeFile(cwd)
+	case "ipfs":
+		return ipfs.CreateKuboComposeFile(cwd)
 	default:
 		return "", fmt.Errorf("unsupported network: %s", network)
 	}

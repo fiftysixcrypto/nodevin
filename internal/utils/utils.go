@@ -31,6 +31,8 @@ import (
 
 type NetworkInfo struct {
 	ContainerName    string
+	DockerHubImage   string
+	SnapshotCID      string
 	RPCPort          int
 	DataSize         int
 	SnapshotSize     int
@@ -41,7 +43,9 @@ type NetworkInfo struct {
 var networkInfoMap = map[string]NetworkInfo{
 	"bitcoin": {
 		ContainerName:    "bitcoin-core",
+		DockerHubImage:   "bitcoin-core",
 		RPCPort:          8332,
+		SnapshotCID:      "",
 		DataSize:         708669603840,  // 660 GB
 		SnapshotSize:     1319413953331, // 1.2TB (~660 GB + ~540 GB)
 		StartMessage:     "\"A system for electronic transactions without relying on trust.\" -- Satoshi Nakamoto",
@@ -49,7 +53,9 @@ var networkInfoMap = map[string]NetworkInfo{
 	},
 	"bitcoin-testnet": {
 		ContainerName:    "bitcoin-core-testnet",
+		DockerHubImage:   "bitcoin-core",
 		RPCPort:          18332,
+		SnapshotCID:      "",
 		DataSize:         0,
 		SnapshotSize:     0,
 		StartMessage:     "\"Testing is the lifeblood of innovation and security.\"",
@@ -57,7 +63,9 @@ var networkInfoMap = map[string]NetworkInfo{
 	},
 	"ord": {
 		ContainerName:    "ord",
+		DockerHubImage:   "ord",
 		RPCPort:          80,
+		SnapshotCID:      "",
 		DataSize:         0,
 		SnapshotSize:     0,
 		StartMessage:     "\"Ordinal theory imbues satoshis with numismatic value, allowing them to be collected and traded as curios.\"",
@@ -65,7 +73,9 @@ var networkInfoMap = map[string]NetworkInfo{
 	},
 	"ord-testnet": {
 		ContainerName:    "ord-testnet",
+		DockerHubImage:   "ord",
 		RPCPort:          80,
+		SnapshotCID:      "",
 		DataSize:         0,
 		SnapshotSize:     0,
 		StartMessage:     "\"Ordinal theory imbues satoshis with numismatic value, allowing them to be collected and traded as curios.\"",
@@ -73,7 +83,9 @@ var networkInfoMap = map[string]NetworkInfo{
 	},
 	"litecoin": {
 		ContainerName:    "litecoin-core",
+		DockerHubImage:   "litecoin-core",
 		RPCPort:          9332,
+		SnapshotCID:      "",
 		DataSize:         268435456000, // 250 GB
 		SnapshotSize:     429496729600, // 400 GB (~240GB + ~160GB)
 		StartMessage:     "\"Litecoin is the silver to Bitcoin's gold.\" -- Charlie Lee",
@@ -81,7 +93,9 @@ var networkInfoMap = map[string]NetworkInfo{
 	},
 	"litecoin-testnet": {
 		ContainerName:    "litecoin-core-testnet",
+		DockerHubImage:   "litecoin-core",
 		RPCPort:          19332,
+		SnapshotCID:      "",
 		DataSize:         0,
 		SnapshotSize:     0,
 		StartMessage:     "\"Testing is the lifeblood of innovation and security.\"",
@@ -89,7 +103,9 @@ var networkInfoMap = map[string]NetworkInfo{
 	},
 	"ord-litecoin": {
 		ContainerName:    "ord-litecoin",
+		DockerHubImage:   "ord-litecoin",
 		RPCPort:          80,
+		SnapshotCID:      "",
 		DataSize:         0,
 		SnapshotSize:     0,
 		StartMessage:     "\"Ordinal theory imbues satoshis with numismatic value, allowing them to be collected and traded as curios.\"",
@@ -97,11 +113,23 @@ var networkInfoMap = map[string]NetworkInfo{
 	},
 	"ord-litecoin-testnet": {
 		ContainerName:    "ord-litecoin-testnet",
+		DockerHubImage:   "ord-litecoin",
 		RPCPort:          80,
+		SnapshotCID:      "",
 		DataSize:         0,
 		SnapshotSize:     0,
 		StartMessage:     "\"Ordinal theory imbues satoshis with numismatic value, allowing them to be collected and traded as curios.\"",
 		CommandSupported: false,
+	},
+	"ipfs": {
+		ContainerName:    "ipfs",
+		DockerHubImage:   "bitcoin-core",
+		RPCPort:          5001,
+		SnapshotCID:      "",
+		DataSize:         0, // needs review
+		SnapshotSize:     0, // needs review
+		StartMessage:     "\"A peer-to-peer media protocol to make the web safer, faster, and more open.\" -- IPFS",
+		CommandSupported: true,
 	},
 }
 
@@ -143,7 +171,7 @@ func GetNetworkRequiredSnapshotSize(network string) (int, bool) {
 
 func GetFiftysixDockerhubContainerName(network string) (string, bool) {
 	networkInfo, exists := networkInfoMap[network]
-	return "fiftysix/" + networkInfo.ContainerName, exists
+	return "fiftysix/" + networkInfo.DockerHubImage, exists
 }
 
 func GetAllSupportedNetworks() string {
@@ -173,6 +201,15 @@ func CheckIfTestnetOrTestnetNetworkFlag() bool {
 	testnetFlag := viper.GetBool("testnet")
 
 	return testnetFlag || networkFlag == "testnet"
+}
+
+func GetSnapshotCIDByNetwork(network string) (string, bool) {
+	networkInfo, exists := networkInfoMap[network]
+	return networkInfo.SnapshotCID, exists
+}
+
+func IsSupportedExtendedInfoSoftware(software string) bool {
+	return software == "bitcoin-core" || software == "litecoin-core"
 }
 
 // Returns path to the user's nodevin data directory (~/.nodevin/data)

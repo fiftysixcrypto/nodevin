@@ -127,6 +127,22 @@ func displayInfo() {
 
 		formattedPorts := formatPorts(container.Ports)
 
+		println(imageName, "hii")
+
+		if !utils.IsSupportedExtendedInfoSoftware(imageName) {
+			fmt.Fprintf(w, "| %s\t %s\t %s\t %s\t %s\t %s\t %s/%s\n",
+				container.Names,
+				version,
+				container.Command,
+				container.Status,
+				formattedPorts,
+				"-",
+				"-",
+				"-",
+			)
+			continue
+		}
+
 		localLatestBlock := 0
 		globalLatestBlock := 0
 		peers := 0

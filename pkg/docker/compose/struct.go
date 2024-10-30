@@ -77,7 +77,7 @@ type VolumeDetails struct {
 
 // ComposeFile defines the top-level structure of the Docker Compose file.
 type ComposeFile struct {
-	Version  string                    `yaml:"version"`
+	//Version  string                    `yaml:"version"`
 	Services map[string]Service        `yaml:"services"`
 	Networks map[string]NetworkDetails `yaml:"networks"`
 	Volumes  map[string]VolumeDetails  `yaml:"volumes"`

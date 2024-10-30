@@ -88,7 +88,7 @@ Nodevin is a command-line interface (CLI) daemon that simplifies the setup, mana
 
 *Description*: Specifies the directory where nodevin and blockchain data will be stored.
 *Usage*: `--data-dir="<file-path>"`
-*Example*: `--data-dir="~/Desktop"`
+*Example*: `nodevin --data-dir="~/Desktop" start ipfs`
 
 #### Docker & Container Options:
 

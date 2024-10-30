@@ -462,7 +462,7 @@ fi"`, initSnapshotSyncCommand),
 
 	// Build the compose file structure
 	composeFile := ComposeFile{
-		Version:  "3.9",
+		//Version:  "3.9", // Throws a warning on start, also requires commenting/removing ComposeFile.Version
 		Services: services,
 		Networks: extraNetworkDefs,
 		Volumes:  allVolumeDefs,

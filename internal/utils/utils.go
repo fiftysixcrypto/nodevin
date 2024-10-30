@@ -123,7 +123,7 @@ var networkInfoMap = map[string]NetworkInfo{
 	},
 	"ipfs": {
 		ContainerName:    "ipfs",
-		DockerHubImage:   "bitcoin-core",
+		DockerHubImage:   "kubo",
 		RPCPort:          5001,
 		SnapshotCID:      "",
 		DataSize:         0, // needs review

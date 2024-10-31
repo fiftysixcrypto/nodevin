@@ -2,7 +2,7 @@ BINARY_NAME=nodevin
 MAIN_PACKAGE=./cmd/nodevin
 VERSION=$(shell git describe --tags --abbrev=0)
 
-all: checksum build-linux build-macos build-windows package-linux package-macos package-windows
+all: build-linux-amd64 build-linux-arm64 build-macos-amd64 build-macos-arm64 build-windows-amd64 build-windows-arm64
 
 checksum:
 	shasum -a 256 $(BINARY_NAME) > $(BINARY_NAME).sha256 || true
@@ -14,11 +14,11 @@ build-linux-amd64:
 build-linux-arm64:
 	GOOS=linux GOARCH=arm64 go build -o $(BINARY_NAME)-linux-arm64 $(MAIN_PACKAGE)
 
-build-macos-arm64:
-	GOOS=darwin GOARCH=arm64 go build -o $(BINARY_NAME)-macos-arm64 $(MAIN_PACKAGE)
-
 build-macos-amd64:
 	GOOS=darwin GOARCH=amd64 go build -o $(BINARY_NAME)-macos-amd64 $(MAIN_PACKAGE)
+
+build-macos-arm64:
+	GOOS=darwin GOARCH=arm64 go build -o $(BINARY_NAME)-macos-arm64 $(MAIN_PACKAGE)
 
 build-windows-amd64:
 	GOOS=windows GOARCH=amd64 go build -o $(BINARY_NAME)-windows-amd64.exe $(MAIN_PACKAGE)

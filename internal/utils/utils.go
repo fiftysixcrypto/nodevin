@@ -131,6 +131,16 @@ var networkInfoMap = map[string]NetworkInfo{
 		StartMessage:     "\"A peer-to-peer media protocol to make the web safer, faster, and more open.\" -- IPFS",
 		CommandSupported: true,
 	},
+	"ipfs-cluster": {
+		ContainerName:    "ipfs-cluster",
+		DockerHubImage:   "ipfs-cluster",
+		RPCPort:          9094,
+		SnapshotCID:      "",
+		DataSize:         0, // needs review
+		SnapshotSize:     0, // needs review
+		StartMessage:     "\"A network of nodes working together to preserve and share data reliably.\"",
+		CommandSupported: false,
+	},
 }
 
 func NetworkContainerMap() map[string]string {

@@ -61,6 +61,7 @@ type Service struct {
 	Volumes       []string                             `yaml:"volumes"`
 	Networks      []string                             `yaml:"networks"`
 	Healthcheck   *Healthcheck                         `yaml:"healthcheck,omitempty"`
+	Environment   map[string]string                    `yaml:"environment,omitempty"`
 	DependsOn     map[string]ServiceDependsOnCondition `yaml:"depends_on,omitempty"`
 	Deploy        *Deploy                              `yaml:"deploy,omitempty"`
 }
@@ -94,6 +95,7 @@ type NetworkConfig struct {
 	Volumes              []string
 	Networks             []string
 	Deploy               Deploy
+	Environment          map[string]string
 	NetworkDefs          map[string]NetworkDetails
 	VolumeDefs           map[string]VolumeDetails
 	LocalPath            string

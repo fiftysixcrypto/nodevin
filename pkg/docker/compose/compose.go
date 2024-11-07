@@ -220,7 +220,6 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 if [ ! -f /nodevin-volume-%s/.copy-done ]; then
   mkdir -p /nodevin-volume-%s/ &&
   cp -r * /nodevin-volume-%s/ &&
-  apt install ipget &&
   %s &&
   touch /nodevin-volume-%s/.copy-done
 else
@@ -377,7 +376,12 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 						testnetDataDirectoryCommand = fmt.Sprintf("mkdir -p %s && ", finalConfig.LocalChainDataPath)
 					}
 
-					initSnapshotSyncCommand = fmt.Sprintf("%sipget --progress --peers=\"/ip4/172.20.0.2/tcp/4001/p2p/12D3KooWHUZ36WvuUBmz5aFLJ9PoNKrUJRMSA22i98BkoAaQPRzi\" -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s",
+					initSnapshotSyncCommand = fmt.Sprintf(`curl -LO https://go.dev/dl/go1.23.2.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.23.2.linux-amd64.tar.gz &&
+					export PATH=$PATH:/usr/local/go/bin &&
+					. ~/.bashrc && go version &&
+					go install github.com/ipfs/ipget@latest &&
+					echo 'export PATH=$PATH:/usr/local/go/bin:/root/go/bin' >> ~/.bashrc &&
+					. ~/.bashrc && %sipget --progress --peers=\"/ip4/172.20.0.2/tcp/4001/p2p/12D3KooWHUZ36WvuUBmz5aFLJ9PoNKrUJRMSA22i98BkoAaQPRzi\" -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s`,
 						testnetDataDirectoryCommand,
 						finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
 						finalConfig.SnapshotSyncCID,
@@ -399,12 +403,6 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 if [ ! -f /nodevin-volume/.copy-done ]; then
   mkdir -p /nodevin-volume/ &&
   cp -r * /nodevin-volume/ &&
-  curl -LO https://go.dev/dl/go1.23.2.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.23.2.linux-amd64.tar.gz &&
-  export PATH=$PATH:/usr/local/go/bin &&
-  . ~/.bashrc && go version &&
-  go install github.com/ipfs/ipget@latest &&
-  echo 'export PATH=$PATH:/usr/local/go/bin:/root/go/bin' >> ~/.bashrc &&
-  . ~/.bashrc &&
   %s &&
   touch /nodevin-volume/.copy-done
 else

@@ -63,7 +63,7 @@ func GetKuboNetworkComposeConfig(network string) (NetworkConfig, error) {
 			},
 		}
 		baseConfig.LocalPath = localPath
-		baseConfig.SnapshotSyncUrl = ""
+		baseConfig.SnapshotSyncCID = ""
 		baseConfig.SnapshotDataFilename = ""
 		baseConfig.LocalChainDataPath = "/nodevin-volume/ipfs/data"
 

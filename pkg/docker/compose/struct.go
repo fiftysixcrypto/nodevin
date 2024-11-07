@@ -97,7 +97,7 @@ type NetworkConfig struct {
 	NetworkDefs          map[string]NetworkDetails
 	VolumeDefs           map[string]VolumeDetails
 	LocalPath            string
-	SnapshotSyncUrl      string
+	SnapshotSyncCID      string
 	LocalChainDataPath   string
 	SnapshotDataFilename string
 	SnapshotSyncCommand  string

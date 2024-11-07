@@ -48,8 +48,8 @@ func mergeConfigs(defaultConfig, overrideConfig NetworkConfig) NetworkConfig {
 	if overrideConfig.LocalPath != "" {
 		defaultConfig.LocalPath = overrideConfig.LocalPath
 	}
-	if overrideConfig.SnapshotSyncUrl != "" {
-		defaultConfig.SnapshotSyncUrl = overrideConfig.SnapshotSyncUrl
+	if overrideConfig.SnapshotSyncCID != "" {
+		defaultConfig.SnapshotSyncCID = overrideConfig.SnapshotSyncCID
 	}
 	if overrideConfig.LocalChainDataPath != "" {
 		defaultConfig.LocalChainDataPath = overrideConfig.LocalChainDataPath
@@ -154,7 +154,7 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 			VolumeDefs:           extraVolumeDefs,
 			LocalPath:            viper.GetString(fmt.Sprintf("%s-local-path", serviceName)),
 			SnapshotSyncCommand:  viper.GetString(fmt.Sprintf("%s-snapshot-sync-command", serviceName)),
-			SnapshotSyncUrl:      viper.GetString(fmt.Sprintf("%s-snapshot-sync-url", serviceName)),
+			SnapshotSyncCID:      viper.GetString(fmt.Sprintf("%s-snapshot-sync-cid", serviceName)),
 			LocalChainDataPath:   viper.GetString(fmt.Sprintf("%s-snapshot-sync-data-dir", serviceName)),
 			SnapshotDataFilename: viper.GetString(fmt.Sprintf("%s-snapshot-sync-file-name", serviceName)),
 		}
@@ -188,7 +188,7 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 			initSnapshotSyncCommand := "echo 'Snapshot sync not enabled. Skipping download.'"
 
 			if viper.GetBool("snapshot-sync") { // fmt.Sprintf("snapshot-sync", serviceName)
-				if finalConfig.SnapshotSyncUrl != "" {
+				if finalConfig.SnapshotSyncCID != "" {
 					if finalConfig.SnapshotSyncCommand != "" {
 						initSnapshotSyncCommand = finalConfig.SnapshotSyncCommand
 					} else {
@@ -198,10 +198,10 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 							testnetDataDirectoryCommand = fmt.Sprintf("mkdir -p %s && ", finalConfig.LocalChainDataPath)
 						}
 
-						initSnapshotSyncCommand = fmt.Sprintf("%scurl -C - -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s",
+						initSnapshotSyncCommand = fmt.Sprintf("%sipget -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s",
 							testnetDataDirectoryCommand,
 							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
-							finalConfig.SnapshotSyncUrl,
+							finalConfig.SnapshotSyncCID,
 							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
 							finalConfig.LocalChainDataPath,
 							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename)
@@ -220,6 +220,7 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 if [ ! -f /nodevin-volume-%s/.copy-done ]; then
   mkdir -p /nodevin-volume-%s/ &&
   cp -r * /nodevin-volume-%s/ &&
+  apt install ipget &&
   %s &&
   touch /nodevin-volume-%s/.copy-done
 else
@@ -336,7 +337,7 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 		VolumeDefs:           volumeDefs,
 		LocalPath:            viper.GetString("local-path"),
 		SnapshotSyncCommand:  viper.GetString("snapshot-sync-command"),
-		SnapshotSyncUrl:      viper.GetString("snapshot-sync-url"),
+		SnapshotSyncCID:      viper.GetString("snapshot-sync-cid"),
 		LocalChainDataPath:   viper.GetString("snapshot-sync-data-dir"),
 		SnapshotDataFilename: viper.GetString("snapshot-sync-file-name"),
 	}
@@ -366,7 +367,7 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 		initSnapshotSyncCommand := "echo 'Snapshot sync not enabled. Skipping download.'"
 
 		if viper.GetBool("snapshot-sync") {
-			if finalConfig.SnapshotSyncUrl != "" {
+			if finalConfig.SnapshotSyncCID != "" {
 				if finalConfig.SnapshotSyncCommand != "" {
 					initSnapshotSyncCommand = finalConfig.SnapshotSyncCommand
 				} else {
@@ -376,10 +377,10 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 						testnetDataDirectoryCommand = fmt.Sprintf("mkdir -p %s && ", finalConfig.LocalChainDataPath)
 					}
 
-					initSnapshotSyncCommand = fmt.Sprintf("%scurl -C - -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s",
+					initSnapshotSyncCommand = fmt.Sprintf("%sipget --progress --peers=\"/ip4/172.20.0.2/tcp/4001/p2p/12D3KooWHUZ36WvuUBmz5aFLJ9PoNKrUJRMSA22i98BkoAaQPRzi\" -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s",
 						testnetDataDirectoryCommand,
 						finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
-						finalConfig.SnapshotSyncUrl,
+						finalConfig.SnapshotSyncCID,
 						finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
 						finalConfig.LocalChainDataPath,
 						finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename)
@@ -398,6 +399,12 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 if [ ! -f /nodevin-volume/.copy-done ]; then
   mkdir -p /nodevin-volume/ &&
   cp -r * /nodevin-volume/ &&
+  curl -LO https://go.dev/dl/go1.23.2.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.23.2.linux-amd64.tar.gz &&
+  export PATH=$PATH:/usr/local/go/bin &&
+  . ~/.bashrc && go version &&
+  go install github.com/ipfs/ipget@latest &&
+  echo 'export PATH=$PATH:/usr/local/go/bin:/root/go/bin' >> ~/.bashrc &&
+  . ~/.bashrc &&
   %s &&
   touch /nodevin-volume/.copy-done
 else

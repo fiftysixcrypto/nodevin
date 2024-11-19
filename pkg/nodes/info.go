@@ -123,6 +123,10 @@ func displayInfo() {
 		if parts := strings.Split(imageName, ":"); len(parts) > 1 {
 			imageName = parts[0]
 			version = parts[1]
+			if version == "latest" {
+				// Fetch the actual version from the container's environment
+				version = getNodeVersionFromEnv(container.ID)
+			}
 		}
 
 		formattedPorts := formatPorts(container.Ports)
@@ -406,4 +410,38 @@ func formatPorts(ports string) string {
 		}
 	}
 	return strings.Join(formattedPorts, ", ")
+}
+
+func getNodeVersionFromEnv(containerID string) string {
+	// Prepare the docker inspect command
+	cmd := exec.Command("docker", "inspect", containerID)
+
+	// Execute the command
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		logger.LogError("Failed to inspect container: " + err.Error())
+		return "unknown"
+	}
+
+	// Parse the output JSON
+	var inspectData []map[string]interface{}
+	if err := json.Unmarshal(output, &inspectData); err != nil {
+		logger.LogError("Failed to parse inspect data: " + err.Error())
+		return "unknown"
+	}
+
+	// Traverse to find environment variables
+	if len(inspectData) > 0 {
+		if config, ok := inspectData[0]["Config"].(map[string]interface{}); ok {
+			if envVars, ok := config["Env"].([]interface{}); ok {
+				for _, envVar := range envVars {
+					if envStr, ok := envVar.(string); ok && strings.HasPrefix(envStr, "NODE_VERSION=") {
+						return strings.TrimPrefix(envStr, "NODE_VERSION=")
+					}
+				}
+			}
+		}
+	}
+
+	return "unknown"
 }

@@ -6,6 +6,9 @@ nodevin-*.exe
 nodevin-macos-*
 nodevin-linux-*
 
+# Checksum files
+*.sha256
+
 # Environment variables
 *.env
 

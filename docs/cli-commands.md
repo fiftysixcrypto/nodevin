@@ -1,6 +1,6 @@
 # Nodevin CLI Documentation
 
-Nodevin is a command-line interface (CLI) daemon that simplifies the setup, management, and running of blockchain nodes. Below is a comprehensive list of the available commands and their options.
+Nodevin is a command-line interface (CLI) that simplifies the setup, management, and running of blockchain nodes. Below is a comprehensive list of the available commands and their options.
 
 ---
 

@@ -45,7 +45,7 @@ var networkInfoMap = map[string]NetworkInfo{
 		ContainerName:    "bitcoin-core",
 		DockerHubImage:   "bitcoin-core",
 		RPCPort:          8332,
-		SnapshotCID:      "",
+		SnapshotCID:      "QmbTy7qCfPJYengA8zew1Ng2vzJFdLtFAx3fxyYFUptoHR",
 		DataSize:         708669603840,  // 660 GB
 		SnapshotSize:     1319413953331, // 1.2TB (~660 GB + ~540 GB)
 		StartMessage:     "\"A system for electronic transactions without relying on trust.\" -- Satoshi Nakamoto",
@@ -65,9 +65,9 @@ var networkInfoMap = map[string]NetworkInfo{
 		ContainerName:    "ord",
 		DockerHubImage:   "ord",
 		RPCPort:          80,
-		SnapshotCID:      "",
-		DataSize:         0,
-		SnapshotSize:     0,
+		SnapshotCID:      "QmYt17T4GXF3Hvv2tX8M1H6hq7zQXmDM77EGp2c7Q5wM63",
+		DataSize:         182536110080, // 170 GB
+		SnapshotSize:     279172874240, // (~170GB + ~90GB)
 		StartMessage:     "\"Ordinal theory imbues satoshis with numismatic value, allowing them to be collected and traded as curios.\"",
 		CommandSupported: true,
 	},
@@ -85,7 +85,7 @@ var networkInfoMap = map[string]NetworkInfo{
 		ContainerName:    "litecoin-core",
 		DockerHubImage:   "litecoin-core",
 		RPCPort:          9332,
-		SnapshotCID:      "",
+		SnapshotCID:      "QmPovkiCovehHEDKCe4YqyHAArVohZUVZiLMzrut8JLXn9",
 		DataSize:         268435456000, // 250 GB
 		SnapshotSize:     429496729600, // 400 GB (~240GB + ~160GB)
 		StartMessage:     "\"Litecoin is the silver to Bitcoin's gold.\" -- Charlie Lee",
@@ -106,8 +106,8 @@ var networkInfoMap = map[string]NetworkInfo{
 		DockerHubImage:   "ord-litecoin",
 		RPCPort:          80,
 		SnapshotCID:      "",
-		DataSize:         0,
-		SnapshotSize:     0,
+		DataSize:         107387498496, // 100 GB
+		SnapshotSize:     0,            // (~100GB + ~100GB)
 		StartMessage:     "\"Ordinal theory imbues satoshis with numismatic value, allowing them to be collected and traded as curios.\"",
 		CommandSupported: true,
 	},
@@ -130,6 +130,16 @@ var networkInfoMap = map[string]NetworkInfo{
 		SnapshotSize:     0, // needs review
 		StartMessage:     "\"A peer-to-peer media protocol to make the web safer, faster, and more open.\" -- IPFS",
 		CommandSupported: true,
+	},
+	"ipfs-cluster": {
+		ContainerName:    "ipfs-cluster",
+		DockerHubImage:   "ipfs-cluster",
+		RPCPort:          9094,
+		SnapshotCID:      "",
+		DataSize:         0, // needs review
+		SnapshotSize:     0, // needs review
+		StartMessage:     "\"A network of nodes working together to preserve and share data reliably.\"",
+		CommandSupported: false,
 	},
 }
 

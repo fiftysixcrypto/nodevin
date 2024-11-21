@@ -48,6 +48,12 @@ func GetBitcoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 		VolumeDefs: map[string]VolumeDetails{},
 	}
 
+	networkCID, exists := utils.GetSnapshotCIDByNetwork(network)
+	if !exists {
+		networkCID = ""
+		fmt.Printf("Unable to find CID for network. Skipping...")
+	}
+
 	// Set the container name and command based on the network
 	switch network {
 	case "bitcoin":
@@ -64,7 +70,7 @@ func GetBitcoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 			},
 		}
 		baseConfig.LocalPath = localPath
-		baseConfig.SnapshotSyncUrl = "https://www.dwsamplefiles.com/?dl_id=552"
+		baseConfig.SnapshotSyncCID = networkCID
 		baseConfig.SnapshotDataFilename = "bitcoin-mainnet-chain-data.tar.gz"
 		baseConfig.LocalChainDataPath = "/nodevin-volume/bitcoin-core/data"
 
@@ -89,7 +95,7 @@ func GetBitcoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 			},
 		}
 		baseConfig.LocalPath = localPath
-		baseConfig.SnapshotSyncUrl = "https://www.dwsamplefiles.com/?dl_id=552"
+		baseConfig.SnapshotSyncCID = networkCID
 		baseConfig.SnapshotDataFilename = "bitcoin-testnet-chain-data.tar.gz"
 		baseConfig.LocalChainDataPath = "/nodevin-volume/bitcoin-core/data/testnet3"
 

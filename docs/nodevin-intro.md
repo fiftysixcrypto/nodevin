@@ -65,7 +65,7 @@ A **blockchain node** is a computer that participates in a blockchain network by
 
 Nodevin removes the complexities of running blockchain nodes. Normally, setting up a node requires technical expertise and configuration. Nodevin does all this automatically by:
 - Using Docker to isolate the node software.
-- Handling updates with the daemon.
+- Handling updates with [Watchtower](https://containrrr.dev/watchtower/).
 - Running nodes with a simple command: `nodevin start <blockchain>`.
 - In depth information about each blockchain: `nodevin info`.
 

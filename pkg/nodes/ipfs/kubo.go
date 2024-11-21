@@ -19,7 +19,12 @@
 package ipfs
 
 import (
+	"runtime"
+
+	"github.com/fiftysixcrypto/nodevin/internal/logger"
+	"github.com/fiftysixcrypto/nodevin/pkg/docker"
 	"github.com/fiftysixcrypto/nodevin/pkg/docker/compose"
+	"github.com/spf13/viper"
 )
 
 func CreateKuboComposeFile(cwd string) (string, error) {
@@ -37,5 +42,43 @@ func CreateKuboComposeFile(cwd string) (string, error) {
 		[]compose.NetworkConfig{},
 		cwd)
 
-	return composeFilePath, err
+	if err != nil {
+		return "", err
+	}
+
+	if viper.GetBool("ipfs-cluster") {
+		if runtime.GOARCH == "arm64" {
+			logger.LogError("Running on ARM architecture: ipfs-cluster functionality is not supported on ARM builds. Skipping ipfs-cluster.")
+			return composeFilePath, nil
+		}
+
+		ipfsClusterNetwork := "ipfs-cluster"
+
+		// Pull the ipfs-cluster Docker image
+		image := viper.GetString("ipfs-cluster-image") + ":" + viper.GetString("ipfs-cluster-version")
+		if err := docker.PullImage(image); err != nil {
+			logger.LogError("Failed to pull Docker image: " + err.Error())
+			return "", err
+		}
+
+		ipfsClusterBaseComposeConfig, err := compose.GetIpfsClusterNetworkComposeConfig(ipfsClusterNetwork)
+		if err != nil {
+			return "", err
+		}
+
+		composeFilePath, err := compose.CreateComposeFile(
+			kuboBaseComposeConfig.ContainerName,
+			kuboBaseComposeConfig,
+			[]string{"ipfs-cluster"},
+			[]compose.NetworkConfig{ipfsClusterBaseComposeConfig},
+			cwd)
+
+		if err != nil {
+			return "", err
+		}
+
+		return composeFilePath, nil
+	} else {
+		return composeFilePath, nil
+	}
 }

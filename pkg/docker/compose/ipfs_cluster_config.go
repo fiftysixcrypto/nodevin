@@ -23,20 +23,22 @@ import (
 	"path/filepath"
 
 	"github.com/fiftysixcrypto/nodevin/internal/utils"
+	"github.com/spf13/viper"
 )
 
-func GetKuboNetworkComposeConfig(network string) (NetworkConfig, error) {
+func GetIpfsClusterNetworkComposeConfig(network string) (NetworkConfig, error) {
 	// Get base nodevin data directory
 	nodevinDataDir, err := utils.GetNodevinDataDir()
 	if err != nil {
 		return NetworkConfig{}, err
 	}
 
-	// Define the base configuration for Kubo (IPFS)
+	// Define the base configuration for ipfs-cluster (used alongside IPFS)
 	baseConfig := NetworkConfig{
-		Image:    "fiftysix/kubo",
+		Image:    "fiftysix/ipfs-cluster",
 		Version:  "latest",
-		Ports:    []string{"4001:4001", "5001:5001", "8080:8080"},
+		Restart:  "always",
+		Ports:    []string{"9094:9094", "9096:9096"},
 		Volumes:  []string{},
 		Networks: []string{"ipfs-net"},
 		NetworkDefs: map[string]NetworkDetails{
@@ -47,25 +49,46 @@ func GetKuboNetworkComposeConfig(network string) (NetworkConfig, error) {
 		VolumeDefs: map[string]VolumeDetails{},
 	}
 
+	// Conditionally set environment variables if Viper flags are set
+	env := make(map[string]string)
+
+	if peername := viper.GetString("ipfs-cluster-peername"); peername != "" {
+		env["CLUSTER_PEERNAME"] = peername
+	}
+	if secret := viper.GetString("ipfs-cluster-secret"); secret != "" {
+		env["CLUSTER_SECRET"] = secret
+	}
+	if bootstrap := viper.GetString("ipfs-cluster-bootstrap"); bootstrap != "" {
+		env["CLUSTER_BOOTSTRAP"] = bootstrap
+	}
+
+	// Only assign the environment map if it has entries
+	if len(env) > 0 {
+		baseConfig.Environment = env
+	}
+
 	// Set the container name and command based on the network
 	switch network {
-	case "ipfs":
-		localPath := filepath.Join(nodevinDataDir, "ipfs")     // nodevin data dir, software type
-		localChainDataPath := filepath.Join(localPath, "ipfs") // on-image data dir
-		baseConfig.ContainerName = "ipfs"
+	case "ipfs-cluster":
+		localPath := filepath.Join(nodevinDataDir, "ipfs-cluster")     // nodevin data dir, software type
+		localChainDataPath := filepath.Join(localPath, "ipfs-cluster") // on-image data dir
+		baseConfig.ContainerName = "ipfs-cluster"
 		baseConfig.Command = ""
-		baseConfig.Volumes = []string{fmt.Sprintf("%s:/node/ipfs", localChainDataPath)}
+		baseConfig.Volumes = []string{
+			fmt.Sprintf("%s:/node/ipfs", filepath.Join(nodevinDataDir, "ipfs", "ipfs")),
+			fmt.Sprintf("%s:/node/ipfs-cluster", localChainDataPath),
+		}
 		baseConfig.VolumeDefs = map[string]VolumeDetails{
-			"ipfs-data": {
+			"ipfs-cluster-data": {
 				Labels: map[string]string{
-					"nodevin.blockchain.software": "kubo",
+					"nodevin.blockchain.software": "ipfs-cluster",
 				},
 			},
 		}
 		baseConfig.LocalPath = localPath
 		baseConfig.SnapshotSyncCID = ""
 		baseConfig.SnapshotDataFilename = ""
-		baseConfig.LocalChainDataPath = "/nodevin-volume/ipfs/data"
+		baseConfig.LocalChainDataPath = "/nodevin-volume-ipfs-cluster/ipfs-cluster/data"
 
 	default:
 		return NetworkConfig{}, fmt.Errorf("unknown network: %s", network)

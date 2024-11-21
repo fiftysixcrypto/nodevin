@@ -16,12 +16,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var skipPrompt bool
+
 var InitCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize nodevin and check system capabilities",
 	Run: func(cmd *cobra.Command, args []string) {
 		runInit()
 	},
+}
+
+func init() {
+	InitCmd.Flags().BoolVarP(&skipPrompt, "yes", "y", false, "Automatically confirm all prompts")
 }
 
 func runInit() {
@@ -38,21 +44,30 @@ func runInit() {
 		fmt.Println("")
 		logger.LogError("System inspection failed: " + err.Error())
 
-		// Ask the user if they want to install Docker and Docker Compose
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print("Docker and Docker Compose are required but not installed. Would you like to install them? ('y'/'n'): ")
-		input, _ := reader.ReadString('\n')
-		input = strings.TrimSpace(strings.ToLower(input))
-
-		// Check user response
-		if input == "y" {
+		// Skip prompt if `-y` is set
+		if skipPrompt {
+			fmt.Println("Skipping prompt and proceeding with Docker and Docker Compose installation...")
 			if err := installDockerAndCompose(); err != nil {
 				logger.LogError("Failed to install Docker and Docker Compose: " + err.Error())
 				return
 			}
 		} else {
-			fmt.Println("Canceling docker installation.")
-			return
+			// Ask the user if they want to install Docker and Docker Compose
+			reader := bufio.NewReader(os.Stdin)
+			fmt.Print("Docker and Docker Compose are required but not installed. Would you like to install them? ('y'/'n'): ")
+			input, _ := reader.ReadString('\n')
+			input = strings.TrimSpace(strings.ToLower(input))
+
+			// Check user response
+			if input == "y" {
+				if err := installDockerAndCompose(); err != nil {
+					logger.LogError("Failed to install Docker and Docker Compose: " + err.Error())
+					return
+				}
+			} else {
+				fmt.Println("Canceling docker installation.")
+				return
+			}
 		}
 	}
 

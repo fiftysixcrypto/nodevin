@@ -123,6 +123,9 @@ func stopAllNodes() {
 		allowedContainers[containerName] = true
 	}
 
+	// Include watchtower in container shutdowns
+	allowedContainers["watchtower-nodevin"] = true
+
 	// Get a list of running Docker container IDs with their names
 	psCmd := exec.Command("docker", "ps", "--format", "{{.ID}} {{.Names}}")
 	var psOut bytes.Buffer

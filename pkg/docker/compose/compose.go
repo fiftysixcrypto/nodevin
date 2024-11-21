@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/fiftysixcrypto/nodevin/internal/utils"
@@ -464,6 +465,26 @@ fi"`, initSnapshotSyncCommand),
 	for volumeName, volumeDetails := range volumeDefs {
 		allVolumeDefs[volumeName] = volumeDetails
 	}
+
+	// Add Watchtower service to monitor software image updates
+	watchtowerContainerNames := []string{}
+	for name := range services {
+		if !strings.HasPrefix(name, "init-") {
+			watchtowerContainerNames = append(watchtowerContainerNames, name)
+		}
+	}
+
+	watchtowerService := Service{
+		ContainerName: "watchtower-nodevin",
+		Image:         "containrrr/watchtower",
+		Ports:         []string{},
+		Volumes: []string{
+			"/var/run/docker.sock:/var/run/docker.sock",
+		},
+		Command: fmt.Sprintf("%s --interval 7200", strings.Join(watchtowerContainerNames, " ")),
+	}
+
+	services["watchtower"] = watchtowerService
 
 	// Build the compose file structure
 	composeFile := ComposeFile{

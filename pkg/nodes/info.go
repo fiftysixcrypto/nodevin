@@ -36,8 +36,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-const pidFilePath = "/tmp/nodevin_daemon.pid"
-
 type ContainerInfo struct {
 	ID         string `json:"ID"`
 	Image      string `json:"Image"`
@@ -87,8 +85,6 @@ func displayInfo() {
 	if len(containers) < 2 {
 		fmt.Println("No running blockchain nodes found.\n")
 		displayNodeDirectoryInfo()
-
-		displayPIDInfo()
 
 		fmt.Println("\n-- Helpful Commands:\n")
 		fmt.Printf("%s start <network>\n", utils.GetNodevinExecutable())
@@ -169,29 +165,11 @@ func displayInfo() {
 
 	displayNodeDirectoryInfo()
 
-	displayPIDInfo()
-
 	fmt.Println("\n-- Helpful Commands:\n")
 
 	fmt.Printf("%s stop <network>\n", utils.GetNodevinExecutable())
 	fmt.Printf("%s shell <network>\n", utils.GetNodevinExecutable())
-	fmt.Printf("%s daemon start\n", utils.GetNodevinExecutable())
 	fmt.Printf("%s logs <network> --tail 20\n", utils.GetNodevinExecutable())
-}
-
-func displayPIDInfo() {
-	if _, err := os.Stat(pidFilePath); err == nil {
-		fmt.Println("\n-- Nodevin Daemon:")
-		pidData, err := os.ReadFile(pidFilePath)
-		if err != nil {
-			logger.LogError("Failed to read PID file: " + err.Error())
-			return
-		}
-		fmt.Printf("\nDaemon is running to update nodes with PID: %s\n", string(pidData))
-
-		fmt.Printf("Logs: %s daemon logs\n", utils.GetNodevinExecutable())
-		fmt.Printf("Stop: %s daemon stop\n", utils.GetNodevinExecutable())
-	}
 }
 
 func getLatestBlocks(containerName string) (int, int) {

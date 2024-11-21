@@ -22,7 +22,6 @@ import (
 	"fmt"
 
 	"github.com/fiftysixcrypto/nodevin/internal/version"
-	"github.com/fiftysixcrypto/nodevin/pkg/daemon"
 	"github.com/fiftysixcrypto/nodevin/pkg/initialize"
 	"github.com/fiftysixcrypto/nodevin/pkg/nodes"
 	"github.com/fiftysixcrypto/nodevin/pkg/update"
@@ -158,9 +157,6 @@ func init() {
 
 	// Add manual update commands
 	rootCmd.AddCommand(update.UpdateCmd)
-
-	// Add daemon commands
-	rootCmd.AddCommand(daemon.DaemonCmd)
 }
 
 func Execute() error {

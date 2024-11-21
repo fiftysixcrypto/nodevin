@@ -7,7 +7,7 @@ Our goal is to facilitate blockchain node standup and maintenance for every chai
 ## Features
 
 - **Easy Setup:** Quickly set up blockchain nodes with a single command.
-- **Automatic Updates:** The Nodevin daemon ensures your nodes are always running the latest software versions.
+- **Automatic Updates:** Nodevin ensures your nodes are always running the latest software versions.
 - **Maximum Customization:** Set unique ports, data storage, networking, images, or even run multiple nodes at once.
 - **Cross-Platform Support:** Works on Linux, macOS, and Windows.
 
@@ -75,7 +75,7 @@ sudo mv nodevin /usr/local/bin/
 Continue to learn about Nodevin:
 - [Introduction to Nodevin](./docs/nodevin-intro.md) - Learn more about what Nodevin is and how it works.
 - [Using Nodevin](./docs/cli-commands.md) - Documentation on how to use Nodevin. 
-- [The Nodevin Daemon](./docs/daemon-commands.md) - Documentation on how to use the monitoring Nodevin daemon.
+- [Nodevin Blog](...) - Coming soon... 
 
 ## Snapshot Synchronization
 
@@ -90,10 +90,6 @@ Snapshot synchronization can save up to **days** of node initialization.
 ### Adding Your Data Snapshot
 
 Nodevin requires a [small one-time grant](#nodevin-subscription) for networks interested in having their data snapshots integrated and universally accessible to all users.
-
-## Nodevin Daemon
-
-The Nodevin daemon runs in the background and ensures your blockchain nodes are always up-to-date. It checks for updates every hour and automatically updates the nodes if a new version is available. [Read more](./docs/daemon-commands.md) about the daemon.
 
 ## Integrating Your Blockchain
 

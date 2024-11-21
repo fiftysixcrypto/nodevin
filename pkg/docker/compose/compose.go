@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/fiftysixcrypto/nodevin/internal/logger"
@@ -479,7 +480,7 @@ fi"`, initSnapshotSyncCommand),
 		Image:         "containrrr/watchtower",
 		Ports:         []string{},
 		Volumes: []string{
-			"/var/run/docker.sock:/var/run/docker.sock",
+			getDockerSocketVolume(),
 		},
 		Command: fmt.Sprintf("%s --interval 7200", strings.Join(watchtowerContainerNames, " ")),
 	}
@@ -507,6 +508,15 @@ fi"`, initSnapshotSyncCommand),
 	}
 
 	return composeFilePath, nil
+}
+
+func getDockerSocketVolume() string {
+	if runtime.GOOS == "windows" {
+		// Use named pipe for Windows
+		return "//./pipe/docker_engine:/var/run/docker.sock"
+	}
+	// Default for Linux and macOS
+	return "/var/run/docker.sock:/var/run/docker.sock"
 }
 
 // Helper function to calculate the total size of files in a directory

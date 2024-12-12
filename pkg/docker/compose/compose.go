@@ -190,28 +190,31 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 			initSnapshotSyncCommand := "echo 'Snapshot sync not enabled. Skipping download.'"
 
 			if viper.GetBool("snapshot-sync") { // fmt.Sprintf("snapshot-sync", serviceName)
-				if finalConfig.SnapshotSyncCID != "" {
-					if finalConfig.SnapshotSyncCommand != "" {
-						initSnapshotSyncCommand = finalConfig.SnapshotSyncCommand
-					} else {
-						testnetDataDirectoryCommand := ""
-						if utils.CheckIfTestnetOrTestnetNetworkFlag() {
-							// Ord, Bitcoin and Litecoin testnet require full paths to be created before snapshot sync
-							testnetDataDirectoryCommand = fmt.Sprintf("mkdir -p %s && ", finalConfig.LocalChainDataPath)
-						}
+				// Commented out for now
+				/*
+					if finalConfig.SnapshotSyncCID != "" {
+						if finalConfig.SnapshotSyncCommand != "" {
+							initSnapshotSyncCommand = finalConfig.SnapshotSyncCommand
+						} else {
+							testnetDataDirectoryCommand := ""
+							if utils.CheckIfTestnetOrTestnetNetworkFlag() {
+								// Ord, Bitcoin and Litecoin testnet require full paths to be created before snapshot sync
+								testnetDataDirectoryCommand = fmt.Sprintf("mkdir -p %s && ", finalConfig.LocalChainDataPath)
+							}
 
-						initSnapshotSyncCommand = fmt.Sprintf("%sipget -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s",
-							testnetDataDirectoryCommand,
-							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
-							finalConfig.SnapshotSyncCID,
-							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
-							finalConfig.LocalChainDataPath,
-							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename)
+							initSnapshotSyncCommand = fmt.Sprintf("%sipget -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s",
+								testnetDataDirectoryCommand,
+								finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
+								finalConfig.SnapshotSyncCID,
+								finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
+								finalConfig.LocalChainDataPath,
+								finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename)
+						}
+					} else {
+						initSnapshotSyncCommand = "echo 'Snapshot sync url not found. Skipping download.'"
+						logger.LogInfo("Snapshot sync url not found. Skipping download.")
 					}
-				} else {
-					initSnapshotSyncCommand = "echo 'Snapshot sync url not found. Skipping download.'"
-					logger.LogInfo("Snapshot sync url not found. Skipping download.")
-				}
+				*/
 			}
 
 			initService := Service{
@@ -368,33 +371,36 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 		initSnapshotSyncCommand := "echo 'Snapshot sync not enabled. Skipping download.'"
 
 		if viper.GetBool("snapshot-sync") {
-			if finalConfig.SnapshotSyncCID != "" {
-				if finalConfig.SnapshotSyncCommand != "" {
-					initSnapshotSyncCommand = finalConfig.SnapshotSyncCommand
-				} else {
-					testnetDataDirectoryCommand := ""
-					if utils.CheckIfTestnetOrTestnetNetworkFlag() {
-						// Bitcoin and Litecoin testnet require full paths to be created before snapshot sync
-						testnetDataDirectoryCommand = fmt.Sprintf("mkdir -p %s && ", finalConfig.LocalChainDataPath)
-					}
+			// Commented out for now
+			/*
+				if finalConfig.SnapshotSyncCID != "" {
+					if finalConfig.SnapshotSyncCommand != "" {
+						initSnapshotSyncCommand = finalConfig.SnapshotSyncCommand
+					} else {
+						testnetDataDirectoryCommand := ""
+						if utils.CheckIfTestnetOrTestnetNetworkFlag() {
+							// Bitcoin and Litecoin testnet require full paths to be created before snapshot sync
+							testnetDataDirectoryCommand = fmt.Sprintf("mkdir -p %s && ", finalConfig.LocalChainDataPath)
+						}
 
-					initSnapshotSyncCommand = fmt.Sprintf(`curl -LO https://go.dev/dl/go1.23.2.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.23.2.linux-amd64.tar.gz &&
-					export PATH=$PATH:/usr/local/go/bin &&
-					. ~/.bashrc && go version &&
-					go install github.com/ipfs/ipget@latest &&
-					echo 'export PATH=$PATH:/usr/local/go/bin:/root/go/bin' >> ~/.bashrc &&
-					. ~/.bashrc && %sipget --progress --peers=\"/ip4/172.20.0.2/tcp/4001/p2p/12D3KooWHUZ36WvuUBmz5aFLJ9PoNKrUJRMSA22i98BkoAaQPRzi\" -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s`,
-						testnetDataDirectoryCommand,
-						finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
-						finalConfig.SnapshotSyncCID,
-						finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
-						finalConfig.LocalChainDataPath,
-						finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename)
+						initSnapshotSyncCommand = fmt.Sprintf(`curl -LO https://go.dev/dl/go1.23.2.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.23.2.linux-amd64.tar.gz &&
+						export PATH=$PATH:/usr/local/go/bin &&
+						. ~/.bashrc && go version &&
+						go install github.com/ipfs/ipget@latest &&
+						echo 'export PATH=$PATH:/usr/local/go/bin:/root/go/bin' >> ~/.bashrc &&
+						. ~/.bashrc && %sipget --progress --peers=\"/ip4/172.20.0.2/tcp/4001/p2p/12D3KooWHUZ36WvuUBmz5aFLJ9PoNKrUJRMSA22i98BkoAaQPRzi\" -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s`,
+							testnetDataDirectoryCommand,
+							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
+							finalConfig.SnapshotSyncCID,
+							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
+							finalConfig.LocalChainDataPath,
+							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename)
+					}
+				} else {
+					initSnapshotSyncCommand = "echo 'Snapshot sync url not found. Skipping download.'"
+					logger.LogInfo("Snapshot sync url not found. Skipping download.")
 				}
-			} else {
-				initSnapshotSyncCommand = "echo 'Snapshot sync url not found. Skipping download.'"
-				logger.LogInfo("Snapshot sync url not found. Skipping download.")
-			}
+			*/
 		}
 
 		initService := Service{

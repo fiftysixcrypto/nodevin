@@ -79,6 +79,8 @@ Continue to learn about Nodevin:
 
 ## Snapshot Synchronization
 
+**NOTE: Snapshot Synchronization is currently disabled.**
+
 Data snapshots are compressed archives of the state of a blockchain node. Using snapshot synchronization greatly speeds up the process of catching up with the network, as the node starts from downloaded data rather than trying to synchronize from the beginning of the blockchain. Running this command will use snapshot synchronization when starting up your node.
 
 ```

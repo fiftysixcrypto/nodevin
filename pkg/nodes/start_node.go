@@ -92,36 +92,40 @@ func startNode(args []string) {
 
 	// Print out warning info for chain size and snapshot sync timing
 	if viper.GetBool("snapshot-sync") {
-		snapshotSize, exists := utils.GetNetworkRequiredSnapshotSize(network)
+		logger.LogInfo("INFO: Snapshot sync is currently disabled. Continuing ")
 
-		if !exists {
-			logger.LogInfo("Cannot determine assumed size for network.")
-			snapshotSize = 0
-		}
-
-		logger.LogInfo("--")
-		logger.LogInfo("WARNING: Initial snapshot sync can take hours depending on your download speed and computer specs. Nodevin will automatically start up your node after the download completes.")
-		logger.LogInfo(fmt.Sprintf("WARNING: Snapshot sync for this software requires %s amount of space. Ensure you have enough storage on disk.", utils.GetSizeDescription(int64(snapshotSize))))
-
-		if viper.GetBool("ord") {
-			dataSize, exists := utils.GetNetworkRequiredSnapshotSize("ord")
+		/*
+			snapshotSize, exists := utils.GetNetworkRequiredSnapshotSize(network)
 
 			if !exists {
-				logger.LogInfo("Cannot determine assumed size for ord.")
-				dataSize = 0
+				logger.LogInfo("Cannot determine assumed size for network.")
+				snapshotSize = 0
 			}
 
-			logger.LogInfo(fmt.Sprintf("WARNING: Ord software requires an additional %s amount of snapshot space. Ensure you have enough storage on disk for both.", utils.GetSizeDescription(int64(dataSize))))
-		} else if viper.GetBool("ord-litecoin") {
-			dataSize, exists := utils.GetNetworkRequiredSnapshotSize("ord-litecoin")
+			logger.LogInfo("--")
+			logger.LogInfo("WARNING: Initial snapshot sync can take hours depending on your download speed and computer specs. Nodevin will automatically start up your node after the download completes.")
+			logger.LogInfo(fmt.Sprintf("WARNING: Snapshot sync for this software requires %s amount of space. Ensure you have enough storage on disk.", utils.GetSizeDescription(int64(snapshotSize))))
 
-			if !exists {
-				logger.LogInfo("Cannot determine assumed size for ord-litecoin.")
-				dataSize = 0
+			if viper.GetBool("ord") {
+				dataSize, exists := utils.GetNetworkRequiredSnapshotSize("ord")
+
+				if !exists {
+					logger.LogInfo("Cannot determine assumed size for ord.")
+					dataSize = 0
+				}
+
+				logger.LogInfo(fmt.Sprintf("WARNING: Ord software requires an additional %s amount of snapshot space. Ensure you have enough storage on disk for both.", utils.GetSizeDescription(int64(dataSize))))
+			} else if viper.GetBool("ord-litecoin") {
+				dataSize, exists := utils.GetNetworkRequiredSnapshotSize("ord-litecoin")
+
+				if !exists {
+					logger.LogInfo("Cannot determine assumed size for ord-litecoin.")
+					dataSize = 0
+				}
+
+				logger.LogInfo(fmt.Sprintf("WARNING: Ord-litecoin software requires an additional %s amount of snapshot space. Ensure you have enough storage on disk for both.", utils.GetSizeDescription(int64(dataSize))))
 			}
-
-			logger.LogInfo(fmt.Sprintf("WARNING: Ord-litecoin software requires an additional %s amount of snapshot space. Ensure you have enough storage on disk for both.", utils.GetSizeDescription(int64(dataSize))))
-		}
+		*/
 
 		logger.LogInfo("--")
 	} else if network == "ipfs" {

@@ -36,8 +36,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-const pidFilePath = "/tmp/nodevin_daemon.pid"
-
 type ContainerInfo struct {
 	ID         string `json:"ID"`
 	Image      string `json:"Image"`
@@ -88,8 +86,6 @@ func displayInfo() {
 		fmt.Println("No running blockchain nodes found.\n")
 		displayNodeDirectoryInfo()
 
-		displayPIDInfo()
-
 		fmt.Println("\n-- Helpful Commands:\n")
 		fmt.Printf("%s start <network>\n", utils.GetNodevinExecutable())
 		fmt.Printf("%s start <network> --testnet\n", utils.GetNodevinExecutable())
@@ -123,6 +119,10 @@ func displayInfo() {
 		if parts := strings.Split(imageName, ":"); len(parts) > 1 {
 			imageName = parts[0]
 			version = parts[1]
+			if version == "latest" {
+				// Fetch the actual version from the container's environment
+				version = getNodeVersionFromEnv(container.ID)
+			}
 		}
 
 		formattedPorts := formatPorts(container.Ports)
@@ -165,29 +165,11 @@ func displayInfo() {
 
 	displayNodeDirectoryInfo()
 
-	displayPIDInfo()
-
 	fmt.Println("\n-- Helpful Commands:\n")
 
 	fmt.Printf("%s stop <network>\n", utils.GetNodevinExecutable())
 	fmt.Printf("%s shell <network>\n", utils.GetNodevinExecutable())
-	fmt.Printf("%s daemon start\n", utils.GetNodevinExecutable())
 	fmt.Printf("%s logs <network> --tail 20\n", utils.GetNodevinExecutable())
-}
-
-func displayPIDInfo() {
-	if _, err := os.Stat(pidFilePath); err == nil {
-		fmt.Println("\n-- Nodevin Daemon:")
-		pidData, err := os.ReadFile(pidFilePath)
-		if err != nil {
-			logger.LogError("Failed to read PID file: " + err.Error())
-			return
-		}
-		fmt.Printf("\nDaemon is running to update nodes with PID: %s\n", string(pidData))
-
-		fmt.Printf("Logs: %s daemon logs\n", utils.GetNodevinExecutable())
-		fmt.Printf("Stop: %s daemon stop\n", utils.GetNodevinExecutable())
-	}
 }
 
 func getLatestBlocks(containerName string) (int, int) {
@@ -406,4 +388,38 @@ func formatPorts(ports string) string {
 		}
 	}
 	return strings.Join(formattedPorts, ", ")
+}
+
+func getNodeVersionFromEnv(containerID string) string {
+	// Prepare the docker inspect command
+	cmd := exec.Command("docker", "inspect", containerID)
+
+	// Execute the command
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		logger.LogError("Failed to inspect container: " + err.Error())
+		return "unknown"
+	}
+
+	// Parse the output JSON
+	var inspectData []map[string]interface{}
+	if err := json.Unmarshal(output, &inspectData); err != nil {
+		logger.LogError("Failed to parse inspect data: " + err.Error())
+		return "unknown"
+	}
+
+	// Traverse to find environment variables
+	if len(inspectData) > 0 {
+		if config, ok := inspectData[0]["Config"].(map[string]interface{}); ok {
+			if envVars, ok := config["Env"].([]interface{}); ok {
+				for _, envVar := range envVars {
+					if envStr, ok := envVar.(string); ok && strings.HasPrefix(envStr, "NODE_VERSION=") {
+						return strings.TrimPrefix(envStr, "NODE_VERSION=")
+					}
+				}
+			}
+		}
+	}
+
+	return "unknown"
 }

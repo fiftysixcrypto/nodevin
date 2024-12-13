@@ -49,6 +49,12 @@ func GetOrdLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 		VolumeDefs: map[string]VolumeDetails{},
 	}
 
+	networkCID, exists := utils.GetSnapshotCIDByNetwork(network)
+	if !exists {
+		networkCID = ""
+		fmt.Printf("Unable to find CID for network. Skipping...")
+	}
+
 	// Set the container name and command based on the network
 	switch network {
 	case "ord-litecoin":
@@ -68,7 +74,7 @@ func GetOrdLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 			},
 		}
 		baseConfig.LocalPath = localPath
-		baseConfig.SnapshotSyncUrl = "https://www.dwsamplefiles.com/?dl_id=552"
+		baseConfig.SnapshotSyncCID = networkCID
 		baseConfig.SnapshotDataFilename = "ord-litecoin-mainnet-chain-data.tar.gz"
 		baseConfig.LocalChainDataPath = "/nodevin-volume-ord-litecoin/ord-litecoin/data"
 
@@ -95,7 +101,7 @@ func GetOrdLitecoinNetworkComposeConfig(network string) (NetworkConfig, error) {
 			},
 		}
 		baseConfig.LocalPath = localPath
-		baseConfig.SnapshotSyncUrl = "https://www.dwsamplefiles.com/?dl_id=552"
+		baseConfig.SnapshotSyncCID = networkCID
 		baseConfig.SnapshotDataFilename = "ord-litecoin-testnet-chain-data.tar.gz"
 		baseConfig.LocalChainDataPath = "/nodevin-volume-ord-litecoin/ord-litecoin/data/testnet3" // forked from ord, so doesn't move to testnet4
 

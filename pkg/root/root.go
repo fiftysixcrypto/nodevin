@@ -22,7 +22,6 @@ import (
 	"fmt"
 
 	"github.com/fiftysixcrypto/nodevin/internal/version"
-	"github.com/fiftysixcrypto/nodevin/pkg/daemon"
 	"github.com/fiftysixcrypto/nodevin/pkg/initialize"
 	"github.com/fiftysixcrypto/nodevin/pkg/nodes"
 	"github.com/fiftysixcrypto/nodevin/pkg/update"
@@ -83,6 +82,14 @@ func init() {
 	rootCmd.PersistentFlags().String("ord-litecoin-image", "fiftysix/ord-litecoin", "Docker image to use for ord (image name -- ex: fiftysix/ord-litecoin)")
 	rootCmd.PersistentFlags().String("ord-litecoin-version", "latest", "Version of Docker image to use for ord (tag -- ex: latest, 27.0)")
 
+	// IPFS specific flags
+	rootCmd.PersistentFlags().Bool("ipfs-cluster", false, "Run ipfs-cluster software ord alongside the IPFS node")
+	rootCmd.PersistentFlags().String("ipfs-cluster-image", "fiftysix/ipfs-cluster", "Docker image to use for ipfs-cluster (image name -- ex: fiftysix/ipfs-cluster)")
+	rootCmd.PersistentFlags().String("ipfs-cluster-version", "latest", "Version of Docker image to use for ipfs-cluster (tag -- ex: latest, 1.1.1)")
+	rootCmd.PersistentFlags().String("ipfs-cluster-peername", "", "(ipfs-cluster only) The peername(s) to attach to (ex: cluster-peer-1)")
+	rootCmd.PersistentFlags().String("ipfs-cluster-secret", "", "(ipfs-cluster only) The cluster secret required for connection (ex: ...)")
+	rootCmd.PersistentFlags().String("ipfs-cluster-bootstrap", "", "(ipfs-cluster only) The bootstrap node address (ex: /ip4/172.20.0.2/tcp/4001/p2p/12D3KooWHUZ36WvuUBmz5aFLJ9PoNKrUJRMSA22i98BkoAaQPRzi)")
+
 	// Bind flags to viper
 	// Docker flags and configs
 	viper.BindPFlag("command", rootCmd.PersistentFlags().Lookup("command"))
@@ -123,6 +130,14 @@ func init() {
 	viper.BindPFlag("ord-litecoin-image", rootCmd.PersistentFlags().Lookup("ord-litecoin-image"))
 	viper.BindPFlag("ord-litecoin-version", rootCmd.PersistentFlags().Lookup("ord-litecoin-version"))
 
+	// IPFS specific flags
+	viper.BindPFlag("ipfs-cluster", rootCmd.PersistentFlags().Lookup("ipfs-cluster"))
+	viper.BindPFlag("ipfs-cluster-image", rootCmd.PersistentFlags().Lookup("ipfs-cluster-image"))
+	viper.BindPFlag("ipfs-cluster-version", rootCmd.PersistentFlags().Lookup("ipfs-cluster-version"))
+	viper.BindPFlag("ipfs-cluster-peername", rootCmd.PersistentFlags().Lookup("ipfs-cluster-peername"))
+	viper.BindPFlag("ipfs-cluster-secret", rootCmd.PersistentFlags().Lookup("ipfs-cluster-secret"))
+	viper.BindPFlag("ipfs-cluster-bootstrap", rootCmd.PersistentFlags().Lookup("ipfs-cluster-bootstrap"))
+
 	// Add node commands
 	rootCmd.AddCommand(nodes.RequestCmd)
 	rootCmd.AddCommand(nodes.ShellCmd)
@@ -142,9 +157,6 @@ func init() {
 
 	// Add manual update commands
 	rootCmd.AddCommand(update.UpdateCmd)
-
-	// Add daemon commands
-	rootCmd.AddCommand(daemon.DaemonCmd)
 }
 
 func Execute() error {

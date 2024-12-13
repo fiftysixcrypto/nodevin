@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/fiftysixcrypto/nodevin/internal/utils"
@@ -48,8 +50,8 @@ func mergeConfigs(defaultConfig, overrideConfig NetworkConfig) NetworkConfig {
 	if overrideConfig.LocalPath != "" {
 		defaultConfig.LocalPath = overrideConfig.LocalPath
 	}
-	if overrideConfig.SnapshotSyncUrl != "" {
-		defaultConfig.SnapshotSyncUrl = overrideConfig.SnapshotSyncUrl
+	if overrideConfig.SnapshotSyncCID != "" {
+		defaultConfig.SnapshotSyncCID = overrideConfig.SnapshotSyncCID
 	}
 	if overrideConfig.LocalChainDataPath != "" {
 		defaultConfig.LocalChainDataPath = overrideConfig.LocalChainDataPath
@@ -154,7 +156,7 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 			VolumeDefs:           extraVolumeDefs,
 			LocalPath:            viper.GetString(fmt.Sprintf("%s-local-path", serviceName)),
 			SnapshotSyncCommand:  viper.GetString(fmt.Sprintf("%s-snapshot-sync-command", serviceName)),
-			SnapshotSyncUrl:      viper.GetString(fmt.Sprintf("%s-snapshot-sync-url", serviceName)),
+			SnapshotSyncCID:      viper.GetString(fmt.Sprintf("%s-snapshot-sync-cid", serviceName)),
 			LocalChainDataPath:   viper.GetString(fmt.Sprintf("%s-snapshot-sync-data-dir", serviceName)),
 			SnapshotDataFilename: viper.GetString(fmt.Sprintf("%s-snapshot-sync-file-name", serviceName)),
 		}
@@ -188,28 +190,31 @@ func createExtraServices(extraServiceNames []string, extraServiceConfigs []Netwo
 			initSnapshotSyncCommand := "echo 'Snapshot sync not enabled. Skipping download.'"
 
 			if viper.GetBool("snapshot-sync") { // fmt.Sprintf("snapshot-sync", serviceName)
-				if finalConfig.SnapshotSyncUrl != "" {
-					if finalConfig.SnapshotSyncCommand != "" {
-						initSnapshotSyncCommand = finalConfig.SnapshotSyncCommand
-					} else {
-						testnetDataDirectoryCommand := ""
-						if utils.CheckIfTestnetOrTestnetNetworkFlag() {
-							// Ord, Bitcoin and Litecoin testnet require full paths to be created before snapshot sync
-							testnetDataDirectoryCommand = fmt.Sprintf("mkdir -p %s && ", finalConfig.LocalChainDataPath)
-						}
+				// Commented out for now
+				/*
+					if finalConfig.SnapshotSyncCID != "" {
+						if finalConfig.SnapshotSyncCommand != "" {
+							initSnapshotSyncCommand = finalConfig.SnapshotSyncCommand
+						} else {
+							testnetDataDirectoryCommand := ""
+							if utils.CheckIfTestnetOrTestnetNetworkFlag() {
+								// Ord, Bitcoin and Litecoin testnet require full paths to be created before snapshot sync
+								testnetDataDirectoryCommand = fmt.Sprintf("mkdir -p %s && ", finalConfig.LocalChainDataPath)
+							}
 
-						initSnapshotSyncCommand = fmt.Sprintf("%scurl -C - -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s",
-							testnetDataDirectoryCommand,
-							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
-							finalConfig.SnapshotSyncUrl,
-							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
-							finalConfig.LocalChainDataPath,
-							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename)
+							initSnapshotSyncCommand = fmt.Sprintf("%sipget -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s",
+								testnetDataDirectoryCommand,
+								finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
+								finalConfig.SnapshotSyncCID,
+								finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
+								finalConfig.LocalChainDataPath,
+								finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename)
+						}
+					} else {
+						initSnapshotSyncCommand = "echo 'Snapshot sync url not found. Skipping download.'"
+						logger.LogInfo("Snapshot sync url not found. Skipping download.")
 					}
-				} else {
-					initSnapshotSyncCommand = "echo 'Snapshot sync url not found. Skipping download.'"
-					logger.LogInfo("Snapshot sync url not found. Skipping download.")
-				}
+				*/
 			}
 
 			initService := Service{
@@ -336,7 +341,7 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 		VolumeDefs:           volumeDefs,
 		LocalPath:            viper.GetString("local-path"),
 		SnapshotSyncCommand:  viper.GetString("snapshot-sync-command"),
-		SnapshotSyncUrl:      viper.GetString("snapshot-sync-url"),
+		SnapshotSyncCID:      viper.GetString("snapshot-sync-cid"),
 		LocalChainDataPath:   viper.GetString("snapshot-sync-data-dir"),
 		SnapshotDataFilename: viper.GetString("snapshot-sync-file-name"),
 	}
@@ -366,28 +371,36 @@ func CreateComposeFile(nodeName string, config NetworkConfig, extraServiceNames 
 		initSnapshotSyncCommand := "echo 'Snapshot sync not enabled. Skipping download.'"
 
 		if viper.GetBool("snapshot-sync") {
-			if finalConfig.SnapshotSyncUrl != "" {
-				if finalConfig.SnapshotSyncCommand != "" {
-					initSnapshotSyncCommand = finalConfig.SnapshotSyncCommand
-				} else {
-					testnetDataDirectoryCommand := ""
-					if utils.CheckIfTestnetOrTestnetNetworkFlag() {
-						// Bitcoin and Litecoin testnet require full paths to be created before snapshot sync
-						testnetDataDirectoryCommand = fmt.Sprintf("mkdir -p %s && ", finalConfig.LocalChainDataPath)
-					}
+			// Commented out for now
+			/*
+				if finalConfig.SnapshotSyncCID != "" {
+					if finalConfig.SnapshotSyncCommand != "" {
+						initSnapshotSyncCommand = finalConfig.SnapshotSyncCommand
+					} else {
+						testnetDataDirectoryCommand := ""
+						if utils.CheckIfTestnetOrTestnetNetworkFlag() {
+							// Bitcoin and Litecoin testnet require full paths to be created before snapshot sync
+							testnetDataDirectoryCommand = fmt.Sprintf("mkdir -p %s && ", finalConfig.LocalChainDataPath)
+						}
 
-					initSnapshotSyncCommand = fmt.Sprintf("%scurl -C - -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s",
-						testnetDataDirectoryCommand,
-						finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
-						finalConfig.SnapshotSyncUrl,
-						finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
-						finalConfig.LocalChainDataPath,
-						finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename)
+						initSnapshotSyncCommand = fmt.Sprintf(`curl -LO https://go.dev/dl/go1.23.2.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.23.2.linux-amd64.tar.gz &&
+						export PATH=$PATH:/usr/local/go/bin &&
+						. ~/.bashrc && go version &&
+						go install github.com/ipfs/ipget@latest &&
+						echo 'export PATH=$PATH:/usr/local/go/bin:/root/go/bin' >> ~/.bashrc &&
+						. ~/.bashrc && %sipget --progress --peers=\"/ip4/172.20.0.2/tcp/4001/p2p/12D3KooWHUZ36WvuUBmz5aFLJ9PoNKrUJRMSA22i98BkoAaQPRzi\" -o %s/%s %s && tar -xzf %s/%s -C %s && rm -f %s/%s`,
+							testnetDataDirectoryCommand,
+							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
+							finalConfig.SnapshotSyncCID,
+							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename,
+							finalConfig.LocalChainDataPath,
+							finalConfig.LocalChainDataPath, finalConfig.SnapshotDataFilename)
+					}
+				} else {
+					initSnapshotSyncCommand = "echo 'Snapshot sync url not found. Skipping download.'"
+					logger.LogInfo("Snapshot sync url not found. Skipping download.")
 				}
-			} else {
-				initSnapshotSyncCommand = "echo 'Snapshot sync url not found. Skipping download.'"
-				logger.LogInfo("Snapshot sync url not found. Skipping download.")
-			}
+			*/
 		}
 
 		initService := Service{
@@ -460,6 +473,26 @@ fi"`, initSnapshotSyncCommand),
 		allVolumeDefs[volumeName] = volumeDetails
 	}
 
+	// Add Watchtower service to monitor software image updates
+	watchtowerContainerNames := []string{}
+	for name := range services {
+		if !strings.HasPrefix(name, "init-") {
+			watchtowerContainerNames = append(watchtowerContainerNames, name)
+		}
+	}
+
+	watchtowerService := Service{
+		ContainerName: "watchtower-nodevin",
+		Image:         "containrrr/watchtower",
+		Ports:         []string{},
+		Volumes: []string{
+			getDockerSocketVolume(),
+		},
+		Command: fmt.Sprintf("%s --interval 7200", strings.Join(watchtowerContainerNames, " ")),
+	}
+
+	services["watchtower"] = watchtowerService
+
 	// Build the compose file structure
 	composeFile := ComposeFile{
 		//Version:  "3.9", // Throws a warning on start, also requires commenting/removing ComposeFile.Version
@@ -481,6 +514,15 @@ fi"`, initSnapshotSyncCommand),
 	}
 
 	return composeFilePath, nil
+}
+
+func getDockerSocketVolume() string {
+	if runtime.GOOS == "windows" {
+		// Use named pipe for Windows
+		return "//./pipe/docker_engine:/var/run/docker.sock"
+	}
+	// Default for Linux and macOS
+	return "/var/run/docker.sock:/var/run/docker.sock"
 }
 
 // Helper function to calculate the total size of files in a directory

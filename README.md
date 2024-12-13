@@ -89,13 +89,9 @@ nodevin start litecoin --snapshot-sync
 
 Snapshot synchronization can save up to **days** of node initialization.
 
-### Adding Your Data Snapshot
-
-Nodevin requires a [small one-time grant](#nodevin-subscription) for networks interested in having their data snapshots integrated and universally accessible to all users.
-
 ## Integrating Your Blockchain
 
-Adding your blockchain to Nodevin requires a small one-time grant. For more information, visit [our business page](https://nodevin.xyz/#/business).
+Adding your blockchain data to Nodevin requires a small one-time grant. For more information, reach out to us at [business@nodevin.xyz](mailto:business@nodevin.xyz).
 
 ### Nodevin Docker Images
 
@@ -113,13 +109,12 @@ This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE
 
 Socials:
 - [Website](https://nodevin.xyz)
-- [Business](https://nodevin.xyz/#/business)
 - [Discord](https://discord.com/invite/XuhW2ykW3D)
-- [Twitter/X](https://x.com/nodevin_)
+- [Twitter/X](https://x.com/node_vin)
 
 This repository is currently maintained by [Fiftysix](https://fiftysix.xyz).
 
-For any questions or suggestions, feel free to contact us at [nodes@fiftysix.xyz](mailto:nodes@fiftysix.xyz).
+For any questions or suggestions, feel free to contact us at [business@nodevin.xyz](mailto:business@nodevin.xyz).
 
 ---
 

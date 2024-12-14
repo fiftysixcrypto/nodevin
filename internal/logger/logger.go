@@ -30,16 +30,16 @@ var (
 )
 
 func Init() {
-	InfoLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
-	ErrorLogger = log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
+	InfoLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
+	ErrorLogger = log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime)
 }
 
 func LogInfo(message string) {
-	InfoLogger.Println(message)
+	InfoLogger.Printf("(n_v)/: %s", message)
 }
 
 func LogError(message string) {
-	ErrorLogger.Println(message)
+	ErrorLogger.Printf("(v_v)\\: %s", message)
 }
 
 func SetOutput(output io.Writer) {

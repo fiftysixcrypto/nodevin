@@ -148,6 +148,7 @@ func init() {
 	rootCmd.AddCommand(nodes.LogsCmd)
 	rootCmd.AddCommand(nodes.InfoCmd)
 	rootCmd.AddCommand(nodes.ListCmd)
+	rootCmd.AddCommand(nodes.ViewCmd)
 
 	// Add IPFS support commands
 	rootCmd.AddCommand(nodes.IpfsSupportCmd)

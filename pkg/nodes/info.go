@@ -188,24 +188,24 @@ func getLocalLatestBlock(containerName string) int {
 
 	response, err := makeRequest("", url, method, params, "", user, pass)
 	if err != nil {
-		logger.LogError("Failed to get local latest block: " + err.Error())
+		//logger.LogError("Failed to get local latest block: " + err.Error())
 		return 0
 	}
 
 	var rpcResponse RPCResponse
 	if err := json.Unmarshal(response, &rpcResponse); err != nil {
-		logger.LogError("Failed to parse RPC response: " + err.Error())
+		//logger.LogError("Failed to parse RPC response: " + err.Error())
 		return 0
 	}
 
 	if rpcResponse.Error != nil {
-		logger.LogError("RPC Error: " + rpcResponse.Error.Message)
+		//logger.LogError("RPC Error: " + rpcResponse.Error.Message)
 		return 0
 	}
 
 	blockCount, ok := rpcResponse.Result.(float64)
 	if !ok {
-		logger.LogError("Failed to parse block count")
+		//logger.LogError("Failed to parse block count")
 		return 0
 	}
 
@@ -284,24 +284,24 @@ func getPeers(containerName string) int {
 
 	response, err := makeRequest("bitcoin", url, method, params, "", user, pass)
 	if err != nil {
-		logger.LogError("Failed to get peer count: " + err.Error())
+		//logger.LogError("Failed to get peer count: " + err.Error())
 		return 0
 	}
 
 	var rpcResponse RPCResponse
 	if err := json.Unmarshal(response, &rpcResponse); err != nil {
-		logger.LogError("Failed to parse RPC response: " + err.Error())
+		//logger.LogError("Failed to parse RPC response: " + err.Error())
 		return 0
 	}
 
 	if rpcResponse.Error != nil {
-		logger.LogError("RPC Error: " + rpcResponse.Error.Message)
+		//logger.LogError("RPC Error: " + rpcResponse.Error.Message)
 		return 0
 	}
 
 	peerCount, ok := rpcResponse.Result.(float64)
 	if !ok {
-		logger.LogError("Failed to parse peer count")
+		//logger.LogError("Failed to parse peer count")
 		return 0
 	}
 

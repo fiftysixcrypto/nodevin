@@ -67,7 +67,7 @@ func init() {
 	rootCmd.PersistentFlags().Bool("testnet", false, "Run assumed network testnet")
 	rootCmd.PersistentFlags().String("network", "", "Run node attached to a specific network (network name -- ex: goerli, testnet3)")
 
-	// Chain software specific flags (bitcoin-core, litecoin-core)
+	// Chain software specific flags (bitcoin-core, litecoin-core, etc.)
 	rootCmd.PersistentFlags().String("rpc-user", "user", "Username passed in via command for JSON RPC -- (default: user)")
 	rootCmd.PersistentFlags().String("rpc-pass", "fiftysix", "Username passed in via command for JSON RPC -- (default: fiftysix)")
 	rootCmd.PersistentFlags().Bool("cookie-auth", false, "Use authentication directly with node cookie file -- (default: false)")
@@ -115,7 +115,7 @@ func init() {
 	viper.BindPFlag("testnet", rootCmd.PersistentFlags().Lookup("testnet"))
 	viper.BindPFlag("network", rootCmd.PersistentFlags().Lookup("network"))
 
-	// Chain software specific flags (bitcoin-core, litecoin-core)
+	// Chain software specific flags (bitcoin-core, litecoin-core, etc.)
 	viper.BindPFlag("rpc-user", rootCmd.PersistentFlags().Lookup("rpc-user"))
 	viper.BindPFlag("rpc-pass", rootCmd.PersistentFlags().Lookup("rpc-pass"))
 	viper.BindPFlag("cookie-auth", rootCmd.PersistentFlags().Lookup("cookie-auth"))

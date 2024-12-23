@@ -141,6 +141,26 @@ var networkInfoMap = map[string]NetworkInfo{
 		StartMessage:     "\"A network of nodes working together to preserve and share data reliably.\"",
 		CommandSupported: false,
 	},
+	"dogecoin": {
+		ContainerName:    "dogecoin-core",
+		DockerHubImage:   "dogecoin-core",
+		RPCPort:          22555,
+		SnapshotCID:      "",
+		DataSize:         0,
+		SnapshotSize:     0,
+		StartMessage:     "\"Dogecoin to the moon.\" -- Dogecoin Community",
+		CommandSupported: true,
+	},
+	"dogecoin-testnet": {
+		ContainerName:    "dogecoin-core-testnet",
+		DockerHubImage:   "dogecoin-core",
+		RPCPort:          44555,
+		SnapshotCID:      "",
+		DataSize:         0,
+		SnapshotSize:     0,
+		StartMessage:     "\"Testing is the lifeblood of innovation and security.\"",
+		CommandSupported: false,
+	},
 }
 
 func NetworkContainerMap() map[string]string {
@@ -219,7 +239,7 @@ func GetSnapshotCIDByNetwork(network string) (string, bool) {
 }
 
 func IsSupportedExtendedInfoSoftware(software string) bool {
-	return software == "bitcoin-core" || software == "litecoin-core"
+	return software == "bitcoin-core" || software == "litecoin-core" || software == "dogecoin-core"
 }
 
 // Returns path to the user's nodevin data directory (~/.nodevin/data)

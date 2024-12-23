@@ -82,7 +82,7 @@ func fetchNodeStats() []NodeData {
 			logger.LogError("Failed to parse container JSON: " + err.Error())
 			continue
 		}
-		if strings.Contains(container.Names, "watchtower") {
+		if !utils.IsSupportedExtendedInfoSoftware(container.Names) {
 			continue
 		}
 
@@ -105,6 +105,8 @@ func getNodevinName(network string) string {
 		return "Bitvin"
 	case "litecoin-core":
 		return "Litevin"
+	case "dogecoin-core":
+		return "Dogevin"
 	default:
 		return "Nodevin"
 	}
@@ -116,6 +118,8 @@ func getSoftwareNetworkName(softwareName string) string {
 		return "bitcoin"
 	case "litecoin-core":
 		return "litecoin"
+	case "dogecoin-core":
+		return "dogecoin"
 	default:
 		return ""
 	}

@@ -254,6 +254,10 @@ func getGlobalEndpointByContainerName(containerName string) string {
 		globalFetchLink = "https://api.blockcypher.com/v1/ltc/main"
 	} else if containerName == "litecoin-core-testnet" {
 		globalFetchLink = ""
+	} else if containerName == "dogecoin-core" {
+		globalFetchLink = "https://api.blockcypher.com/v1/doge/main"
+	} else if containerName == "dogecoin-core-testnet" {
+		globalFetchLink = ""
 	}
 
 	return globalFetchLink
@@ -270,6 +274,10 @@ func getLocalEndpointByContainerName(containerName string) string {
 		url = "http://127.0.0.1:9332"
 	} else if containerName == "litecoin-core-testnet" {
 		url = "http://127.0.0.1:19332"
+	} else if containerName == "dogecoin-core" {
+		url = "http://127.0.0.1:22555"
+	} else if containerName == "dogecoin-core-testnet" {
+		url = "http://127.0.0.1:44555"
 	}
 
 	return url

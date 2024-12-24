@@ -150,24 +150,30 @@ func displayNodevinArt(nodeSizes map[string]int64, nodes []NodeData) {
 
 		var art string
 		switch {
-		case node.Uptime >= 7 && node.Peers >= 3 && node.LatestBlock >= 500000 && nodeSize > 100000000000:
-			art = "   (n_v)  \n  \\[***]/  \n   [###]  \nNetwork Supremacy! "
-		case node.Peers >= 3 && node.LatestBlock >= 10000 && nodeSize > 100000000000:
-			art = "   (n_v)  \n  \\[**#]/  \n   [##*]  \nSupercharged! "
-		case nodeSize > 600000000000:
-			art = "   (n_v)  \n  \\[^^^]/  \n   [^^^]  \nRejoining Crew... "
-		case nodeSize > 100000000000:
-			art = "   (n_v)  \n  \\[-*-]/  \n   [-*-]  \nGetting Set... "
-		case node.Uptime >= 3 && node.Peers >= 3:
-			art = "   (n_v)  \n  \\[ **]/  \n   [ ##]  \nGrowing Strong! "
-		case node.Uptime >= 2 && node.Peers >= 3:
-			art = "   (n_v)  \n  \\[ * ]/  \n   [ # ]  \nWarming Up! "
-		case node.Uptime >= 1 && node.Peers >= 3:
-			art = "   (n_v)  \n  \\[ .#]/   \n   [ .#]   \nPowering On! "
-		case node.Uptime >= 0 && node.Peers >= 1:
-			art = "   (n_v)  \n  \\[ . ]/   \n   [ . ]   \nJust Hatched! "
+		case node.Uptime >= 50 && node.Peers >= 5 && node.LatestBlock >= 2000000 && nodeSize > 1000000000000:
+			art = "   (n_v)  \n  \\[&&&]/  \n   [!!!]   \nDecentralized Giant!"
+		case node.Uptime >= 40 && node.Peers >= 5 && node.LatestBlock >= 1500000 && nodeSize > 1000000000000:
+			art = "   (n_v)  \n  \\[+++]/  \n   [===]   \nBlockchain Beacon!"
+		case node.Uptime >= 25 && node.Peers >= 3 && node.LatestBlock >= 1000000 && nodeSize > 750000000000:
+			art = "   (n_v)  \n  \\[###]/  \n   [***]   \nLeading the Charge!"
+		case node.Peers >= 3 && node.LatestBlock >= 500000 && nodeSize > 600000000000:
+			art = "   (n_v)  \n  \\[ooo]/  \n   [~~~]   \nConnectivity Master!"
+		case nodeSize > 1000000000000:
+			art = "   (n_v)  \n  \\[@@@]/  \n   [$$$]   \nOverflowing Power!"
+		case nodeSize > 500000000000:
+			art = "   (n_v)  \n  \\[>>>]/  \n   [:::]   \nNodeimus Prime!"
+		case node.Uptime >= 20 && node.Peers >= 8:
+			art = "   (n_v)  \n  \\[ ##]/  \n   [ **]   \nGrowing Network!"
+		case node.Uptime >= 10 && node.Peers >= 5:
+			art = "   (n_v)  \n  \\[ **]/  \n   [ --]   \nExpanding Presence!"
+		case node.Peers >= 5 && node.LatestBlock >= 100000:
+			art = "   (n_v)  \n  \\[ **]/  \n   [ ==]   \nStepping Forward!"
+		case node.LatestBlock >= 5000:
+			art = "   (n_v)  \n  \\[ --]/  \n   [ **]   \nSynchronizing Chain!"
+		case node.Uptime >= 1 && node.Peers >= 2:
+			art = "   (n_v)  \n  \\[ .-]/  \n   [ ..]   \nEarly Adopter!"
 		default:
-			art = "   (n_v)  \n  /[   ]\\   \n   [   ]   \nGetting Situated... "
+			art = "   (n_v)  \n  /[   ]\\   \n   [   ]   \nAwaiting Activity..."
 		}
 
 		fmt.Printf("%s\n\n", art)

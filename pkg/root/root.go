@@ -19,8 +19,7 @@
 package root
 
 import (
-	"fmt"
-
+	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/fiftysixcrypto/nodevin/internal/version"
 	"github.com/fiftysixcrypto/nodevin/pkg/initialize"
 	"github.com/fiftysixcrypto/nodevin/pkg/nodes"
@@ -38,7 +37,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version number of Nodevin",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("nodevin CLI v" + version.Version)
+		logger.LogInfo("nodevin CLI v" + version.Version)
 	},
 }
 

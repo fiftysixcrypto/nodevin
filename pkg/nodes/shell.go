@@ -23,6 +23,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/fiftysixcrypto/nodevin/internal/utils"
 
 	"github.com/spf13/cobra"
@@ -45,7 +46,7 @@ var shellCmd = &cobra.Command{
 		network := args[0]
 		containerName, exists := utils.GetDefaultLocalMappedContainerName(network)
 		if !exists {
-			fmt.Printf("Unsupported blockchain network: %s\n", network)
+			logger.LogError(fmt.Sprintf("Unsupported blockchain network: %s\n", network))
 			return
 		}
 		runShell(containerName)
@@ -80,7 +81,7 @@ func runShell(containerName string) {
 	cmd.Stdin = os.Stdin
 
 	if err := cmd.Run(); err != nil {
-		fmt.Printf("Failed to run shell in container %s: %v\n", containerName, err)
+		logger.LogError(fmt.Sprintf("Failed to run shell in container %s: %v\n", containerName, err))
 	}
 }
 

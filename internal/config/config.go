@@ -19,6 +19,10 @@
 package config
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/fiftysixcrypto/nodevin/internal/logger"
 	"github.com/spf13/viper"
 )
@@ -33,18 +37,35 @@ type Config struct {
 var AppConfig Config
 
 func InitConfig() {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
+	viper.SetConfigName(".env")
+	viper.SetConfigType("env")
+
+	// Add project-specific configuration (current directory)
 	viper.AddConfigPath(".")
+
+	// Add user-specific configuration (~/.nodevin)
+	homeDir, err := os.UserHomeDir()
+	if err == nil {
+		viper.AddConfigPath(filepath.Join(homeDir, ".nodevin"))
+	}
+
+	// Add global configuration (/etc/nodevin)
+	viper.AddConfigPath("/etc/nodevin")
+
+	// Add executable-specific configuration
+	exePath, err := os.Executable()
+	if err == nil {
+		viper.AddConfigPath(filepath.Dir(exePath))
+	}
+
+	// Allow overriding with environment variables
 	viper.AutomaticEnv()
 
-	// Read in config file if it exists
-	//if err := viper.ReadInConfig(); err == nil {
-	//	log.Println("Using config file:", viper.ConfigFileUsed())
-	//}
-
-	// Unmarshal the config into the config struct
-	if err := viper.Unmarshal(&AppConfig); err != nil {
-		logger.LogError("Unable to decode into struct: " + err.Error())
+	// Read the configuration file, if available
+	err = viper.ReadInConfig()
+	if err == nil {
+		logger.LogInfo(fmt.Sprintf("Successfully loaded configuration from %s", viper.ConfigFileUsed()))
+	} else {
+		logger.LogError(fmt.Sprintf("Warning: Could not read .env file: %v", err))
 	}
 }

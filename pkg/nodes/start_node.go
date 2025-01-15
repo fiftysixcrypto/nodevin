@@ -71,8 +71,12 @@ func startNode(args []string) {
 		return
 	}
 
-	// Pull the Docker image
-	image := containerName + ":latest"
+	version := viper.GetString("version")
+	if version == "" {
+		version = "latest"
+	}
+	image := containerName + ":" + version
+
 	if err := docker.PullImage(image); err != nil {
 		logger.LogError("Failed to pull Docker image: " + err.Error())
 		return

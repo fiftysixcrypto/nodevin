@@ -344,7 +344,6 @@ nodevin request bitcoin --method getblockheader --params '["00000000c937983704a7
 
 Nodevin supports using an `.env` file for easy configuration. Note that variables set in the `.env` file will be overridden by command-line flags.
 
-
 ### `.env` File Location:
 
 Nodevin will look for the `.env` file in the following locations, in order of priority:
@@ -384,4 +383,4 @@ ord-litecoin-image=fiftysix/ord-litecoin
 ord-litecoin-version=latest
 ```
 
-Be careful setting other configs, as they may interfere with the Nodevin's automatic node detection.
+Be careful setting other configs, as they may interfere with Nodevin's automatic node detection.

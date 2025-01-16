@@ -43,7 +43,7 @@ nodevin start bitcoin
 
 #### **(Optional) - Advanced Features:**
 
-Nodevin allows for full customization in node startup. View the full list of flags for configuration details [here](./docs/cli-commands.md). Nodevin also supports using an `.env` file (info [here](./docs/cli-commands.md)). For example, this command runs a Bitcoin Testnet node with a specified command, docker image and tag (version), unique nodevin data directory, and more:
+Nodevin allows for full customization in node startup. View the full list of flags and configuration details, including `.env` file setup [here](./docs/cli-commands.md). For example, this command runs a Bitcoin Testnet node with a specified command, docker image and tag (version), unique nodevin data directory, and more:
 
 ```sh
 nodevin start bitcoin \

@@ -25,6 +25,9 @@ Nodevin is a command-line interface (CLI) that simplifies the setup, management,
 - [nodevin delete](#nodevin-delete)
 - [nodevin cleanup](#nodevin-cleanup)
 
+### Using a .env File
+- [Info](#env-file)
+
 ---
 
 ## Commands and Detailed Options
@@ -334,3 +337,51 @@ nodevin request bitcoin --method getblockheader --params '["00000000c937983704a7
 
 - **Description**: Deletes all local Docker images with prefix `fiftysix`.
 - **Simple Example**: `nodevin cleanup`
+
+---
+
+## Env File
+
+Nodevin supports using an `.env` file for easy configuration. Note that variables set in the `.env` file will be overridden by command-line flags.
+
+
+### `.env` File Location:
+
+Nodevin will look for the `.env` file in the following locations, in order of priority:
+
+1. **Current Working Directory (CWD)**: The directory where you run the Nodevin command.
+2. **User-Specific Directory**: `~/.nodevin/.env` (e.g., `/home/user/.nodevin/.env` on Linux or `C:\Users\YourUser\.nodevin\.env` on Windows).
+3. **Global Configuration Directory**: `/etc/nodevin/.env`.
+4. **Executable Directory**: The directory containing the Nodevin binary (e.g., `/usr/local/bin/.env`).
+
+### Example `.env` File
+
+Here’s an example `.env` file for Nodevin:
+
+```bash
+# Docker Configuration
+image=fiftysix/bitcoin-core
+version=27.0
+restart=always
+cpu-limit=2.0
+mem-limit=2g
+cpu-reservation=1.0
+mem-reservation=1g
+
+# Nodevin Configuration
+data-dir=/home/user/.nodevin
+
+# Chain Software Configuration
+rpc-user=admin
+rpc-pass=securepassword123
+
+# Bitcoin-Specific Configuration
+ord-image=fiftysix/ord
+ord-version=latest
+
+# Litecoin-Specific Configuration
+ord-litecoin-image=fiftysix/ord-litecoin
+ord-litecoin-version=latest
+```
+
+Be careful setting other configs, as they may interfere with the Nodevin's automatic node detection.

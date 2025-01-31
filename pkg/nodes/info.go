@@ -59,15 +59,20 @@ type RPCError struct {
 }
 
 var infoCmd = &cobra.Command{
-	Use:   "info",
-	Short: "Get information about all running blockchain nodes",
+	Use:   "info [network]",
+	Short: "Get information about running blockchain nodes",
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		displayInfo()
+		var networkFilter string
+		if len(args) > 0 {
+			networkFilter = args[0]
+		}
+		displayInfo(networkFilter)
 	},
 }
 
-func displayInfo() {
-	// Prepare the docker ps command
+// Prepare the docker ps command
+func displayInfo(networkFilter string) {
 	args := []string{"ps", "--format", "{{json .}}"}
 
 	// Execute the docker ps command
@@ -84,8 +89,7 @@ func displayInfo() {
 	containers := strings.Split(string(output), "\n")
 	if len(containers) < 2 {
 		fmt.Println("No running blockchain nodes found.\n")
-		displayNodeDirectoryInfo()
-
+		displayNodeDirectoryInfo(networkFilter)
 		fmt.Println("\n-- Helpful Commands:\n")
 		fmt.Printf("%s start <network>\n", utils.GetNodevinExecutable())
 		fmt.Printf("%s start <network> --testnet\n", utils.GetNodevinExecutable())
@@ -115,6 +119,10 @@ func displayInfo() {
 			continue
 		}
 
+		if networkFilter != "" && !strings.Contains(container.Names, networkFilter) {
+			continue
+		}
+
 		version := "unknown"
 		if parts := strings.Split(imageName, ":"); len(parts) > 1 {
 			imageName = parts[0]
@@ -141,12 +149,8 @@ func displayInfo() {
 			continue
 		}
 
-		localLatestBlock := 0
-		globalLatestBlock := 0
-		peers := 0
-
-		localLatestBlock, globalLatestBlock = getLatestBlocks(container.Names)
-		peers = getPeers(container.Names)
+		localLatestBlock, globalLatestBlock := getLatestBlocks(container.Names)
+		peers := getPeers(container.Names)
 
 		fmt.Fprintf(w, "| %s\t %s\t %s\t %s\t %s\t %d\t %d/%d\n",
 			container.Names,
@@ -163,7 +167,7 @@ func displayInfo() {
 
 	fmt.Println("")
 
-	displayNodeDirectoryInfo()
+	displayNodeDirectoryInfo(networkFilter)
 
 	fmt.Println("\n-- Helpful Commands:\n")
 
@@ -316,7 +320,7 @@ func getPeers(containerName string) int {
 	return int(peerCount)
 }
 
-func displayNodeDirectoryInfo() {
+func displayNodeDirectoryInfo(networkFilter string) {
 	fmt.Println("-- Blockchain Node Data:\n")
 
 	// Get the nodevin data directory
@@ -344,6 +348,10 @@ func displayNodeDirectoryInfo() {
 		containerName, exists := utils.GetDefaultLocalMappedContainerName(network)
 		if !exists {
 			logger.LogError("Unsupported blockchain network: " + network)
+			continue
+		}
+
+		if networkFilter != "" && networkFilter != network {
 			continue
 		}
 
